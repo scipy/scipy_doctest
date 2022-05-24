@@ -21,8 +21,6 @@ jobs:
         include:
         - os: ubuntu-latest
           path: ~/.cache/pip
-        - os: macos-latest
-          path: ~/Library/Caches/pip
 
     steps:
     - uses: actions/checkout@v2
@@ -40,7 +38,7 @@ jobs:
          ${{ runner.os }}-pip-
 
     # Actually build it
-    - name: Build
+    - name: Run doctests
       run: |
-        python -m doctest test_module.py
+        python run.py test_module.py
 
