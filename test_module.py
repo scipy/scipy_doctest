@@ -8,8 +8,9 @@ def func():
 
 def func2():
     """
-    Check that `np.` is imported and the array repr is recognized
-    >>> np.array([1, 2, 3.0])
+    Check that `np.` is imported and the array repr is recognized. Also check
+    that whitespace is irrelevant for the checker.
+    >>> np.array([1,         2,          3.0])
     array([1, 2, 3])
 
     Check that the comparison is with atol and rtol: give less digits than
