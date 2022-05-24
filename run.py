@@ -6,7 +6,7 @@ import inspect
 from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
 
-from _checker import DTRunner
+from _checker import DummyDTRunner as DTRunner, DEFAULT_NAMESPACE
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
@@ -132,7 +132,8 @@ def _test():
             sys.path.insert(0, dirname)
             m = __import__(filename[:-3])
             del sys.path[0]
-            failures, _ = testmod(m, verbose=verbose, optionflags=options)
+            failures, _ = testmod(m, verbose=verbose, optionflags=options,
+                                  globs=DEFAULT_NAMESPACE)
         else:
             failures, _ = testfile(filename, module_relative=False,
                                      verbose=verbose, optionflags=options)

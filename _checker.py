@@ -1,6 +1,7 @@
 import numpy as np
-import doctest
 import re
+import doctest
+from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 # the namespace to run examples in
 DEFAULT_NAMESPACE = {'np': np}
@@ -66,9 +67,10 @@ class Checker(doctest.OutputChecker):
         if want == got:
             return True
 
-        # skip stopwords in source
-        if any(word in self._source for word in self.stopwords):
-            return True
+# XXX : stores example._stopwords on the checker ?
+###        # skip stopwords in source
+###        if any(word in self._source for word in self.stopwords):
+###            return True
 
         # skip random stuff
         if any(word in want for word in self.rndm_markers):
@@ -160,7 +162,15 @@ class Checker(doctest.OutputChecker):
         return np.allclose(want, got, atol=self.atol, rtol=self.rtol)
 
 
-class DTRunner(doctest.DocTestRunner):
+class DummyDTRunner(doctest.DocTestRunner):
+    def __init__(self, checker=None, verbose=None, optionflags=0):
+        flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
+        if checker is None:
+            checker = Checker()
+        doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose, optionflags=flags)
+
+
+class OriginalDTRunner(doctest.DocTestRunner):
     DIVIDER = "\n"
 
     def __init__(self, item_name, checker=None, verbose=None, optionflags=0):
