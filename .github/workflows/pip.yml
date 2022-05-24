@@ -40,5 +40,5 @@ jobs:
     # Actually build it
     - name: Run doctests
       run: |
-        python run.py test_module.py
+        python run.py test_module.py -v
 
