@@ -3,9 +3,10 @@
 import sys
 import os
 import inspect
-
 from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
+
+from _checker import DTRunner
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
@@ -82,7 +83,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if raise_on_error:
         runner = DebugRunner(verbose=verbose, optionflags=optionflags)
     else:
-        runner = DocTestRunner(verbose=verbose, optionflags=optionflags)
+        runner = DTRunner(verbose=verbose, optionflags=optionflags)
 
     for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
         runner.run(test)
