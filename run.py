@@ -5,14 +5,21 @@ import os
 import inspect
 from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
+from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from _checker import DummyDTRunner as DTRunner, DEFAULT_NAMESPACE
+from _checker import Checker, DEFAULT_NAMESPACE
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
             raise_on_error=False, exclude_empty=False):
-    """m=None, name=None, globs=None, verbose=None, report=True,
+    """This is a `testmod` driver from the standard library, with minimal patches.
+
+    1. hardcode optionflags
+    2. use _checker.Checker
+
+
+       m=None, name=None, globs=None, verbose=None, report=True,
        optionflags=0, extraglobs=None, raise_on_error=False,
        exclude_empty=False
     Test examples in docstrings in functions and classes reachable
@@ -83,7 +90,9 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if raise_on_error:
         runner = DebugRunner(verbose=verbose, optionflags=optionflags)
     else:
-        runner = DTRunner(verbose=verbose, optionflags=optionflags)
+        # our modifications
+        flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
+        runner = DocTestRunner(verbose=verbose, checker=Checker(), optionflags=flags)
 
     for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
         runner.run(test)

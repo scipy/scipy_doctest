@@ -1,7 +1,6 @@
 import numpy as np
 import re
 import doctest
-from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 # the namespace to run examples in
 DEFAULT_NAMESPACE = {'np': np}
@@ -162,15 +161,7 @@ class Checker(doctest.OutputChecker):
         return np.allclose(want, got, atol=self.atol, rtol=self.rtol)
 
 
-class DummyDTRunner(doctest.DocTestRunner):
-    def __init__(self, checker=None, verbose=None, optionflags=0):
-        flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
-        if checker is None:
-            checker = Checker()
-        doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose, optionflags=flags)
-
-
-class OriginalDTRunner(doctest.DocTestRunner):
+class DTRunner(doctest.DocTestRunner):
     DIVIDER = "\n"
 
     def __init__(self, item_name, checker=None, verbose=None, optionflags=0):
