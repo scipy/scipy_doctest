@@ -46,4 +46,6 @@ jobs:
     - name: Run doctests
       run: |
         python run.py test_module.py -v
-
+        python run.py test_module.py -v -f   # repeat with the vanilla Finder
+        |
+        python run.py test_stopwords.py -v   # fails with -f

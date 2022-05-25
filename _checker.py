@@ -47,11 +47,6 @@ class Checker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
     rndm_markers = {'# random', '# Random', '#random', '#Random', "# may vary"}
-    stopwords = {'plt.', '.hist', '.show', '.ylim', '.subplot(',
-                 'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
-                 '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
-                 '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
-                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel='}
 
     def __init__(self, parse_namedtuples=True, ns=None, atol=1e-8, rtol=1e-2):
         self.parse_namedtuples = parse_namedtuples
@@ -65,11 +60,6 @@ class Checker(doctest.OutputChecker):
         # cut it short if they are equal
         if want == got:
             return True
-
-# XXX : stores example._stopwords on the checker ?
-###        # skip stopwords in source
-###        if any(word in self._source for word in self.stopwords):
-###            return True
 
         # skip random stuff
         if any(word in want for word in self.rndm_markers):
@@ -203,6 +193,21 @@ class DTRunner(doctest.DocTestRunner):
 
 
 class DTFinder(doctest.DocTestFinder):
-    """Finder with a stopword list."""
+    """A Finder with a stopword list.
+    """
+    stopwords = {'plt.', '.hist', '.show', '.ylim', '.subplot(',
+                 'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
+                 '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
+                 '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
+                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel='}
+
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
-        return super().find(obj, name, module, globs, extraglobs)
+        tests = super().find(obj, name, module, globs, extraglobs)
+
+        for test in tests:
+            for example in test.examples:
+                if any(word in example.source for word in self.stopwords):
+                    # Found a stopword. Do not check the output (but do check
+                    # that the source is valid python). 
+                    example.want += "  # may vary\n"
+        return tests

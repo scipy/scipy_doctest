@@ -123,9 +123,9 @@ def _test():
                         help=('stop running tests after first failure (this'
                               ' is a shorthand for -o FAIL_FAST, and is'
                               ' in addition to any other -o options)'))
-    parser.add_argument('-f', '--finder', action='store_true',
-                        help='use DTFinder if True, otherwise use the'
-                             ' doctest.DocTestFinder')
+    parser.add_argument('-f', '--finder', action='store_false',
+                        help='use `doctest.DocTestFinder` if given, otherwise'
+                             ' use DTFinder.')
     parser.add_argument('file', nargs='+',
                         help='file containing the tests to run')
     args = parser.parse_args()
@@ -157,6 +157,7 @@ def _test():
         else:
             failures, _ = testfile(filename, module_relative=False,
                                      verbose=verbose, optionflags=options)
+
         if failures:
             return 1
     return 0
