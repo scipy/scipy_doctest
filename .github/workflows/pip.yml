@@ -40,12 +40,11 @@ jobs:
     # Install dependencies
     - name: Install numpy
       run: |
-        python -m pip install numpy scipy
+        python -m pip install numpy scipy matplotlib
 
     # Actually build it
     - name: Run doctests
       run: |
         python run.py test_module.py -v
         python run.py test_module.py -v -f   # repeat with the vanilla Finder
-        |
         python run.py test_stopwords.py -v   # fails with -f
