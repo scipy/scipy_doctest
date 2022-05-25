@@ -40,7 +40,7 @@ jobs:
     # Install dependencies
     - name: Install numpy
       run: |
-        python -m pip install numpy
+        python -m pip install numpy scipy
 
     # Actually build it
     - name: Run doctests
