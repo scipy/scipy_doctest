@@ -7,17 +7,18 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from _checker import Checker, DEFAULT_NAMESPACE
+from _checker import Checker, DEFAULT_NAMESPACE, DTFinder
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
-            raise_on_error=False, exclude_empty=False):
+            raise_on_error=False, exclude_empty=False,
+            use_dtfinder=False):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
     2. use _checker.Checker
-
+    3. an option to use the modified DTFinder
 
        m=None, name=None, globs=None, verbose=None, report=True,
        optionflags=0, extraglobs=None, raise_on_error=False,
@@ -85,7 +86,10 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         name = m.__name__
 
     # Find, parse, and run all tests in the given module.
-    finder = DocTestFinder(exclude_empty=exclude_empty)
+    if use_dtfinder:
+        finder = DTFinder(exclude_empty=exclude_empty)
+    else:
+        finder = DocTestFinder(exclude_empty=exclude_empty)
 
     if raise_on_error:
         runner = DebugRunner(verbose=verbose, optionflags=optionflags)
@@ -115,10 +119,13 @@ def _test():
                         help=('specify a doctest option flag to apply'
                               ' to the test run; may be specified more'
                               ' than once to apply multiple options'))
-    parser.add_argument('-f', '--fail-fast', action='store_true',
+    parser.add_argument('-x', '--fail-fast', action='store_true',
                         help=('stop running tests after first failure (this'
                               ' is a shorthand for -o FAIL_FAST, and is'
                               ' in addition to any other -o options)'))
+    parser.add_argument('-f', '--finder', action='store_true',
+                        help='use DTFinder if True, otherwise use the'
+                             ' doctest.DocTestFinder')
     parser.add_argument('file', nargs='+',
                         help='file containing the tests to run')
     args = parser.parse_args()
@@ -132,6 +139,10 @@ def _test():
     if args.fail_fast:
         options |= FAIL_FAST
 
+    use_dtfinder = False
+    if args.finder:
+        use_dtfinder = True
+
     for filename in testfiles:
         if filename.endswith(".py"):
             # It is a module -- insert its dir into sys.path and try to
@@ -142,7 +153,7 @@ def _test():
             m = __import__(filename[:-3])
             del sys.path[0]
             failures, _ = testmod(m, verbose=verbose, optionflags=options,
-                                  globs=DEFAULT_NAMESPACE)
+                                  globs=DEFAULT_NAMESPACE, use_dtfinder=use_dtfinder)
         else:
             failures, _ = testfile(filename, module_relative=False,
                                      verbose=verbose, optionflags=options)

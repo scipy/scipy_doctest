@@ -201,3 +201,8 @@ class DTRunner(doctest.DocTestRunner):
         return doctest.DocTestRunner.report_failure(self, out, test,
                                                     example, got)
 
+
+class DTFinder(doctest.DocTestFinder):
+    """Finder with a stopword list."""
+    def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
+        return super().find(obj, name, module, globs, extraglobs)
