@@ -27,3 +27,17 @@ def func3():
     [0.33  0.66  1  1.33]
     """
 
+def func4():
+    """
+    Test `# may vary` markers : these should not break doctests (but the code
+    should still be valid, otherwise it's an error).
+
+    >>> np.random.randint(50)
+    42      # may vary
+
+    >>> np.random.randint(50)
+    42      # Random
+
+    >>> np.random.randint(50)
+    42      # random
+    """
