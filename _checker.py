@@ -47,6 +47,7 @@ class Checker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
     rndm_markers = {'# random', '# Random', '#random', '#Random', "# may vary"}
+    rndm_markers.add('# _ignore')  # technical, private. See DTFinder
 
     def __init__(self, parse_namedtuples=True, ns=None, atol=1e-8, rtol=1e-2):
         self.parse_namedtuples = parse_namedtuples
@@ -209,5 +210,5 @@ class DTFinder(doctest.DocTestFinder):
                 if any(word in example.source for word in self.stopwords):
                     # Found a stopword. Do not check the output (but do check
                     # that the source is valid python). 
-                    example.want += "  # may vary\n"
+                    example.want += "  # _ignore\n"
         return tests
