@@ -58,6 +58,11 @@ class DTChecker(doctest.OutputChecker):
             self.ns = ns
 
     def check_output(self, want, got, optionflags):
+
+
+        if "Describe" in want or "Describe" in got:
+            breakpoint()
+
         # cut it short if they are equal
         if want == got:
             return True

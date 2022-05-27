@@ -70,6 +70,7 @@ def func6():
 
     """
 
+
 def func6():
     """
     Namedtuples (they are *not* in the namespace)
@@ -83,20 +84,31 @@ def func6():
     >>> levene(a, b, c)
     LeveneResult(statistic=7.58495, pvalue=0.00243)
 
+    # can be reformatted
+    >>> levene(a, b, c)
+    LeveneResult(statistic=7.85495,
+                 pvalue=0.00243)
+
     # ... or can be given just as tuples
     >>> levene(a, b, c)
     (7.58495, 0.00243)
+
     """
 
 
 def func7():
     """
-    Multiline namedtuples, see scipy/gh-16082
+    Multiline namedtuples + nested tuples, see scipy/gh-16082
 
     >>> from scipy import stats
     >>> a = np.arange(10)
     >>> stats.describe(a)
     DescribeResult(nobs=10, minmax=(0, 9), mean=4.5,
-                   variance=9.166666666666666, skewness=0.0,
-                   kurtosis=-1.2242424242424244)
+                   variance=9.16666666666, skewness=0.0,
+                   kurtosis=-1.224242424)
+
+    A single-line form of a namedtuple
+    >>> stats.describe(a)
+    DescribeResult(nobs=10, minmax=(0, 9),      mean=4.5,       variance=9.16666, skewness=0.0, kurtosis=-1.2242424)
+
     """
