@@ -1,6 +1,7 @@
 import numpy as np
 import re
 import doctest
+import warnings
 
 # the namespace to run examples in
 DEFAULT_NAMESPACE = {'np': np}
@@ -58,11 +59,6 @@ class DTChecker(doctest.OutputChecker):
             self.ns = ns
 
     def check_output(self, want, got, optionflags):
-
-
-        if "Describe" in want or "Describe" in got:
-            breakpoint()
-
         # cut it short if they are equal
         if want == got:
             return True
@@ -154,7 +150,11 @@ class DTChecker(doctest.OutputChecker):
                 return True
         except Exception:
             pass
-        return np.allclose(want, got, atol=self.atol, rtol=self.rtol)
+        with warnings.catch_warnings():
+            # NumPy's ragged array deprecation of np.array([1, (2, 3)])
+            warnings.simplefilter('ignore', np.VisibleDeprecationWarning)
+            result = np.allclose(want, got, atol=self.atol, rtol=self.rtol)
+        return result
 
 
 class DTRunner(doctest.DocTestRunner):

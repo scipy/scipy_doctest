@@ -86,7 +86,7 @@ def func6():
 
     # can be reformatted
     >>> levene(a, b, c)
-    LeveneResult(statistic=7.85495,
+    LeveneResult(statistic=7.58495,
                  pvalue=0.00243)
 
     # ... or can be given just as tuples
