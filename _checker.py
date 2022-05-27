@@ -153,6 +153,8 @@ class DTChecker(doctest.OutputChecker):
         with warnings.catch_warnings():
             # NumPy's ragged array deprecation of np.array([1, (2, 3)])
             warnings.simplefilter('ignore', np.VisibleDeprecationWarning)
+
+            # This line is the crux of the whole thing. The rest is mostly scaffolding.
             result = np.allclose(want, got, atol=self.atol, rtol=self.rtol)
         return result
 
