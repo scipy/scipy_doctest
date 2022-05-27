@@ -7,7 +7,7 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from _checker import Checker, DEFAULT_NAMESPACE, DTFinder
+from _checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
@@ -17,7 +17,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
-    2. use _checker.Checker
+    2. use _checker.DTChecker
     3. an option to use the modified DTFinder
 
        m=None, name=None, globs=None, verbose=None, report=True,
@@ -96,7 +96,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     else:
         # our modifications
         flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
-        runner = DocTestRunner(verbose=verbose, checker=Checker(), optionflags=flags)
+        runner = DocTestRunner(verbose=verbose, checker=DTChecker(), optionflags=flags)
 
     for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
         runner.run(test)

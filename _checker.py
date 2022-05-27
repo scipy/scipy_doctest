@@ -43,7 +43,7 @@ def try_convert_namedtuple(got):
     return got_again
 
 
-class Checker(doctest.OutputChecker):
+class DTChecker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
     rndm_markers = {'# random', '# Random', '#random', '#Random', "# may vary"}
