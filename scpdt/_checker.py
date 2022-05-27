@@ -162,17 +162,15 @@ class DTChecker(doctest.OutputChecker):
 class DTRunner(doctest.DocTestRunner):
     DIVIDER = "\n"
 
-    def __init__(self, item_name, checker=None, verbose=None, optionflags=0):
-        self._item_name = item_name
+    def __init__(self, checker=None, verbose=None, optionflags=0):
         self._had_unexpected_error = False
         doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose,
                                        optionflags=optionflags)
 
-    def _report_item_name(self, out, new_line=False):
-        if self._item_name is not None:
+    def _report_item_name(self, out, item_name, new_line=False):
+        if item_name is not None:
             if new_line:
                 out("\n")
-            self._item_name = None
 
     def report_start(self, out, test, example):
         self._checker._source = example.source
@@ -180,7 +178,7 @@ class DTRunner(doctest.DocTestRunner):
 
     def report_success(self, out, test, example, got):
         if self._verbose:
-            self._report_item_name(out, new_line=True)
+            self._report_item_name(out, test.name, new_line=True)
         return doctest.DocTestRunner.report_success(self, out, test, example, got)
 
     def report_unexpected_exception(self, out, test, example, exc_info):
@@ -191,11 +189,10 @@ class DTRunner(doctest.DocTestRunner):
         self._had_unexpected_error = True
 
         self._report_item_name(out)
-        return super().report_unexpected_exception(
-            out, test, example, exc_info)
+        return super().report_unexpected_exception(out, test, example, exc_info)
 
     def report_failure(self, out, test, example, got):
-        self._report_item_name(out)
+        self._report_item_name(test.name, out)
         return doctest.DocTestRunner.report_failure(self, out, test,
                                                     example, got)
 
