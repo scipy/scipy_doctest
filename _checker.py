@@ -1,6 +1,7 @@
 import numpy as np
 import re
 import doctest
+import warnings
 
 # the namespace to run examples in
 DEFAULT_NAMESPACE = {'np': np}
@@ -37,7 +38,7 @@ def try_convert_namedtuple(got):
     regex = (r'[\w\d_]+\(' +
              ', '.join([r'[\w\d_]+=(.+)']*num) +
              r'\)')
-    grp = re.findall(regex, got.replace('\n', ' '))
+    grp = re.findall(regex, " ".join(got.split()))
     # fold it back to a tuple
     got_again = '(' + ', '.join(grp[0]) + ')'
     return got_again
@@ -149,7 +150,11 @@ class DTChecker(doctest.OutputChecker):
                 return True
         except Exception:
             pass
-        return np.allclose(want, got, atol=self.atol, rtol=self.rtol)
+        with warnings.catch_warnings():
+            # NumPy's ragged array deprecation of np.array([1, (2, 3)])
+            warnings.simplefilter('ignore', np.VisibleDeprecationWarning)
+            result = np.allclose(want, got, atol=self.atol, rtol=self.rtol)
+        return result
 
 
 class DTRunner(doctest.DocTestRunner):
