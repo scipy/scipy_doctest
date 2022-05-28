@@ -1,7 +1,7 @@
 from . import test_module, test_stopwords
 from .._run import testmod
 
-def test(verbose=True, use_dtfinder=True):
+def test(verbose=True):
     res_1 = testmod(test_module, verbose=verbose)
     res_2 = testmod(test_module, verbose=verbose, use_dtfinder=False)
     res_3 = testmod(test_stopwords, verbose=verbose)

@@ -44,6 +44,6 @@ jobs:
 
     - name: Run testmod
       run: |
-        python -c'from scpdt import test; print(test())'
+        python -c'from scpdt import test; test()'
 
 

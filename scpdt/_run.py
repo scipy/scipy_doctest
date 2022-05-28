@@ -13,7 +13,7 @@ from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
             raise_on_error=False, exclude_empty=False,
-            use_dtfinder=False):
+            use_dtfinder=True):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
