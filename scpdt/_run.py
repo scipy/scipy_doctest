@@ -7,7 +7,7 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from _checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
+from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
