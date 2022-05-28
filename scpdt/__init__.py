@@ -9,3 +9,6 @@ __version__ = "0.1"
 
 from ._checker import DTChecker, DTFinder
 from ._run import testmod
+
+from ._tests import test
+
