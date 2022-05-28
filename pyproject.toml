@@ -1,0 +1,22 @@
+[build-system]
+requires = ["flit_core >=3.2,<4",
+            "numpy"
+]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "scpdt"
+authors = [{name = "Evgeni Burovski et al", email = "evgeny.burovskiy@gmail.com"}]
+readme = "README.md"
+dynamic = ["version", "description"]
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload"
+]
+
+requires  = [
+    "numpy>=1.19.5"
+]
+
+[project.urls]
+Home = "https://github.com/ev-br/scpdt"

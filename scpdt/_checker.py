@@ -207,7 +207,7 @@ class DTFinder(doctest.DocTestFinder):
                  'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
                  '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
                  '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
-                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel='}
+                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
 
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
         tests = super().find(obj, name, module, globs, extraglobs)
