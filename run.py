@@ -85,6 +85,10 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if name is None:
         name = m.__name__
 
+    # out modifications
+    if globs is None:
+        globs = dict(DEFAULT_NAMESPACE)  # NB: copy
+
     # Find, parse, and run all tests in the given module.
     if use_dtfinder:
         finder = DTFinder(exclude_empty=exclude_empty)

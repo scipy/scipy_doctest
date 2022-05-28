@@ -42,9 +42,13 @@ jobs:
       run: |
         python -m pip install numpy scipy matplotlib
 
-    # Actually build it
-    - name: Run doctests
+    - name: Run doctests via CLI
       run: |
         python run.py test_module.py -v
         python run.py test_module.py -v -f   # repeat with the vanilla Finder
         python run.py test_stopwords.py -v   # fails with -f
+
+    - name: Run testmod
+      run: |
+        python -c'import test_module; import run; run.testmod(test_module, verbose=True)'
+
