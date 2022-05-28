@@ -47,4 +47,9 @@ jobs:
       run: |
         python -c'from scpdt import test; test()'
 
+    - name: Run testmod a scipy submodule
+      run: |
+        python -c'from scipy.linalg import _basic; from scpdt import testmod; testmod(_basic, verbose=True)'
+
+
 
