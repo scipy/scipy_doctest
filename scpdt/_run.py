@@ -8,7 +8,7 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
-
+from ._util import matplotlib_make_headless
 
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
@@ -102,8 +102,10 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
         runner = DocTestRunner(verbose=verbose, checker=DTChecker(), optionflags=flags)
 
-    for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
-        runner.run(test)
+    # our modifications
+    with matplotlib_make_headless():
+        for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
+            runner.run(test)
 
     if report:
         runner.summarize()
