@@ -1,7 +1,10 @@
 """
 Assorted utilities.
 """
+import os
 import warnings
+import shutil
+import tempfile
 from contextlib import contextmanager
 
 @contextmanager
@@ -27,3 +30,15 @@ def matplotlib_make_headless():
             plt.close('all')
             matplotlib.use(backend)
 
+
+@contextmanager
+def temp_cwd():
+    """Switch to a temp directory, clean up when done."""
+    cwd = os.getcwd()
+    tmpdir = tempfile.mkdtemp()
+    try:
+        os.chdir(tmpdir)
+        yield tmpdir
+    finally:
+        os.chdir(cwd)
+        shutil.rmtree(tmpdir)
