@@ -6,6 +6,7 @@ import warnings
 import shutil
 import copy
 import tempfile
+import inspect
 from contextlib import contextmanager
 
 @contextmanager
