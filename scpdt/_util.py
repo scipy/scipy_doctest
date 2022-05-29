@@ -60,6 +60,8 @@ def is_deprecated(f):
         return False
 
 
+### Object / Doctest selection helpers ###
+
 def get_all_list(module):
     """Return a copy of the __all__ list with irrelevant items removed.
 
@@ -96,4 +98,33 @@ def get_all_list(module):
     others = set(dir(module)).difference(set(deprecated)).difference(set(not_deprecated))
 
     return not_deprecated, deprecated, others
+
+
+def get_public_objects(module, skiplist=None):
+    """Return a list of public objects in a module.
+    """
+    if skiplist is None:
+        skiplist = set()
+
+    all_list, _, _ = get_all_list(module)
+
+    items, failures = [], []
+
+    for name in all_list:
+        full_name = module.__name__ + '.' + name
+
+        if full_name in skiplist:
+            continue
+
+        try:
+            obj = getattr(module, name)
+            items.append(obj)
+        except AttributeError:
+            import traceback
+            failures.append((full_name, False,
+                            "Missing item!\n" +
+                            traceback.format_exc()))
+            continue
+
+    return items, failures
 
