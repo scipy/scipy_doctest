@@ -1,4 +1,4 @@
-from . import module, stopwords
+from . import module_cases as module, stopwords_cases as stopwords
 from .._run import testmod
 
 _VERBOSE = True
