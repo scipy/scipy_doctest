@@ -8,17 +8,18 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
-from ._util import matplotlib_make_headless as mpl, temp_cwd
+from ._util import matplotlib_make_headless as mpl, temp_cwd, get_public_objects
 
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
             raise_on_error=False, exclude_empty=False,
-            use_dtfinder=True):
+            use_dtfinder=True, public_items_only=False):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
     2. use _checker.DTChecker
     3. an option to use the modified DTFinder
+    4. an option for discovery of only public objects
 
        m=None, name=None, globs=None, verbose=None, report=True,
        optionflags=0, extraglobs=None, raise_on_error=False,
@@ -95,6 +96,18 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     else:
         finder = DocTestFinder(exclude_empty=exclude_empty)
 
+    # XXX: refactor into a three-state selector: None for the module, "public" and a list of items
+    if public_items_only:
+        items, failures = get_public_objects(m)
+        tests = []
+        for item in items:
+            t = finder.find(item, globs=globs, extraglobs=extraglobs)  # FIXME: name
+            tests += t
+
+
+    else:
+        tests = finder.find(m, name, globs=globs, extraglobs=extraglobs)
+
     if raise_on_error:
         runner = DebugRunner(verbose=verbose, optionflags=optionflags)
     else:
@@ -104,7 +117,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
 
     # our modifications
     with mpl(), temp_cwd():
-        for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
+        for test in tests:
             runner.run(test)
 
     if report:

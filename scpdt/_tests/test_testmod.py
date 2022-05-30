@@ -30,3 +30,10 @@ def test_stopwords():
         raise RuntimeError("Test_stopwords failed.")
     return res
 
+
+def test_public_obj_discovery():
+    res = testmod(module, verbose=_VERBOSE, public_items_only=True)
+    if res.failed != 0 or res.attempted == 0:
+        raise RuntimeError("Test_public_obj failed.")
+    return res
+
