@@ -40,12 +40,12 @@ jobs:
     # Install dependencies 
     - name: Install
       run: |
-        python -m pip install numpy scipy matplotlib
+        python -m pip install numpy scipy matplotlib pytest
         python -m pip install -e .
 
     - name: Run testmod
       run: |
-        python -c'from scpdt import test; test()'
+        pytest --pyargs scpdt -v -s
 
     - name: Run testmod a scipy submodule
       run: |

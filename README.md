@@ -7,5 +7,5 @@ Extract NumPy / SciPy modified doctesting from refguide-check to a separate pack
 
 ```
    $ pip install -e .
-   $ python -c'from scpdt import test; test()'
+   $ pytest --pyargs scpdt
 ```
