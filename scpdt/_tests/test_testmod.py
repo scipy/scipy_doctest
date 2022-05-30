@@ -27,6 +27,6 @@ def test_module_vanilla_dtfinder():
 def test_stopwords():
     res = testmod(stopwords, verbose=_VERBOSE)
     if res.failed != 0 or res.attempted == 0:
-        raise RuntimeError("Test_module(vanilla DocTestFinder) failed)")
+        raise RuntimeError("Test_stopwords failed.")
     return res
 

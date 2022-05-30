@@ -8,7 +8,7 @@ def test_get_all_list():
 
 def test_get_all_list_no_all():
     # test get_all_list on a module which does not define all.
-    # XXX: remove __all__, test, reload on exit. 
+    # Remove __all__, test, reload on exit to not depend on the test order.
     try:
         del finder_cases.__all__
         items, depr, other = get_all_list(finder_cases)
@@ -21,5 +21,32 @@ def test_get_all_list_no_all():
 def test_get_objects():
     items, failures = get_public_objects(finder_cases)
     assert items == [finder_cases.func, finder_cases.Klass]
+    assert failures == []
+
+
+def test_get_objects_extra_itetms():
+    # test get_all_list on a module which defines an incorrect all.
+    # Patch __all__, test, reload on exit to not depend on the test order.
+    try:
+        finder_cases.__all__ += ['spurious']
+        items, failures = get_public_objects(finder_cases)
+
+        assert items == [finder_cases.func, finder_cases.Klass]
+        assert len(failures) == 1
+
+        failed = failures[0]
+        assert failed[0].endswith(".spurious")
+        assert failed[2].startswith("Missing item")
+
+    finally:
+        from importlib import reload
+        reload(finder_cases)
+
+
+def test_get_objects_skiplist():
+    skips = [finder_cases.__name__ + '.' + 'func']
+    items, failures = get_public_objects(finder_cases, skiplist=skips)
+
+    assert items == [finder_cases.Klass]
     assert failures == []
 
