@@ -53,5 +53,5 @@ jobs:
 
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
-        python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, public_items_only=True)'
+        python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="public")'
 
