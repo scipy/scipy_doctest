@@ -1,3 +1,5 @@
+import numpy as np
+
 from . import module_cases as module, stopwords_cases as stopwords, finder_cases
 from .._run import testmod, find_doctests
 
@@ -52,4 +54,13 @@ def test_explicit_object_list_with_module():
     tests = find_doctests(finder_cases, strategy=objs)
     assert ([test.name for test in tests] ==
             ['scpdt._tests.finder_cases', 'Klass', 'Klass.meth'])
+
+
+def test_global_state():
+    # Make sure doctesting does not alter the global state, as much as reasonable
+    objs = [module.manip_printoptions]
+    opts = np.get_printoptions()
+    testmod(module, verbose=False)
+    new_opts = np.get_printoptions()
+    assert new_opts == opts
 

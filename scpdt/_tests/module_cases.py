@@ -112,3 +112,10 @@ def func7():
     DescribeResult(nobs=10, minmax=(0, 9),      mean=4.5,       variance=9.16666, skewness=0.0, kurtosis=-1.2242424)
 
     """
+
+
+def manip_printoptions():
+    """Manipulate np.printoptions.
+
+    >>> np.set_printoptions(linewidth=146)
+    """
