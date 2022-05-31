@@ -190,7 +190,7 @@ class DTRunner(doctest.DocTestRunner):
             return
         self._had_unexpected_error = True
 
-        self._report_item_name(out)
+        self._report_item_name(out, test.name)
         return super().report_unexpected_exception(out, test, example, exc_info)
 
     def report_failure(self, out, test, example, got):

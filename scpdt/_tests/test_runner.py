@@ -13,4 +13,11 @@ def test_single_failure():
     for test in tests:
         runner.run(test)
 
+
+def test_exception():
+    finder = DTFinder()
+    tests = finder.find(module.func10)
+    runner = DTRunner(verbose=True)
+    for test in tests:
+        runner.run(test)
   
