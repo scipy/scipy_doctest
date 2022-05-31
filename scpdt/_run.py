@@ -8,7 +8,7 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
-from ._util import matplotlib_make_headless as mpl, temp_cwd, get_public_objects
+from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 
 def find_doctests(module, strategy=None,

@@ -10,8 +10,8 @@ import inspect
 from contextlib import contextmanager
 
 @contextmanager
-def matplotlib_make_headless():
-    """ Temporarily make the matplotlib backend headless; close all figures on exit.
+def matplotlib_make_nongui():
+    """ Temporarily make the matplotlib backend non-GUI; close all figures on exit.
     """
     try:
         import matplotlib
@@ -21,7 +21,7 @@ def matplotlib_make_headless():
         backend = None
 
     try:
-        # Matplotlib issues UserWarnings on plt.show() with a headless backend,
+        # Matplotlib issues UserWarnings on plt.show() with a non-GUI backend,
         # Filter them out.
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", "Matplotlib", UserWarning)
