@@ -7,7 +7,7 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
                      DocTestRunner)
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
+from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder, DTRunner
 from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 
@@ -148,7 +148,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     else:
         # our modifications
         flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
-        runner = DocTestRunner(verbose=verbose, checker=DTChecker(), optionflags=flags)
+        runner = DTRunner(verbose=verbose, optionflags=flags)
 
     # our modifications
     with mpl(), temp_cwd():
