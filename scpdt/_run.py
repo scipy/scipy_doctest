@@ -44,10 +44,16 @@ def find_doctests(module, strategy=None,
         # strategy must then be a list of objects to look at
         if not isinstance(strategy, list):
             raise ValueError(f"Expected a list of objects, got {strategy}.")
+        items = strategy[:]
 
     tests = []
     for item in items:
-        t = finder.find(item, globs=globs, extraglobs=extraglobs)  # FIXME: name
+        if inspect.ismodule(item):
+            # do not recurse, only inspect the module docstring
+            _finder = DTFinder(recurse=False)
+            t = _finder.find(item, globs=globs, extraglobs=extraglobs)
+        else:
+            t = finder.find(item, globs=globs, extraglobs=extraglobs)  # FIXME: name
         tests += t
     
     return tests
