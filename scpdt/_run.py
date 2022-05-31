@@ -148,7 +148,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     else:
         # our modifications
         flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
-        runner = DTRunner(verbose=verbose, checker=DTChecker(), optionflags=flags)
+        runner = DTRunner(verbose=verbose, optionflags=flags)
 
     # our modifications
     with mpl(), temp_cwd():

@@ -164,6 +164,8 @@ class DTRunner(doctest.DocTestRunner):
 
     def __init__(self, checker=None, verbose=None, optionflags=0):
         self._had_unexpected_error = False
+        if checker is None:
+            checker = DTChecker()
         doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose,
                                        optionflags=optionflags)
 
@@ -207,6 +209,8 @@ class DTFinder(doctest.DocTestFinder):
                  '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
 
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
+        if globs is None:
+            globs = dict(DEFAULT_NAMESPACE)
         tests = super().find(obj, name, module, globs, extraglobs)
 
         for test in tests:
