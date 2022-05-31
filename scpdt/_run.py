@@ -8,17 +8,67 @@ from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder
-from ._util import matplotlib_make_headless as mpl, temp_cwd
+from ._util import matplotlib_make_headless as mpl, temp_cwd, get_public_objects
+
+
+def find_doctests(module, strategy=None,
+                  name=None, exclude_empty=False, globs=None, extraglobs=None,
+                  use_dtfinder=True):
+    """Find doctests in a module.
+
+    Parameters
+    ----------
+    m : module
+        The base module to look into
+    stratety : str or list of objects, optional
+        The strategy to use to find doctests.
+        If "public", look into public, non-deprecated objects in the module.
+        If a list of objects, only look into the docstring of these objects
+        If None, use the standard `doctest` behavior.
+        Default is None.
+
+    """
+    if use_dtfinder:
+        finder = DTFinder(exclude_empty=exclude_empty)
+    else:
+        finder = DocTestFinder(exclude_empty=exclude_empty)
+
+    if strategy is None:
+        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs)
+        return tests
+
+    if strategy == "public":
+        items, failures = get_public_objects(module)
+        # XXX: handle failures
+    else:
+        # strategy must then be a list of objects to look at
+        if not isinstance(strategy, list):
+            raise ValueError(f"Expected a list of objects, got {strategy}.")
+        items = strategy[:]
+
+    tests = []
+    for item in items:
+        if inspect.ismodule(item):
+            # do not recurse, only inspect the module docstring
+            _finder = DTFinder(recurse=False)
+            t = _finder.find(item, globs=globs, extraglobs=extraglobs)
+        else:
+            t = finder.find(item, globs=globs, extraglobs=extraglobs)  # FIXME: name
+        tests += t
+    
+    return tests
+
 
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
             raise_on_error=False, exclude_empty=False,
-            use_dtfinder=True):
+            use_dtfinder=True, strategy=None):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
     2. use _checker.DTChecker
     3. an option to use the modified DTFinder
+    4. an option for discovery of only public objects
 
        m=None, name=None, globs=None, verbose=None, report=True,
        optionflags=0, extraglobs=None, raise_on_error=False,
@@ -90,10 +140,8 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         globs = dict(DEFAULT_NAMESPACE)  # NB: copy
 
     # Find, parse, and run all tests in the given module.
-    if use_dtfinder:
-        finder = DTFinder(exclude_empty=exclude_empty)
-    else:
-        finder = DocTestFinder(exclude_empty=exclude_empty)
+    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder)
+
 
     if raise_on_error:
         runner = DebugRunner(verbose=verbose, optionflags=optionflags)
@@ -104,7 +152,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
 
     # our modifications
     with mpl(), temp_cwd():
-        for test in finder.find(m, name, globs=globs, extraglobs=extraglobs):
+        for test in tests:
             runner.run(test)
 
     if report:
