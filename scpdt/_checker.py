@@ -171,6 +171,7 @@ class DTRunner(doctest.DocTestRunner):
 
     def _report_item_name(self, out, item_name, new_line=False):
         if item_name is not None:
+            out("\n " + item_name + "\n " + "-"*len(item_name))
             if new_line:
                 out("\n")
 
@@ -185,16 +186,18 @@ class DTRunner(doctest.DocTestRunner):
 
     def report_unexpected_exception(self, out, test, example, exc_info):
         # Ignore name errors after failing due to an unexpected exception
-        exception_type = exc_info[0]
-        if self._had_unexpected_error and exception_type is NameError:
-            return
-        self._had_unexpected_error = True
+# XXX: this came in in https://github.com/scipy/scipy/pull/13116
+# Need to find out what this is about.
+#        exception_type = exc_info[0]
+#        if self._had_unexpected_error and exception_type is NameError:
+#            return
+#        self._had_unexpected_error = True
 
         self._report_item_name(out, test.name)
         return super().report_unexpected_exception(out, test, example, exc_info)
 
     def report_failure(self, out, test, example, got):
-        self._report_item_name(test.name, out)
+        self._report_item_name(out, test.name)
         return doctest.DocTestRunner.report_failure(self, out, test,
                                                     example, got)
 
