@@ -60,7 +60,7 @@ def find_doctests(module, strategy=None,
 
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
-            raise_on_error=False, exclude_empty=False,
+            raise_on_error=False, exclude_empty=True,
             use_dtfinder=True, strategy=None):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
@@ -141,7 +141,6 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     # Find, parse, and run all tests in the given module.
     tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder)
 
-
     flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
     if raise_on_error:
         runner = DebugDTRunner(verbose=verbose, optionflags=flags)
@@ -152,6 +151,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     # our modifications
     with mpl(), temp_cwd():
         for test in tests:
+  # XXX          print(test.name)
             runner.run(test)
 
     if report:
