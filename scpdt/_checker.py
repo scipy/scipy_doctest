@@ -201,6 +201,15 @@ class DTRunner(doctest.DocTestRunner):
         return doctest.DocTestRunner.report_failure(self, out, test,
                                                     example, got)
 
+    def get_history(self):
+        """Return a dict with names of items which were run.
+
+        Actually the dict is `{name : (f, t)}`, where `name` is the name of
+        an object, and the value is a tuple of the numbers of examples which
+        failed and which were tried.
+        """
+        return self._name2ft
+
 
 class DTFinder(doctest.DocTestFinder):
     """A Finder with a stopword list.

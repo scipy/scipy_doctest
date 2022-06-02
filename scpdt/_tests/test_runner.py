@@ -2,7 +2,7 @@ import io
 
 import pytest
 
-from . import failure_cases as module
+from . import failure_cases as module, finder_cases as finder_module
 from .. import DTFinder, DTRunner
 
 
@@ -27,9 +27,19 @@ def test_exception():
     runner = DTRunner(verbose=False)
     stream = io.StringIO()
     for test in tests:
-        runner.run(test, out = stream.write)
+        runner.run(test, out=stream.write)
 
     stream.seek(0)
     output = stream.read()
     assert output.startswith('\n func10\n ------\n')
 
+
+def test_get_history():
+    finder = DTFinder()
+    tests = finder.find(finder_module)
+    runner = DTRunner(verbose=False)
+    for test in tests:
+        runner.run(test)
+
+    dct = runner.get_history()
+    assert len(dct) == 6
