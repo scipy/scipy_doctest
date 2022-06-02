@@ -1,7 +1,13 @@
 import numpy as np
+import pytest
+import doctest
 
-from . import module_cases as module, stopwords_cases as stopwords, finder_cases
+from . import (module_cases as module,
+               stopwords_cases as stopwords,
+               finder_cases,
+               failure_cases)
 from .._run import testmod, find_doctests
+
 
 _VERBOSE = True
 
@@ -63,4 +69,9 @@ def test_global_state():
     testmod(module, verbose=False)
     new_opts = np.get_printoptions()
     assert new_opts == opts
+
+
+def test_module_debugrunner():
+    with pytest.raises((doctest.UnexpectedException, doctest.DocTestFailure)):
+        res = testmod(failure_cases, raise_on_error=True)
 
