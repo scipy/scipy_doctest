@@ -3,11 +3,10 @@
 import sys
 import os
 import inspect
-from doctest import (OPTIONFLAGS_BY_NAME, TestResults, DocTestFinder,
-                     DocTestRunner)
+import doctest
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder, DTRunner
+from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder, DTRunner, DebugDTRunner
 from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 
@@ -31,7 +30,7 @@ def find_doctests(module, strategy=None,
     if use_dtfinder:
         finder = DTFinder(exclude_empty=exclude_empty)
     else:
-        finder = DocTestFinder(exclude_empty=exclude_empty)
+        finder = doctest.DocTestFinder(exclude_empty=exclude_empty)
 
     if strategy is None:
         tests = finder.find(module, name, globs=globs, extraglobs=extraglobs)
@@ -143,11 +142,11 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder)
 
 
+    flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
     if raise_on_error:
-        runner = DebugRunner(verbose=verbose, optionflags=optionflags)
+        runner = DebugDTRunner(verbose=verbose, optionflags=flags)
     else:
         # our modifications
-        flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
         runner = DTRunner(verbose=verbose, optionflags=flags)
 
     # our modifications
@@ -158,7 +157,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if report:
         runner.summarize()
 
-    return TestResults(runner.failures, runner.tries)
+    return doctest.TestResults(runner.failures, runner.tries)
 
 
 
@@ -169,7 +168,7 @@ def _test():
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='print very verbose output for all tests')
     parser.add_argument('-o', '--option', action='append',
-                        choices=OPTIONFLAGS_BY_NAME.keys(), default=[],
+                        choices=doctest.OPTIONFLAGS_BY_NAME.keys(), default=[],
                         help=('specify a doctest option flag to apply'
                               ' to the test run; may be specified more'
                               ' than once to apply multiple options'))
@@ -189,7 +188,7 @@ def _test():
     verbose = args.verbose
     options = 0
     for option in args.option:
-        options |= OPTIONFLAGS_BY_NAME[option]
+        options |= doctest.OPTIONFLAGS_BY_NAME[option]
     if args.fail_fast:
         options |= FAIL_FAST
 
@@ -207,7 +206,7 @@ def _test():
             m = __import__(filename[:-3])
             del sys.path[0]
             failures, _ = testmod(m, verbose=verbose, optionflags=options,
-                                  globs=DEFAULT_NAMESPACE, use_dtfinder=use_dtfinder)
+                                  use_dtfinder=use_dtfinder)
         else:
             failures, _ = testfile(filename, module_relative=False,
                                      verbose=verbose, optionflags=options)
