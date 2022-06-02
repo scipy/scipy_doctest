@@ -212,6 +212,10 @@ class DTRunner(doctest.DocTestRunner):
 
 
 class DebugDTRunner(DTRunner):
+    """Doctest runner which raises on a first error.
+
+    Almost verbatim copy of `doctest.DebugRunner`.
+    """
     def run(self, test, compileflags=None, out=None, clear_globs=True):
         r = super().run(test, compileflags, out, False)
         if clear_globs:
