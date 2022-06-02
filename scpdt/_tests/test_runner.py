@@ -1,9 +1,11 @@
 import io
 
+import doctest
+
 import pytest
 
 from . import failure_cases as module, finder_cases as finder_module
-from .. import DTFinder, DTRunner
+from .. import DTFinder, DTRunner, DebugDTRunner
 
 
 ### Smoke test DTRunner methods. Mainly to check that they are runnable.
@@ -43,3 +45,13 @@ def test_get_history():
 
     dct = runner.get_history()
     assert len(dct) == 6
+
+
+def test_debug_runner():
+    finder = DTFinder()
+    tests = finder.find(module.func9)
+    runner = DebugDTRunner(verbose=False)
+
+    with pytest.raises(doctest.DocTestFailure) as failure:
+        for t in tests:
+            runner.run(t)

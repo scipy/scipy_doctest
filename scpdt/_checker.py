@@ -211,6 +211,20 @@ class DTRunner(doctest.DocTestRunner):
         return self._name2ft
 
 
+class DebugDTRunner(DTRunner):
+    def run(self, test, compileflags=None, out=None, clear_globs=True):
+        r = super().run(test, compileflags, out, False)
+        if clear_globs:
+            test.globs.clear()
+        return r
+
+    def report_unexpected_exception(self, out, test, example, exc_info):
+        raise doctest.UnexpectedException(test, example, exc_info)
+
+    def report_failure(self, out, test, example, got):
+        raise doctest.DocTestFailure(test, example, got)
+
+
 class DTFinder(doctest.DocTestFinder):
     """A Finder with a stopword list.
     """
