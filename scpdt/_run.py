@@ -144,6 +144,11 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         Control verbosity: 0 means only report failures, 1 emit object names,
         2 is the max verbosity from doctest. Default is 0.
 
+    Returns
+    -------
+    a tuple of a DocTestResult, and a dict with details of which objects were examined
+
+
     """
     # If no module was given, then use __main__.
     if m is None:
@@ -187,7 +192,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if report:
         runner.summarize()
 
-    return doctest.TestResults(runner.failures, runner.tries)
+    return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
 
 
 
