@@ -19,17 +19,18 @@ def test_get_all_list_no_all():
 
 
 def test_get_objects():
-    items, failures = get_public_objects(finder_cases)
+    (items, names), failures = get_public_objects(finder_cases)
     assert items == [finder_cases.func, finder_cases.Klass]
+    assert names == [obj.__name__ for obj in items]
     assert failures == []
 
 
-def test_get_objects_extra_itetms():
+def test_get_objects_extra_items():
     # test get_all_list on a module which defines an incorrect all.
     # Patch __all__, test, reload on exit to not depend on the test order.
     try:
         finder_cases.__all__ += ['spurious']
-        items, failures = get_public_objects(finder_cases)
+        (items, names), failures = get_public_objects(finder_cases)
 
         assert items == [finder_cases.func, finder_cases.Klass]
         assert len(failures) == 1
@@ -45,7 +46,7 @@ def test_get_objects_extra_itetms():
 
 def test_get_objects_skiplist():
     skips = [finder_cases.__name__ + '.' + 'func']
-    items, failures = get_public_objects(finder_cases, skiplist=skips)
+    (items, name), failures = get_public_objects(finder_cases, skiplist=skips)
 
     assert items == [finder_cases.Klass]
     assert failures == []

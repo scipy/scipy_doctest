@@ -39,22 +39,23 @@ def find_doctests(module, strategy=None,
         return tests
 
     if strategy == "public":
-        items, failures = get_public_objects(module)
+        (items, names), failures = get_public_objects(module)
         # XXX: handle failures
     else:
         # strategy must then be a list of objects to look at
         if not isinstance(strategy, list):
             raise ValueError(f"Expected a list of objects, got {strategy}.")
         items = strategy[:]
+        names = [item.__name__ for item in items]
 
     tests = []
-    for item in items:
+    for item, name in zip(items, names):
         if inspect.ismodule(item):
             # do not recurse, only inspect the module docstring
             _finder = DTFinder(recurse=False)
-            t = _finder.find(item, globs=globs, extraglobs=extraglobs)
+            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs)
         else:
-            t = finder.find(item, globs=globs, extraglobs=extraglobs)  # FIXME: name
+            t = finder.find(item, name, globs=globs, extraglobs=extraglobs)
         tests += t
     
     return tests
