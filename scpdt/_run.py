@@ -3,6 +3,8 @@
 import sys
 import os
 import inspect
+import operator
+import contextlib
 import doctest
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
@@ -56,6 +58,22 @@ def find_doctests(module, strategy=None,
         tests += t
     
     return tests
+
+
+
+def _map_verbosity(level):
+    """A helper for validating the verbosity level."""
+    if level is None:
+        level = 0
+
+    level = operator.index(level)
+
+    if level not in [0, 1, 2]:
+        raise ValueError("Unknown verbosity setting : level = %s " % level)
+
+    dtverbose = True if level == 2 else False
+
+    return level, dtverbose
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
@@ -118,6 +136,14 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     Passing report=0 to testmod is especially useful then, to delay
     displaying a summary.  Invoke doctest.master.summarize(verbose)
     when you're done fiddling.
+
+
+    Parameters
+    ----------
+    verbose : int
+        Control verbosity: 0 means only report failures, 1 emit object names,
+        2 is the max verbosity from doctest. Default is 0.
+
     """
     # If no module was given, then use __main__.
     if m is None:
@@ -138,21 +164,25 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if globs is None:
         globs = dict(DEFAULT_NAMESPACE)  # NB: copy
 
+    verbose, dtverbose = _map_verbosity(verbose)
+    output = sys.stderr
+
     # Find, parse, and run all tests in the given module.
     tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder)
 
     flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
     if raise_on_error:
-        runner = DebugDTRunner(verbose=verbose, optionflags=flags)
+        runner = DebugDTRunner(verbose=dtverbose, optionflags=flags)
     else:
         # our modifications
-        runner = DTRunner(verbose=verbose, optionflags=flags)
+        runner = DTRunner(verbose=dtverbose, optionflags=flags)
 
     # our modifications
     with mpl(), temp_cwd():
         for test in tests:
-  # XXX          print(test.name)
-            runner.run(test)
+            if verbose == 1:
+                output.write(test.name + '\n')
+            runner.run(test, out=output.write)
 
     if report:
         runner.summarize()
