@@ -1,3 +1,6 @@
+import io
+from contextlib import redirect_stderr
+
 import numpy as np
 import pytest
 import doctest
@@ -9,7 +12,7 @@ from . import (module_cases as module,
 from .._run import testmod, find_doctests
 
 
-_VERBOSE = True
+_VERBOSE = 2
 
 
 def test():
@@ -19,28 +22,28 @@ def test():
 
 
 def test_module():
-    res = testmod(module, verbose=_VERBOSE)
+    res, _ = testmod(module, verbose=_VERBOSE)
     if res.failed != 0 or res.attempted == 0:
         raise RuntimeError("Test_module(DTFinder) failed)")
     return res
 
 
 def test_module_vanilla_dtfinder():
-    res = testmod(module, verbose=_VERBOSE, use_dtfinder=False)
+    res, _ = testmod(module, verbose=_VERBOSE, use_dtfinder=False)
     if res.failed != 0 or res.attempted == 0:
         raise RuntimeError("Test_module(vanilla DocTestFinder) failed)")
     return res
 
 
 def test_stopwords():
-    res = testmod(stopwords, verbose=_VERBOSE)
+    res, _ = testmod(stopwords, verbose=_VERBOSE)
     if res.failed != 0 or res.attempted == 0:
         raise RuntimeError("Test_stopwords failed.")
     return res
 
 
 def test_public_obj_discovery():
-    res = testmod(module, verbose=_VERBOSE, strategy='public')
+    res, _ = testmod(module, verbose=_VERBOSE, strategy='public')
     if res.failed != 0 or res.attempted == 0:
         raise RuntimeError("Test_public_obj failed.")
     return res
@@ -66,7 +69,7 @@ def test_global_state():
     # Make sure doctesting does not alter the global state, as much as reasonable
     objs = [module.manip_printoptions]
     opts = np.get_printoptions()
-    testmod(module, verbose=False)
+    testmod(module)
     new_opts = np.get_printoptions()
     assert new_opts == opts
 
@@ -75,3 +78,9 @@ def test_module_debugrunner():
     with pytest.raises((doctest.UnexpectedException, doctest.DocTestFailure)):
         res = testmod(failure_cases, raise_on_error=True)
 
+
+def test_verbosity_1():
+    # smoke test that verbose=1 works
+    stream = io.StringIO()
+    with redirect_stderr(stream):
+        testmod(failure_cases, verbose=1, report=False)
