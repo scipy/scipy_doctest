@@ -102,13 +102,32 @@ def get_all_list(module):
 
 def get_public_objects(module, skiplist=None):
     """Return a list of public objects in a module.
+
+    Parameters
+    ----------
+    module :
+        A module look for objects
+    skiplist : list
+        The list of names to skip
+
+    Returns
+    -------
+    (items, names) : a tuple of two lists
+        `items` is a list of public objects in the module
+        `names` is a list of names of these objects. Each entry of this list
+        is nothing but `item.__name__` *if the latter exists* :
+        `name == item.__name__ if item.__name__`.
+        Otherwise, the name is taken from the `__all__` list of the module.
+    failures : list
+        a list of names which failed to be found in the module
+
     """
     if skiplist is None:
         skiplist = set()
 
     all_list, _, _ = get_all_list(module)
 
-    items, failures = [], []
+    items, names, failures = [], [], []
 
     for name in all_list:
         full_name = module.__name__ + '.' + name
@@ -119,6 +138,7 @@ def get_public_objects(module, skiplist=None):
         try:
             obj = getattr(module, name)
             items.append(obj)
+            names.append(name)
         except AttributeError:
             import traceback
             failures.append((full_name, False,
@@ -126,5 +146,5 @@ def get_public_objects(module, skiplist=None):
                             traceback.format_exc()))
             continue
 
-    return items, failures
+    return (items, names), failures
 
