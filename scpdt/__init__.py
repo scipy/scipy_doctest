@@ -8,6 +8,7 @@ Whitespace-insensitive, numpy-aware, floating-point-aware doctest helpers.
 __version__ = "0.1"
 
 from ._checker import DTChecker, DTFinder, DTRunner, DebugDTRunner
+from ._util import DTConfig
 from ._run import testmod
 
 from ._tests import test

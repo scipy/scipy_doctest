@@ -6,9 +6,8 @@ import inspect
 import operator
 import contextlib
 import doctest
-from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-from ._checker import DTChecker, DEFAULT_NAMESPACE, DTFinder, DTRunner, DebugDTRunner
+from ._checker import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTConfig
 from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 
@@ -80,7 +79,7 @@ def _map_verbosity(level):
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
             raise_on_error=False, exclude_empty=True,
-            use_dtfinder=True, strategy=None):
+            use_dtfinder=True, strategy=None, config=None):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
@@ -167,8 +166,11 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         name = m.__name__
 
     # out modifications
+    if config is None:
+        config = DTConfig()
+
     if globs is None:
-        globs = dict(DEFAULT_NAMESPACE)  # NB: copy
+        globs = dict(config.default_namespace)
 
     verbose, dtverbose = _map_verbosity(verbose)
     output = sys.stderr
@@ -176,7 +178,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     # Find, parse, and run all tests in the given module.
     tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder)
 
-    flags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
+    flags = config.optionflags
     if raise_on_error:
         runner = DebugDTRunner(verbose=dtverbose, optionflags=flags)
     else:
@@ -196,6 +198,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
 
 
+### THIS BELOW IS NOT TESTED, LIKELY BROKEN
 
 def _test():
     import argparse
