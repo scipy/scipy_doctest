@@ -12,7 +12,9 @@ from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 
 def find_doctests(module, strategy=None,
-                  name=None, exclude_empty=False, globs=None, extraglobs=None,
+                  # doctest parameters. These fall through to the DocTestFinder
+                  name=None, exclude_empty=True, globs=None, extraglobs=None,
+                  # our configuration
                   config=None):
     """Find doctests in a module.
 
@@ -20,14 +22,41 @@ def find_doctests(module, strategy=None,
     ----------
     m : module
         The base module to look into
-    stratety : str or list of objects, optional
+    strategy : str or list of objects, optional
         The strategy to use to find doctests.
         If "public", look into public, non-deprecated objects in the module.
         If a list of objects, only look into the docstring of these objects
         If None, use the standard `doctest` behavior.
         Default is None.
+    name : str, optional
+        The name of the module. Is used to construct the names of DocTest
+        objects. Default is the `module.__name__`.
+    exclude_empty : bool, optional
+        Comes from the stdlib `doctest` module. See Notes.
+        Default is True.
+    globs : dict, optional
+        Comes from the stdlib `doctest` module. See Notes.
+        Default is None.
+    extraglobs : dict, optional
+        Comes from the stdlib `doctest` module. See Notes.
+        Default is None.
     config
-        A DTConfig instance
+        A `DTConfig` instance
+
+    Returns
+    -------
+    tests : list
+        A list of `doctest.DocTest`s that are defined by the module docstring,
+        and by its contained objects’ docstrings. The selection is controlled
+        by the `strategy` argument. 
+
+    Notes
+    -----
+    See https://docs.python.org/3/library/doctest.html#doctestfinder-objects
+    for details on the `doctest`-inherited parameters (`name`, `globs`,
+    `extraglobs`). Note that these are provided mainly for compatibility with
+    the stdlib `doctest` and can be left with default values unless you are
+    doing something unusual.
 
     """
     if config is None:
@@ -36,7 +65,8 @@ def find_doctests(module, strategy=None,
     finder = DTFinder(exclude_empty=exclude_empty)
 
     if strategy is None:
-        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs, config=config)
+        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs,
+                            config=config)
         return tests
 
     if strategy == "public":
@@ -54,11 +84,13 @@ def find_doctests(module, strategy=None,
         if inspect.ismodule(item):
             # do not recurse, only inspect the module docstring
             _finder = DTFinder(recurse=False)
-            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs, config=config)
+            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs,
+                             config=config)
         else:
-            t = finder.find(item, name, globs=globs, extraglobs=extraglobs, config=config)
+            t = finder.find(item, name, globs=globs, extraglobs=extraglobs,
+                            config=config)
         tests += t
-    
+
     return tests
 
 
