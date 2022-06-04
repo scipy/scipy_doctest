@@ -73,7 +73,6 @@ class DTConfig:
                           parse_namedtuples=True,  # Checker
                           nameerror_after_exception=False,  # Runner
     ):
-
         ### DTChecker configuration ###
 
         # The namespace to run examples in
