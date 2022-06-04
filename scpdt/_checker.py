@@ -14,16 +14,19 @@ class DTConfig:
     Attributes
     ----------
     default_namespace : dict
-        The namespace to run examples in
+        The namespace to run examples in.
     check_namespace : dict
-        The namespace to do checks in
+        The namespace to do checks in.
     rndm_markers : set
-        Additional directives which act like `# doctest: + SKIP`
+        Additional directives which act like `# doctest: + SKIP`.
     optionflags : int
         doctest optionflags
     stopwords : list
         If an example contains any of these stopwords, do not check the output
-        (but do check that the source is valid python)
+        (but do check that the source is valid python).
+    skiplist : set
+        A list of names which are known to fail doctesting and we like to keep
+        it that way e.g. sometimes pseudocode is acceptable etc.
 
     """
     def __init__(self, *, default_namespace=None, check_namespace=None,
@@ -31,7 +34,8 @@ class DTConfig:
                           # DTRunner configuration
                           optionflags=None,
                           # DTFinder configuration
-                          stopwords=None):
+                          stopwords=None,
+                          skiplist=None,):
 
         ### DTChecker configuration ###
 
@@ -87,6 +91,14 @@ class DTConfig:
                  '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
                  '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
         self.stopwords = stopwords
+
+        # these names are known to fail doctesting and we like to keep it that way
+        # e.g. sometimes pseudocode is acceptable etc
+        if skiplist is None:
+            skiplist = set(['scipy.special.sinc',  # comes from numpy
+                            'scipy.misc.who',  # comes from numpy
+                            'scipy.optimize.show_options',])
+        self.skiplist = skiplist
 
 
 def try_convert_namedtuple(got):

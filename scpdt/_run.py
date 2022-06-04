@@ -70,7 +70,8 @@ def find_doctests(module, strategy=None,
         return tests
 
     if strategy == "api":
-        (items, names), failures = get_public_objects(module)
+        (items, names), failures = get_public_objects(module,
+                                                      skiplist=config.skiplist)
         # XXX: handle failures
     else:
         # strategy must then be a list of objects to look at
