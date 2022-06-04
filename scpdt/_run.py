@@ -69,7 +69,7 @@ def find_doctests(module, strategy=None,
                             config=config)
         return tests
 
-    if strategy == "public":
+    if strategy == "api":
         (items, names), failures = get_public_objects(module)
         # XXX: handle failures
     else:
@@ -148,7 +148,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         Default is True.
     strategy : str or list of objects, optional
         The strategy to use to find doctests.
-        If "public", look into public, non-deprecated objects in the module.
+        If "api", look into public, non-deprecated objects in the module.
         If a list of objects, only look into the docstring of these objects
         If None, use the standard `doctest` behavior.
         Default is None.
@@ -170,7 +170,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     --------
     >>> from scipy import constants
     >>> from scpdt import testmod
-    >>> result, history = testmod(constants, strategy='public')
+    >>> result, history = testmod(constants, strategy='api')
     >>> result
     TestResults(failed=0, attempted=25)
     >>> len(history)

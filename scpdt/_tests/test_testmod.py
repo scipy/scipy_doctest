@@ -45,7 +45,7 @@ def test_stopwords():
 
 
 def test_public_obj_discovery():
-    res, _ = testmod(module, verbose=_VERBOSE, strategy='public')
+    res, _ = testmod(module, verbose=_VERBOSE, strategy='api')
     if res.failed != 0 or res.attempted == 0:
         raise RuntimeError("Test_public_obj failed.")
     return res
