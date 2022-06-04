@@ -5,11 +5,14 @@ from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 import numpy as np
 
+from . import _util
 
 class DTConfig:
     """A bag class to collect various configuration bits. 
 
-    If an attribute is None, helpful defaults are subsituted.
+    If an attribute is None, helpful defaults are subsituted. If the defaults
+    are not sufficient, users should create an instance of this class,
+    override the desired attributes and pass the instance to `testmod`.
 
     Attributes
     ----------
@@ -36,6 +39,15 @@ class DTConfig:
     skiplist : set
         A list of names which are known to fail doctesting and we like to keep
         it that way e.g. sometimes pseudocode is acceptable etc.
+    user_context_mgr
+        A context manager to run tests in. Is entered for each DocTest
+        (for API docs, this is typically a single docstring). The operation is
+        roughly
+
+        >>> for test in tests:
+        ...     with user_context():
+        ...         runner.run(test)
+        Default is a noop.
 
     """
     def __init__(self, *, # DTChecker configuration
@@ -49,7 +61,9 @@ class DTConfig:
                           optionflags=None,
                           # DTFinder configuration
                           stopwords=None,
-                          skiplist=None,):
+                          skiplist=None,
+                          # Additional user configuration
+                          user_context_mgr=None):
 
         ### DTChecker configuration ###
 
@@ -116,6 +130,11 @@ class DTConfig:
                             'scipy.misc.who',  # comes from numpy
                             'scipy.optimize.show_options',])
         self.skiplist = skiplist
+
+        # User configuration
+        if user_context_mgr is None:
+            user_context_mgr = _util.noop_context_mgr
+        self.user_context_mgr = user_context_mgr
 
 
 def try_convert_namedtuple(got):

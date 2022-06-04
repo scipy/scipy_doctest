@@ -69,6 +69,15 @@ def np_errstate():
         with np.printoptions():
             yield
 
+@contextmanager
+def noop_context_mgr():
+    """Do nothing.
+
+    This is a stub context manager to serve as a default for
+    ``DTConfig().user_context_mgr``, which users can override.
+    """
+    yield
+
 
 ### Object / Doctest selection helpers ###
 

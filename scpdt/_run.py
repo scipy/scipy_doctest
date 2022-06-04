@@ -243,7 +243,8 @@ def testmod(m=None, name=None, globs=None, verbose=None,
             # after each docstring
             with np_errstate():
                 with rndm_state():
-                    runner.run(test, out=output.write)
+                    with config.user_context_mgr():
+                        runner.run(test, out=output.write)
 
     if report:
         runner.summarize()
