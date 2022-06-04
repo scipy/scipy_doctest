@@ -6,7 +6,6 @@ from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 import numpy as np
 
 
-
 class DTConfig:
     """A bag class to collect various configuration bits. 
 

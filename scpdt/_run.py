@@ -13,7 +13,7 @@ from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 def find_doctests(module, strategy=None,
                   name=None, exclude_empty=False, globs=None, extraglobs=None,
-                  use_dtfinder=True):
+                  use_dtfinder=True, config=None):
     """Find doctests in a module.
 
     Parameters
@@ -26,15 +26,24 @@ def find_doctests(module, strategy=None,
         If a list of objects, only look into the docstring of these objects
         If None, use the standard `doctest` behavior.
         Default is None.
+    config
+        A DTConfig instance
 
     """
+    if config is None:
+        config = DTConfig()
+
+    finder = DTFinder(exclude_empty=exclude_empty)
+
+
     if use_dtfinder:
         finder = DTFinder(exclude_empty=exclude_empty)
-    else:
-        finder = doctest.DocTestFinder(exclude_empty=exclude_empty)
+    # FIXME: drop use_dtfinder
+#    else:
+#        finder = doctest.DocTestFinder(exclude_empty=exclude_empty)
 
     if strategy is None:
-        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs)
+        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs, config=config)
         return tests
 
     if strategy == "public":
@@ -52,9 +61,9 @@ def find_doctests(module, strategy=None,
         if inspect.ismodule(item):
             # do not recurse, only inspect the module docstring
             _finder = DTFinder(recurse=False)
-            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs)
+            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs, config=config)
         else:
-            t = finder.find(item, name, globs=globs, extraglobs=extraglobs)
+            t = finder.find(item, name, globs=globs, extraglobs=extraglobs, config=config)
         tests += t
     
     return tests
@@ -65,14 +74,10 @@ def _map_verbosity(level):
     """A helper for validating the verbosity level."""
     if level is None:
         level = 0
-
     level = operator.index(level)
-
     if level not in [0, 1, 2]:
         raise ValueError("Unknown verbosity setting : level = %s " % level)
-
     dtverbose = True if level == 2 else False
-
     return level, dtverbose
 
 
@@ -176,14 +181,14 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     output = sys.stderr
 
     # Find, parse, and run all tests in the given module.
-    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder)
+    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder, config)
 
     flags = config.optionflags
     if raise_on_error:
-        runner = DebugDTRunner(verbose=dtverbose, optionflags=flags)
+        runner = DebugDTRunner(verbose=dtverbose, optionflags=flags, config=config)
     else:
         # our modifications
-        runner = DTRunner(verbose=dtverbose, optionflags=flags)
+        runner = DTRunner(verbose=dtverbose, optionflags=flags, config=config)
 
     # our modifications
     with mpl(), temp_cwd():
