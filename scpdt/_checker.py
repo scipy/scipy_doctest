@@ -19,8 +19,17 @@ class DTConfig:
         The namespace to do checks in.
     rndm_markers : set
         Additional directives which act like `# doctest: + SKIP`.
+    atol : float
+    rtol : float
+        Absolute and relative tolerances to check doctest examples with. 
+        Specifically, the check is ``np.allclose(want, got, atol=atol, rtol=rtol)``
+    parse_namedtuples : bool
+        Whether to compare e.g. ``TTestResult(pvalue=0.9, statistic=42)``
+        literally or extract the numbers and compare the tuple ``(0.9, 42)``.
+        Default is True.
     optionflags : int
         doctest optionflags
+        Default is ``NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL``
     stopwords : list
         If an example contains any of these stopwords, do not check the output
         (but do check that the source is valid python).
@@ -29,8 +38,13 @@ class DTConfig:
         it that way e.g. sometimes pseudocode is acceptable etc.
 
     """
-    def __init__(self, *, default_namespace=None, check_namespace=None,
+    def __init__(self, *, # DTChecker configuration
+                          default_namespace=None,
+                          check_namespace=None,
                           rndm_markers=None,
+                          atol=1e-8,
+                          rtol=1e-2,
+                          parse_namedtuples=True,
                           # DTRunner configuration
                           optionflags=None,
                           # DTFinder configuration
@@ -73,6 +87,9 @@ class DTConfig:
                             '#random', '#Random',
                             "# may vary"}
         self.rndm_markers = rndm_markers
+
+        self.atol, self.rtol = atol, rtol
+        self.parse_namedtuples = parse_namedtuples
 
         ### DTRunner configuration ###
 
@@ -121,15 +138,14 @@ class DTChecker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
 
-    def __init__(self, parse_namedtuples=True,
-                 atol=1e-8, rtol=1e-2, config=None):
+    def __init__(self, config=None):
 
         if config is None:
             config = DTConfig()
         self.config = config
 
-        self.parse_namedtuples = parse_namedtuples
-        self.atol, self.rtol = atol, rtol
+        self.parse_namedtuples = self.config.parse_namedtuples
+        self.atol, self.rtol = self.config.atol, self.config.rtol
         self.ns = dict(self.config.check_namespace)
         self.rndm_markers = set(self.config.rndm_markers)
         self.rndm_markers.add('# _ignore')  # technical, private. See DTFinder
@@ -244,7 +260,7 @@ class DTRunner(doctest.DocTestRunner):
         if config is None:
             config = DTConfig()
         if checker is None:
-            checker = DTChecker()  # FIXME: config.checher(config)
+            checker = DTChecker(config)
         if optionflags is None:
             optionflags = config.optionflags
         doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose,
