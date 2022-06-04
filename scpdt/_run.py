@@ -8,7 +8,9 @@ import contextlib
 import doctest
 
 from ._checker import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTConfig
-from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
+from ._util import (matplotlib_make_nongui as mpl,
+                    temp_cwd, rndm_state, np_errstate,
+                    get_public_objects)
 
 
 def find_doctests(module, strategy=None,
@@ -233,11 +235,15 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     ### Find, parse, and run all tests in the given module.
     tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, config=config)
 
-    with mpl(), temp_cwd():
-        for test in tests:
-            if verbose == 1:
-                output.write(test.name + '\n')
-            runner.run(test, out=output.write)
+    for test in tests:
+        if verbose == 1:
+            output.write(test.name + '\n')
+        with mpl(), temp_cwd():
+            # restore (i) the errstate/print state, and (ii) np.random state
+            # after each docstring
+            with np_errstate():
+                with rndm_state():
+                    runner.run(test, out=output.write)
 
     if report:
         runner.summarize()

@@ -47,6 +47,32 @@ def temp_cwd():
         shutil.rmtree(tmpdir)
 
 
+@contextmanager
+def rndm_state():
+    """Restore the `np.random` state when done."""
+    # FIXME: this matches the refguide-check behavior, but is a tad strange:
+    # makes sure that the seed the old-fashioned np.random* methods is *NOT* reproducible
+    # but the new-style `default_rng()` *IS*.
+    # Should these two be either both repro or both not repro?
+    from scipy._lib._util import _fixed_default_rng
+    import numpy as np
+    with _fixed_default_rng():
+        np.random.seed(None)
+        yield
+
+
+@contextmanager
+def np_errstate():
+    """A context manager to restore the numpy errstate and printoptions when done."""
+    import numpy as np
+    with np.errstate():
+        with np.printoptions():
+            yield
+
+
+### Object / Doctest selection helpers ###
+
+
 def is_deprecated(f):
     """ Check if an item is deprecated.
     """
@@ -60,8 +86,6 @@ def is_deprecated(f):
             pass
         return False
 
-
-### Object / Doctest selection helpers ###
 
 def get_all_list(module):
     """Return a copy of the __all__ list with irrelevant items removed.
