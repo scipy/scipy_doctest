@@ -1,31 +1,92 @@
-import numpy as np
 import re
-import doctest
 import warnings
+import doctest
+from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
-# the namespace to run examples in
-DEFAULT_NAMESPACE = {'np': np}
+import numpy as np
 
-# the namespace to do checks in
-CHECK_NAMESPACE = {
-      'np': np,
-      'assert_allclose': np.testing.assert_allclose,
-      'assert_equal': np.testing.assert_equal,
-      # recognize numpy repr's
-      'array': np.array,
-      'matrix': np.matrix,
-      'masked_array': np.ma.masked_array,
-      'int64': np.int64,
-      'uint64': np.uint64,
-      'int8': np.int8,
-      'int32': np.int32,
-      'float32': np.float32,
-      'float64': np.float64,
-      'dtype': np.dtype,
-      'nan': np.nan,
-      'NaN': np.nan,
-      'inf': np.inf,
-      'Inf': np.inf,}
+
+class DTConfig:
+    """A bag class to collect various configuration bits. 
+
+    If an attribute is None, helpful defaults are subsituted.
+
+    Attributes
+    ----------
+    default_namespace : dict
+        The namespace to run examples in
+    check_namespace : dict
+        The namespace to do checks in
+    rndm_markers : set
+        Additional directives which act like `# doctest: + SKIP`
+    optionflags : int
+        doctest optionflags
+    stopwords : list
+        If an example contains any of these stopwords, do not check the output
+        (but do check that the source is valid python)
+
+    """
+    def __init__(self, *, default_namespace=None, check_namespace=None,
+                          rndm_markers=None,
+                          # DTRunner configuration
+                          optionflags=None,
+                          # DTFinder configuration
+                          stopwords=None):
+
+        ### DTChecker configuration ###
+
+        # The namespace to run examples in
+        if default_namespace is None:
+            default_namespace = {'np': np}
+        self.default_namespace = default_namespace
+
+        # The namespace to do checks in
+        if check_namespace is None:
+            check_namespace = {
+                  'np': np,
+                  'assert_allclose': np.testing.assert_allclose,
+                  'assert_equal': np.testing.assert_equal,
+                  # recognize numpy repr's
+                  'array': np.array,
+                  'matrix': np.matrix,
+                  'masked_array': np.ma.masked_array,
+                  'int64': np.int64,
+                  'uint64': np.uint64,
+                  'int8': np.int8,
+                  'int32': np.int32,
+                  'float32': np.float32,
+                  'float64': np.float64,
+                  'dtype': np.dtype,
+                  'nan': np.nan,
+                  'NaN': np.nan,
+                  'inf': np.inf,
+                  'Inf': np.inf,}
+            self.check_namespace = check_namespace
+
+        # Additional directives which act like `# doctest: + SKIP`
+        if rndm_markers is None:
+            rndm_markers = {'# random', '# Random',
+                            '#random', '#Random',
+                            "# may vary"}
+        self.rndm_markers = rndm_markers
+
+        ### DTRunner configuration ###
+
+        # doctest optionflags
+        if optionflags is None:
+            optionflags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
+        self.optionflags = optionflags
+
+        ### DTFinder configuration ###
+
+        # ignore examples which contain any of these stopwords
+        if stopwords is None:
+            stopwords = {'plt.', '.hist', '.show', '.ylim', '.subplot(',
+                 'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
+                 '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
+                 '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
+                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
+        self.stopwords = stopwords
 
 
 def try_convert_namedtuple(got):
@@ -47,16 +108,20 @@ def try_convert_namedtuple(got):
 class DTChecker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
-    rndm_markers = {'# random', '# Random', '#random', '#Random', "# may vary"}
-    rndm_markers.add('# _ignore')  # technical, private. See DTFinder
 
-    def __init__(self, parse_namedtuples=True, ns=None, atol=1e-8, rtol=1e-2):
+    def __init__(self, parse_namedtuples=True,
+                 atol=1e-8, rtol=1e-2, config=None):
+
+        if config is None:
+            config = DTConfig()
+        self.config = config
+
         self.parse_namedtuples = parse_namedtuples
         self.atol, self.rtol = atol, rtol
-        if ns is None:
-            self.ns = dict(CHECK_NAMESPACE)
-        else:
-            self.ns = ns
+        self.ns = dict(self.config.check_namespace)
+        self.rndm_markers = set(self.config.rndm_markers)
+        self.rndm_markers.add('# _ignore')  # technical, private. See DTFinder
+
 
     def check_output(self, want, got, optionflags):
         # cut it short if they are equal
@@ -162,10 +227,14 @@ class DTChecker(doctest.OutputChecker):
 class DTRunner(doctest.DocTestRunner):
     DIVIDER = "\n"
 
-    def __init__(self, checker=None, verbose=None, optionflags=0):
+    def __init__(self, checker=None, verbose=None, optionflags=None, config=None):
         self._had_unexpected_error = False
+        if config is None:
+            config = DTConfig()
         if checker is None:
-            checker = DTChecker()
+            checker = DTChecker()  # FIXME: config.checher(config)
+        if optionflags is None:
+            optionflags = config.optionflags
         doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose,
                                        optionflags=optionflags)
 
@@ -232,20 +301,16 @@ class DebugDTRunner(DTRunner):
 class DTFinder(doctest.DocTestFinder):
     """A Finder with a stopword list.
     """
-    stopwords = {'plt.', '.hist', '.show', '.ylim', '.subplot(',
-                 'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
-                 '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
-                 '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
-                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
-
-    def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
+    def find(self, obj, name=None, module=None, globs=None, extraglobs=None, config=None):
+        if config is None:
+            config = DTConfig()
         if globs is None:
-            globs = dict(DEFAULT_NAMESPACE)
+            globs = dict(config.default_namespace)
         tests = super().find(obj, name, module, globs, extraglobs)
 
         for test in tests:
             for example in test.examples:
-                if any(word in example.source for word in self.stopwords):
+                if any(word in example.source for word in config.stopwords):
                     # Found a stopword. Do not check the output (but do check
                     # that the source is valid python). 
                     example.want += "  # _ignore\n"

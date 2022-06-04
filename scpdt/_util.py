@@ -9,6 +9,7 @@ import tempfile
 import inspect
 from contextlib import contextmanager
 
+
 @contextmanager
 def matplotlib_make_nongui():
     """ Temporarily make the matplotlib backend non-GUI; close all figures on exit.

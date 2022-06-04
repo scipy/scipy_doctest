@@ -43,7 +43,7 @@ jobs:
         python -m pip install numpy scipy matplotlib pytest
         python -m pip install -e .
 
-    - name: Run testmod
+    - name: Self-test
       run: |
         pytest --pyargs scpdt -v -s
 
@@ -53,5 +53,5 @@ jobs:
 
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
-        python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="public")'
+        python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="api")'
 
