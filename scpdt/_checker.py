@@ -275,7 +275,6 @@ class DTRunner(doctest.DocTestRunner):
     DIVIDER = "\n"
 
     def __init__(self, checker=None, verbose=None, optionflags=None, config=None):
-        self._had_unexpected_error = False
         if config is None:
             config = DTConfig()
         if checker is None:
@@ -302,13 +301,14 @@ class DTRunner(doctest.DocTestRunner):
 
     def report_unexpected_exception(self, out, test, example, exc_info):
         # Ignore name errors after failing due to an unexpected exception
-# XXX: this came in in https://github.com/scipy/scipy/pull/13116
-# Need to find out what this is about.
-#        exception_type = exc_info[0]
-#        if self._had_unexpected_error and exception_type is NameError:
-#            return
-#        self._had_unexpected_error = True
-
+        # NB: this came in in https://github.com/scipy/scipy/pull/13116
+        # However, here we attach the flag to the test itself, not the runner
+        if not hasattr(test, 'had_unexpected_error'):
+            test.had_unexpected_error = True
+        else:
+            exception_type = exc_info[0]
+            if exception_type is NameError:
+                return
         self._report_item_name(out, test.name)
         return super().report_unexpected_exception(out, test, example, exc_info)
 
