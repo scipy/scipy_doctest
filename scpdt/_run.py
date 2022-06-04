@@ -107,83 +107,100 @@ def _map_verbosity(level):
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
-            report=True, optionflags=0, extraglobs=None,
+            report=True, optionflags=None, extraglobs=None,
             raise_on_error=False, exclude_empty=True,
             strategy=None, config=None):
-    """This is a `testmod` driver from the standard library, with minimal patches.
+    """Run modified doctesting on a module or on docstrings of a list of objects.
 
-    1. hardcode optionflags
-    2. use _checker.DTChecker
-    4. an option for discovery of only public objects
-
-       m=None, name=None, globs=None, verbose=None, report=True,
-       optionflags=0, extraglobs=None, raise_on_error=False,
-       exclude_empty=False
-    Test examples in docstrings in functions and classes reachable
-    from module m (or the current module if m is not supplied), starting
-    with m.__doc__.
-    Also test examples reachable from dict m.__test__ if it exists and is
-    not None.  m.__test__ maps names to functions, classes and strings;
-    function and class docstrings are tested even if the name is private;
-    strings are tested directly, as if they were docstrings.
-    Return (#failures, #tests).
-    See help(doctest) for an overview.
-    Optional keyword arg "name" gives the name of the module; by default
-    use m.__name__.
-    Optional keyword arg "globs" gives a dict to be used as the globals
-    when executing examples; by default, use m.__dict__.  A copy of this
-    dict is actually used for each docstring, so that each docstring's
-    examples start with a clean slate.
-    Optional keyword arg "extraglobs" gives a dictionary that should be
-    merged into the globals that are used to execute examples.  By
-    default, no extra globals are used.  This is new in 2.4.
-    Optional keyword arg "verbose" prints lots of stuff if true, prints
-    only failures if false; by default, it's true iff "-v" is in sys.argv.
-    Optional keyword arg "report" prints a summary at the end when true,
-    else prints nothing at the end.  In verbose mode, the summary is
-    detailed, else very brief (in fact, empty if all tests passed).
-    Optional keyword arg "optionflags" or's together module constants,
-    and defaults to 0.  This is new in 2.3.  Possible values (see the
-    docs for details):
-        DONT_ACCEPT_TRUE_FOR_1
-        DONT_ACCEPT_BLANKLINE
-        NORMALIZE_WHITESPACE
-        ELLIPSIS
-        SKIP
-        IGNORE_EXCEPTION_DETAIL
-        REPORT_UDIFF
-        REPORT_CDIFF
-        REPORT_NDIFF
-        REPORT_ONLY_FIRST_FAILURE
-    Optional keyword arg "raise_on_error" raises an exception on the
-    first unexpected exception or failure. This allows failures to be
-    post-mortem debugged.
-    Advanced tomfoolery:  testmod runs methods of a local instance of
-    class doctest.Tester, then merges the results into (or creates)
-    global Tester instance doctest.master.  Methods of doctest.master
-    can be called directly too, if you want to do something unusual.
-    Passing report=0 to testmod is especially useful then, to delay
-    displaying a summary.  Invoke doctest.master.summarize(verbose)
-    when you're done fiddling.
-
+    This function is an analog of the `testmod` driver from the standard library.
 
     Parameters
     ----------
+    m : module, optional
+        Test examples in docstrings in functions and classes reachable
+        from module `m` (or the current module if `m` is not supplied),
+        starting with ``m.__doc__``.
+    name : str, optional
+        Gives the name of the module; by default use ``m.__name__``.
+    globs : dict, optional
+        A dict to be used as the globals when executing examples;  A copy of this
+        dict is actually used for each docstring, so that each docstring's
+        examples start with a clean slate.
+        By default, use `config.default_namespace`.
+    report : bool, optional
+        Prints a summary at the end when `True`, else prints nothing at the end.
+        In verbose mode, the summary is detailed, else very brief (in fact,
+        empty if all tests passed)
+        Default is True.
+    optionflags : int, optional
+        `doctest` module optionflags for checking examples. See the stdlib
+        `doctest` module documentation for details.
+        Default is to use `config.optionflags`.
+    extraglobs : dict, optional
+        Provided for compatibility with `doctest.testmod`. Default is None.
+    raise_on_error : bool, optional
+        Raise an exception on the first unexpected exception or failure.
+        This allows failures to be post-mortem debugged.
+        Default is `False`.
+    exclude_empty : bool, optional
+        Whether to exclude from consideration objects with no docstrings.
+        Comes from the stdlib `doctest` module. See Notes.
+        Default is True.
+    strategy : str or list of objects, optional
+        The strategy to use to find doctests.
+        If "public", look into public, non-deprecated objects in the module.
+        If a list of objects, only look into the docstring of these objects
+        If None, use the standard `doctest` behavior.
+        Default is None.
     verbose : int
-        Control verbosity: 0 means only report failures, 1 emit object names,
-        2 is the max verbosity from doctest. Default is 0.
+        Control the run verbosity:
+        0 means only report failures,
+        1 means emit object names,
+        2 is the max verbosity from doctest (print all examples/want/got).
+        Default is 0.
 
     Returns
     -------
-    a tuple of a DocTestResult, and a dict with details of which objects were examined
+    (result, history)
+        `result` is a namedtuple ``TestResult(failed, attempted)``
+        `history` is a dict with details of which objects were examined (the
+        keys are object names and values are individual objects' ``TestResult``s)
 
+    Examples
+    --------
+    >>> from scipy import constants
+    >>> from scpdt import testmod
+    >>> result, history = testmod(constants, strategy='public')
+    >>> result
+    TestResults(failed=0, attempted=25)
+    >>> len(history)
+    160
+
+    Notes
+    -----
+    The signature is made to be (mostly) consistent with `doctest.testmod`.
+    For details on the `doctest`-inherited parameters see 
+    https://docs.python.org/3/library/doctest.html.
+    For an overview, see ``help(doctest)``.
+
+    ** Doctest discovery **
+
+    The default doctest discovery strategy, `testmod(..., strategy=None)`, is
+    inherited from the stdlib `doctest` module with all its limitations.
+    For instance, it may have difficulties with complex packages, where the
+    implementation is spread across several modules. 
+
+    For complex packages, prefer `strategy='api'`, which works as follows:
+    - take the names of public objects from the `__all__` attribute of the package.
+    - if `__all__` is not defined, take `dir(module)` and filter out names
+      which start with a leading underscore and dunders.
+    - filter out deprecated items, i.e. those which raise `DeprecationWarning`.
 
     """
+    ### mimic `doctest.testmod` initial set-ups
+
     # If no module was given, then use __main__.
     if m is None:
-        # DWA - m will still be None if this wasn't invoked from the command
-        # line, in which case the following TypeError is about as good an error
-        # as we should expect
         m = sys.modules.get('__main__')
 
     # Check that we were actually given a module.
@@ -194,27 +211,27 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     if name is None:
         name = m.__name__
 
-    # out modifications
+    ### Set up the configuration
     if config is None:
         config = DTConfig()
 
+    # pull the the namespace to run examples in, also optionflags from `config`
     if globs is None:
         globs = dict(config.default_namespace)
+    flags = config.optionflags
 
-    verbose, dtverbose = _map_verbosity(verbose)
     output = sys.stderr
 
-    # Find, parse, and run all tests in the given module.
-    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, config=config)
-
-    flags = config.optionflags
+    # Fail fast or run all tests
+    verbose, dtverbose = _map_verbosity(verbose)
     if raise_on_error:
         runner = DebugDTRunner(verbose=dtverbose, optionflags=flags, config=config)
     else:
-        # our modifications
         runner = DTRunner(verbose=dtverbose, optionflags=flags, config=config)
 
-    # our modifications
+    ### Find, parse, and run all tests in the given module.
+    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, config=config)
+
     with mpl(), temp_cwd():
         for test in tests:
             if verbose == 1:
@@ -285,4 +302,5 @@ def _test():
 
 
 if __name__ == "__main__":
-    sys.exit(_test())
+   # sys.exit(_test())
+    testmod()
