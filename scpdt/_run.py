@@ -238,12 +238,19 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     for test in tests:
         if verbose == 1:
             output.write(test.name + '\n')
-        with mpl(), temp_cwd():
-            # restore (i) the errstate/print state, and (ii) np.random state
-            # after each docstring
-            with np_errstate():
-                with rndm_state():
-                    with config.user_context_mgr():
+        # restore (i) the errstate/print state, and (ii) np.random state
+        # after each docstring. Also make MPL backend non-GUI and close
+        # the figures.
+        # The order of context managers is actually relevant. Suppose
+        # that the user_context_mgr turns warnings into errors.
+        # Additionally, suppose that MPL deprecates something and plt.something
+        # starts issuing warngings. Now, all of those become errors
+        # *unless* the `mpl()` context mgr has a chance to filter them out
+        # *before* they become errors in `config.user_context_mgr()`.
+        with np_errstate():
+            with rndm_state():
+                with config.user_context_mgr():
+                    with mpl(), temp_cwd():
                         runner.run(test, out=output.write)
 
     if report:

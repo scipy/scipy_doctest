@@ -74,9 +74,17 @@ def noop_context_mgr():
     """Do nothing.
 
     This is a stub context manager to serve as a default for
-    ``DTConfig().user_context_mgr``, which users can override.
+    ``DTConfig().user_context_mgr``, for users to override.
     """
     yield
+
+
+@contextmanager
+def warnings_errors():
+    """Temporarily turn all warnings to errors."""
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', Warning)
+        yield
 
 
 ### Object / Doctest selection helpers ###

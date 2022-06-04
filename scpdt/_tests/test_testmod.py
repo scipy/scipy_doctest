@@ -8,8 +8,10 @@ import doctest
 from . import (module_cases as module,
                stopwords_cases as stopwords,
                finder_cases,
-               failure_cases)
+               failure_cases,
+               failure_cases_2)
 from .._run import testmod, find_doctests
+from .._util import warnings_errors
 from .._checker import DTConfig
 
 _VERBOSE = 2
@@ -127,5 +129,4 @@ class TestNameErrorAfterException:
 
         assert "ValueError:" in output   # the original exception
         assert "NameError:"  in output   # the follow-up NameError
-
 
