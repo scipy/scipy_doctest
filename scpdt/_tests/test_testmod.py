@@ -10,7 +10,7 @@ from . import (module_cases as module,
                finder_cases,
                failure_cases)
 from .._run import testmod, find_doctests
-
+from .._checker import DTConfig
 
 _VERBOSE = 2
 
@@ -29,7 +29,9 @@ def test_module():
 
 
 def test_module_vanilla_dtfinder():
-    res, _ = testmod(module, verbose=_VERBOSE, use_dtfinder=False)
+    config = DTConfig()
+    config.stopwords = []
+    res, _ = testmod(module, verbose=_VERBOSE, config=config)
     if res.failed != 0 or res.attempted == 0:
         raise RuntimeError("Test_module(vanilla DocTestFinder) failed)")
     return res

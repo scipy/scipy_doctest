@@ -13,7 +13,7 @@ from ._util import matplotlib_make_nongui as mpl, temp_cwd, get_public_objects
 
 def find_doctests(module, strategy=None,
                   name=None, exclude_empty=False, globs=None, extraglobs=None,
-                  use_dtfinder=True, config=None):
+                  config=None):
     """Find doctests in a module.
 
     Parameters
@@ -34,13 +34,6 @@ def find_doctests(module, strategy=None,
         config = DTConfig()
 
     finder = DTFinder(exclude_empty=exclude_empty)
-
-
-    if use_dtfinder:
-        finder = DTFinder(exclude_empty=exclude_empty)
-    # FIXME: drop use_dtfinder
-#    else:
-#        finder = doctest.DocTestFinder(exclude_empty=exclude_empty)
 
     if strategy is None:
         tests = finder.find(module, name, globs=globs, extraglobs=extraglobs, config=config)
@@ -84,12 +77,11 @@ def _map_verbosity(level):
 def testmod(m=None, name=None, globs=None, verbose=None,
             report=True, optionflags=0, extraglobs=None,
             raise_on_error=False, exclude_empty=True,
-            use_dtfinder=True, strategy=None, config=None):
+            strategy=None, config=None):
     """This is a `testmod` driver from the standard library, with minimal patches.
 
     1. hardcode optionflags
     2. use _checker.DTChecker
-    3. an option to use the modified DTFinder
     4. an option for discovery of only public objects
 
        m=None, name=None, globs=None, verbose=None, report=True,
@@ -181,7 +173,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     output = sys.stderr
 
     # Find, parse, and run all tests in the given module.
-    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, use_dtfinder, config)
+    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, config=config)
 
     flags = config.optionflags
     if raise_on_error:
@@ -239,6 +231,7 @@ def _test():
     use_dtfinder = False
     if args.finder:
         use_dtfinder = True
+        # FIXME: use config.stopwords=[] instead
 
     for filename in testfiles:
         if filename.endswith(".py"):
@@ -249,8 +242,7 @@ def _test():
             sys.path.insert(0, dirname)
             m = __import__(filename[:-3])
             del sys.path[0]
-            failures, _ = testmod(m, verbose=verbose, optionflags=options,
-                                  use_dtfinder=use_dtfinder)
+            failures, _ = testmod(m, verbose=verbose, optionflags=options)
         else:
             failures, _ = testfile(filename, module_relative=False,
                                      verbose=verbose, optionflags=options)
