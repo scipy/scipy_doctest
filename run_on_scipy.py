@@ -90,7 +90,7 @@ for submodule_name in module_names:
     full_name = module.__name__
     sys.stderr.write("\n\n" + "="*len(full_name) + "\n" + full_name + "\n" + "="*len(full_name) + "\n")
 
-    result, history = testmod(module, strategy='public') 
+    result, history = testmod(module, strategy='api') 
 
     sys.stderr.write(str(result))
 
