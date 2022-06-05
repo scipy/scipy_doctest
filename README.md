@@ -11,8 +11,8 @@ examples are correct. However, the `doctest` module is limited in several
 respects. Consider:
 
 ```
-    >>> np.array([1/3, 2/3, 3/3])   # doctest: +SKIP
-    array([0.333, 0.669, 1])
+ >>> np.array([1/3, 2/3, 3/3])   # doctest: +SKIP
+ array([0.333, 0.669, 1])
 ```
 
 This looks reasonably clear but does not work, in three different ways.
@@ -58,8 +58,8 @@ Its main features are
 # Install and test
 
 ```
-   $ pip install -e .
-   $ pytest --pyargs scpdt
+$ pip install -e .
+$ pytest --pyargs scpdt
 ```
 
 # Usage
@@ -73,9 +73,9 @@ We strive to provide drop-in replacements, or nearly so.
 For example,
 
 ```
-   >>> from scipy import linalg
-   >>> from scpdt import testmod
-   >>> testmod(linalg, strategy='api')
+>>> from scipy import linalg
+>>> from scpdt import testmod
+>>> testmod(linalg, strategy='api')
 ```
 
 See the `testmod` docstring for more details. Other useful functions are
