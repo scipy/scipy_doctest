@@ -98,18 +98,34 @@ def test_user_context():
                 config=config)
 
 
-def test_name_error_after_exception():
-    # After an example fails, subsequent examples may emit NameErrors.
-    # Check that they are suppressed.
-    # This first came in in https://github.com/scipy/scipy/pull/13116
-    stream = io.StringIO()
-    with redirect_stderr(stream):
-        testmod(failure_cases_2,
-                strategy=[failure_cases_2.func_name_error])
+class TestNameErrorAfterException:
+    def test_name_error_after_exception(self):
+        # After an example fails, subsequent examples may emit NameErrors.
+        # Check that they are suppressed.
+        # This first came in in https://github.com/scipy/scipy/pull/13116
+        stream = io.StringIO()
+        with redirect_stderr(stream):
+            testmod(failure_cases_2,
+                    strategy=[failure_cases_2.func_name_error])
 
-    stream.seek(0)
-    output = stream.read()
+        stream.seek(0)
+        output = stream.read()
 
-    assert "ValueError:" in output   # the original exception
-    assert "NameError:" not in output  # the follow-up NameError
+        assert "ValueError:" in output   # the original exception
+        assert "NameError:" not in output  # the follow-up NameError
+
+    def test_name_error_after_exception_off(self):
+        # show NameErrors
+        config = DTConfig(nameerror_after_exception=True)
+        stream = io.StringIO()
+        with redirect_stderr(stream):
+            testmod(failure_cases_2,
+                    strategy=[failure_cases_2.func_name_error], config=config)
+
+        stream.seek(0)
+        output = stream.read()
+
+        assert "ValueError:" in output   # the original exception
+        assert "NameError:"  in output   # the follow-up NameError
+
 
