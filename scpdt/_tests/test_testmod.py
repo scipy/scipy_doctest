@@ -10,9 +10,9 @@ from . import (module_cases as module,
                finder_cases,
                failure_cases,
                failure_cases_2)
-from .._run import testmod, find_doctests
+from .._frontend import testmod, find_doctests
 from .._util import warnings_errors
-from .._checker import DTConfig
+from .._impl import DTConfig
 
 _VERBOSE = 2
 

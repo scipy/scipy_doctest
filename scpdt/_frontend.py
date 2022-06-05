@@ -7,7 +7,7 @@ import operator
 import contextlib
 import doctest
 
-from ._checker import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTConfig
+from ._impl import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTConfig
 from ._util import (matplotlib_make_nongui as mpl,
                     temp_cwd, rndm_state, np_errstate,
                     get_public_objects)
