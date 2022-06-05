@@ -5,11 +5,14 @@ from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 import numpy as np
 
+from . import _util
 
 class DTConfig:
     """A bag class to collect various configuration bits. 
 
-    If an attribute is None, helpful defaults are subsituted.
+    If an attribute is None, helpful defaults are subsituted. If the defaults
+    are not sufficient, users should create an instance of this class,
+    override the desired attributes and pass the instance to `testmod`.
 
     Attributes
     ----------
@@ -23,10 +26,6 @@ class DTConfig:
     rtol : float
         Absolute and relative tolerances to check doctest examples with. 
         Specifically, the check is ``np.allclose(want, got, atol=atol, rtol=rtol)``
-    parse_namedtuples : bool
-        Whether to compare e.g. ``TTestResult(pvalue=0.9, statistic=42)``
-        literally or extract the numbers and compare the tuple ``(0.9, 42)``.
-        Default is True.
     optionflags : int
         doctest optionflags
         Default is ``NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL``
@@ -36,6 +35,25 @@ class DTConfig:
     skiplist : set
         A list of names which are known to fail doctesting and we like to keep
         it that way e.g. sometimes pseudocode is acceptable etc.
+    user_context_mgr
+        A context manager to run tests in. Is entered for each DocTest
+        (for API docs, this is typically a single docstring). The operation is
+        roughly
+
+        >>> for test in tests:
+        ...     with user_context():
+        ...         runner.run(test)
+        Default is a noop.
+
+    parse_namedtuples : bool
+        Whether to compare e.g. ``TTestResult(pvalue=0.9, statistic=42)``
+        literally or extract the numbers and compare the tuple ``(0.9, 42)``.
+        Default is True.
+    nameerror_after_exception : bool
+        If an example fails, next examples in the same test may raise spurious
+        NameErrors. Set to True if you want to see these, or if your test
+        is actually expected to raise NameErrors. 
+        Default is False.
 
     """
     def __init__(self, *, # DTChecker configuration
@@ -44,13 +62,17 @@ class DTConfig:
                           rndm_markers=None,
                           atol=1e-8,
                           rtol=1e-2,
-                          parse_namedtuples=True,
                           # DTRunner configuration
                           optionflags=None,
                           # DTFinder configuration
                           stopwords=None,
-                          skiplist=None,):
-
+                          skiplist=None,
+                          # Additional user configuration
+                          user_context_mgr=None,
+                          # Obscure switches
+                          parse_namedtuples=True,  # Checker
+                          nameerror_after_exception=False,  # Runner
+    ):
         ### DTChecker configuration ###
 
         # The namespace to run examples in
@@ -89,7 +111,6 @@ class DTConfig:
         self.rndm_markers = rndm_markers
 
         self.atol, self.rtol = atol, rtol
-        self.parse_namedtuples = parse_namedtuples
 
         ### DTRunner configuration ###
 
@@ -116,6 +137,15 @@ class DTConfig:
                             'scipy.misc.who',  # comes from numpy
                             'scipy.optimize.show_options',])
         self.skiplist = skiplist
+
+        #### User configuration
+        if user_context_mgr is None:
+            user_context_mgr = _util.noop_context_mgr
+        self.user_context_mgr = user_context_mgr
+
+        #### Obscure switches, best leave intact
+        self.parse_namedtuples = parse_namedtuples
+        self.nameerror_after_exception = nameerror_after_exception
 
 
 def try_convert_namedtuple(got):
@@ -256,11 +286,11 @@ class DTRunner(doctest.DocTestRunner):
     DIVIDER = "\n"
 
     def __init__(self, checker=None, verbose=None, optionflags=None, config=None):
-        self._had_unexpected_error = False
         if config is None:
             config = DTConfig()
         if checker is None:
             checker = DTChecker(config)
+        self.nameerror_after_exception = config.nameerror_after_exception
         if optionflags is None:
             optionflags = config.optionflags
         doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose,
@@ -282,14 +312,16 @@ class DTRunner(doctest.DocTestRunner):
         return doctest.DocTestRunner.report_success(self, out, test, example, got)
 
     def report_unexpected_exception(self, out, test, example, exc_info):
-        # Ignore name errors after failing due to an unexpected exception
-# XXX: this came in in https://github.com/scipy/scipy/pull/13116
-# Need to find out what this is about.
-#        exception_type = exc_info[0]
-#        if self._had_unexpected_error and exception_type is NameError:
-#            return
-#        self._had_unexpected_error = True
-
+        if not self.nameerror_after_exception:
+            # Ignore name errors after failing due to an unexpected exception
+            # NB: this came in in https://github.com/scipy/scipy/pull/13116
+            # However, here we attach the flag to the test itself, not the runner
+            if not hasattr(test, 'had_unexpected_error'):
+                test.had_unexpected_error = True
+            else:
+                exception_type = exc_info[0]
+                if exception_type is NameError:
+                    return
         self._report_item_name(out, test.name)
         return super().report_unexpected_exception(out, test, example, exc_info)
 

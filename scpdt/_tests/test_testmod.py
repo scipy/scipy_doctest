@@ -8,8 +8,10 @@ import doctest
 from . import (module_cases as module,
                stopwords_cases as stopwords,
                finder_cases,
-               failure_cases)
+               failure_cases,
+               failure_cases_2)
 from .._run import testmod, find_doctests
+from .._util import warnings_errors
 from .._checker import DTConfig
 
 _VERBOSE = 2
@@ -86,3 +88,45 @@ def test_verbosity_1():
     stream = io.StringIO()
     with redirect_stderr(stream):
         testmod(failure_cases, verbose=1, report=False)
+
+
+def test_user_context():
+    # use a user context to turn warnings to errors : test that it raises
+    config = DTConfig()
+    config.user_context_mgr = warnings_errors
+    with pytest.raises(doctest.UnexpectedException):
+        testmod(failure_cases_2,
+                raise_on_error=True, strategy=[failure_cases_2.func_depr],
+                config=config)
+
+
+class TestNameErrorAfterException:
+    def test_name_error_after_exception(self):
+        # After an example fails, subsequent examples may emit NameErrors.
+        # Check that they are suppressed.
+        # This first came in in https://github.com/scipy/scipy/pull/13116
+        stream = io.StringIO()
+        with redirect_stderr(stream):
+            testmod(failure_cases_2,
+                    strategy=[failure_cases_2.func_name_error])
+
+        stream.seek(0)
+        output = stream.read()
+
+        assert "ValueError:" in output   # the original exception
+        assert "NameError:" not in output  # the follow-up NameError
+
+    def test_name_error_after_exception_off(self):
+        # show NameErrors
+        config = DTConfig(nameerror_after_exception=True)
+        stream = io.StringIO()
+        with redirect_stderr(stream):
+            testmod(failure_cases_2,
+                    strategy=[failure_cases_2.func_name_error], config=config)
+
+        stream.seek(0)
+        output = stream.read()
+
+        assert "ValueError:" in output   # the original exception
+        assert "NameError:"  in output   # the follow-up NameError
+
