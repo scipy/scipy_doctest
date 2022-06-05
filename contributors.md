@@ -1,4 +1,4 @@
-The following people contributed to `scipy/rools/refguide_check` utility
+The following people contributed to `scipy/tools/refguide_check` utility
 
 ```
 $ git blame tools/refguide_check.py --porcelain | grep  "^author " | sort -u
