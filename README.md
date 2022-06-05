@@ -1,7 +1,6 @@
-Floating-point aware, human readable, numpy-compatible doctesting.
+# Floating-point aware, human readable, numpy-compatible doctesting.
 
-
-# Motivation and scope
+## Motivation and scope
 
 Having examples in the documentation is great. Having wrong examples in the
 documentation is not that great however. 
@@ -55,34 +54,47 @@ Its main features are
   configurable via a `DTConfig` instance attributes. See the `DTConfig`
   docstring for details.
 
-# Install and test
+## Install and test
 
 ```
 $ pip install -e .
 $ pytest --pyargs scpdt
 ```
 
-# Usage
+## Usage
 
 The API of the package closely follows that of the standard `doctest` module.
 We strive to provide drop-in replacements, or nearly so.
 
 
-## Basic usage
+### Basic usage
 
 For example,
 
 ```
 >>> from scipy import linalg
 >>> from scpdt import testmod
->>> testmod(linalg, strategy='api')
+>>> res, hist = testmod(linalg, strategy='api')
+>>> res
+TestResults(failed=0, attempted=764)
 ```
+The second return value, `hist` is a dict which maps the names of the objects
+to the numbers of failures and attempts for individual examples.
 
 See the `testmod` docstring for more details. Other useful functions are
 `find_doctests` and `run_docstring_examples` (the latter mimics the `doctest`
 module behavior).
 
-## More fine-grained control
+There is also a basic CLI, which mimics that of the `doctest` module:
+```
+$ python -m scpdt foo.py
+```
+
+Note that, just like the `$ python -m doctest foo.py`, this may
+fail if `foo.py` is a part of a package due to package imports.
+
+
+### More fine-grained control
 
 More fine-grained control of the functionality is available via the following
 classes
@@ -101,7 +113,7 @@ passing the instance to `testmod` or `DT*` objects/methods. Defaults are
 provided, based on a long-term usage in SciPy.
 
 
-# Prior art and related work
+## Prior art and related work
 
 - `pytest` provides some limited floating-point aware `NumericLiteralChecker`.
 
