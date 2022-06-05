@@ -302,43 +302,22 @@ def run_docstring_examples(f, globs=None, verbose=False, name='NoName',
                    optionflags=optionflags, strategy=[f], config=config)
 
 
-### THIS BELOW IS NOT TESTED, LIKELY BROKEN
-
-def _test():
+def _main():
+    """CLI for `$ python -m scpdt pythonfile.py`, cf `__main__.py`
+    """
     import argparse
 
     parser = argparse.ArgumentParser(description="doctest runner")
-    parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                        help='print very verbose output for all tests')
-    parser.add_argument('-o', '--option', action='append',
-                        choices=doctest.OPTIONFLAGS_BY_NAME.keys(), default=[],
-                        help=('specify a doctest option flag to apply'
-                              ' to the test run; may be specified more'
-                              ' than once to apply multiple options'))
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                        help='print verbose (`-v`) or very verbose (`-vv`) '
+                              'output for all tests')
     parser.add_argument('-x', '--fail-fast', action='store_true',
-                        help=('stop running tests after first failure (this'
-                              ' is a shorthand for -o FAIL_FAST, and is'
-                              ' in addition to any other -o options)'))
-    parser.add_argument('-f', '--finder', action='store_false',
-                        help='use `doctest.DocTestFinder` if given, otherwise'
-                             ' use DTFinder.')
+                        help=('stop running tests after first failure'))
     parser.add_argument('file', nargs='+',
                         help='file containing the tests to run')
     args = parser.parse_args()
     testfiles = args.file
-    # Verbose used to be handled by the "inspect argv" magic in DocTestRunner,
-    # but since we are using argparse we are passing it manually now.
     verbose = args.verbose
-    options = 0
-    for option in args.option:
-        options |= doctest.OPTIONFLAGS_BY_NAME[option]
-    if args.fail_fast:
-        options |= FAIL_FAST
-
-    use_dtfinder = False
-    if args.finder:
-        use_dtfinder = True
-        # FIXME: use config.stopwords=[] instead
 
     for filename in testfiles:
         if filename.endswith(".py"):
@@ -349,16 +328,14 @@ def _test():
             sys.path.insert(0, dirname)
             m = __import__(filename[:-3])
             del sys.path[0]
-            failures, _ = testmod(m, verbose=verbose, optionflags=options)
+            result, _ = testmod(m, verbose=verbose,
+                                  raise_on_error=args.fail_fast)
         else:
+            # XXX: UNTESTED, LIKELY BROKEN
             failures, _ = testfile(filename, module_relative=False,
                                      verbose=verbose, optionflags=options)
 
-        if failures:
+        if result.failed:
             return 1
     return 0
 
-
-if __name__ == "__main__":
-   # sys.exit(_test())
-    testmod()

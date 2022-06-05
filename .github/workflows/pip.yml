@@ -47,6 +47,11 @@ jobs:
       run: |
         pytest --pyargs scpdt -v -s
 
+    - name: Self-test CLI
+      run: |
+        python -m scpdt scpdt/_tests/finder_cases.py -vv
+
+
     - name: Run testmod a scipy submodule
       run: |
         python -c'from scipy.linalg import _basic; from scpdt import testmod; testmod(_basic, verbose=True)'
