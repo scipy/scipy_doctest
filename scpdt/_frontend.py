@@ -135,6 +135,12 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         In verbose mode, the summary is detailed, else very brief (in fact,
         empty if all tests passed)
         Default is True.
+   verbose : int
+        Control the run verbosity:
+        0 means only report failures,
+        1 means emit object names,
+        2 is the max verbosity from doctest (print all examples/want/got).
+        Default is 0.
     optionflags : int, optional
         `doctest` module optionflags for checking examples. See the stdlib
         `doctest` module documentation for details.
@@ -155,12 +161,8 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         If a list of objects, only look into the docstring of these objects
         If None, use the standard `doctest` behavior.
         Default is None.
-    verbose : int
-        Control the run verbosity:
-        0 means only report failures,
-        1 means emit object names,
-        2 is the max verbosity from doctest (print all examples/want/got).
-        Default is 0.
+    config : a DTConfig instance, optional
+        Various configuration options. See the `DTconfig` docstring for details.
 
     Returns
     -------
@@ -257,6 +259,47 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         runner.summarize()
 
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
+
+
+def run_docstring_examples(f, globs=None, verbose=False, name='NoName',
+                           optionflags=None, config=None):
+    """Run examples in the docstring of the object `f`.
+
+    Parameters
+    ----------
+    f
+        Can be a function, a class, a module etc
+    globs : dict, optional
+        A dict to be used as the globals when executing examples;  A copy of this
+        dict is actually used for each docstring, so that each docstring's
+        examples start with a clean slate.
+        By default, use `config.default_namespace`.
+    verbose : bool, optional
+        Control the verbosity of the report.
+    name : str, optional
+        The object name.
+    optionflags : int, optional
+        `doctest` module optionflags for checking examples. See the stdlib
+        `doctest` module documentation for details.
+        Default is to use `config.optionflags`.
+    config : a DTConfig instance, optional
+        Various configuration options. See the `DTconfig` docstring for details.
+    """
+    if config is None:
+        config = DTConfig()
+    if globs is None:
+        globs = dict(config.default_namespace)
+    if verbose is None:
+        verbose = 0
+    if optionflags is None:
+        optionflags = config.optionflags
+    
+    m = f.__module__
+    import importlib
+    module = importlib.import_module(m)
+
+    return testmod(module, name=name, globs=globs, verbose=verbose,
+                   optionflags=optionflags, strategy=[f], config=config)
 
 
 ### THIS BELOW IS NOT TESTED, LIKELY BROKEN

@@ -10,7 +10,7 @@ from . import (module_cases as module,
                finder_cases,
                failure_cases,
                failure_cases_2)
-from .._frontend import testmod, find_doctests
+from .._frontend import testmod, find_doctests, run_docstring_examples
 from .._util import warnings_errors
 from .._impl import DTConfig
 
@@ -67,6 +67,13 @@ def test_explicit_object_list_with_module():
     tests = find_doctests(finder_cases, strategy=objs)
     assert ([test.name for test in tests] ==
             ['scpdt._tests.finder_cases', 'Klass', 'Klass.meth'])
+
+
+def test_run_docstring_examples():
+    f = finder_cases.Klass
+    res1 = run_docstring_examples(f)
+    res2 = testmod(finder_cases, strategy=[finder_cases.Klass])
+    assert res1 == res2
 
 
 def test_global_state():
