@@ -241,10 +241,10 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         # restore (i) the errstate/print state, and (ii) np.random state
         # after each docstring. Also make MPL backend non-GUI and close
         # the figures.
-        # The order of context managers is actually relevant. Suppose
-        # that the user_context_mgr turns warnings into errors.
+        # The order of context managers is actually relevant. Consider
+        # a user_context_mgr that turns warnings into errors.
         # Additionally, suppose that MPL deprecates something and plt.something
-        # starts issuing warngings. Now, all of those become errors
+        # starts issuing warngings. Now all of those become errors
         # *unless* the `mpl()` context mgr has a chance to filter them out
         # *before* they become errors in `config.user_context_mgr()`.
         with np_errstate():

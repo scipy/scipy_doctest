@@ -10,7 +10,7 @@ from . import _util
 class DTConfig:
     """A bag class to collect various configuration bits. 
 
-    If an attribute is None, helpful defaults are subsituted. If the defaults
+    If an attribute is None, helpful defaults are subsituted. If defaults
     are not sufficient, users should create an instance of this class,
     override the desired attributes and pass the instance to `testmod`.
 
