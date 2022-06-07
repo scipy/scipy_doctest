@@ -82,15 +82,15 @@ The second return value, `hist` is a dict which maps the names of the objects
 to the numbers of failures and attempts for individual examples.
 
 See the `testmod` docstring for more details. Other useful functions are
-`find_doctests` and `run_docstring_examples` (the latter mimics the `doctest`
-module behavior).
+`find_doctests` and `run_docstring_examples` (the latter mimics the behaviour
+of the eponimous function of the `doctest` module).
 
-There is also a basic CLI, which mimics that of the `doctest` module:
+There is also a basic CLI, which also mimics that of the `doctest` module:
 ```
 $ python -m scpdt foo.py
 ```
 
-Note that, just like the `$ python -m doctest foo.py`, this may
+Note that, just like `$ python -m doctest foo.py`, this may
 fail if `foo.py` is a part of a package due to package imports.
 
 
@@ -108,7 +108,7 @@ classes
 
 The `DTContext` class is just a bag class which holds various configuration
 settings as attributes.  An instance of this class is passed around, so user
-configuration is as simple creating an instance, overriding an attribute and
+configuration is simply creating an instance, overriding an attribute and
 passing the instance to `testmod` or `DT*` objects/methods. Defaults are
 provided, based on a long-term usage in SciPy.
 
