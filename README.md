@@ -25,7 +25,7 @@ went unnoticed by the doctester also because of the `+SKIP` directive.
 We believe these `# doctest: +SKIP` directives do not add any value to
 a human reader, and should not be present in the documentation.
 
-This package defined modified doctesting routines which fix these deficiencies.
+This package defines modified doctesting routines which fix these deficiencies.
 Its main features are
 
 - *Doctesting is floating-point aware.* In a nutshell, the core check is
