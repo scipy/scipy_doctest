@@ -17,12 +17,6 @@ from .._impl import DTConfig
 _VERBOSE = 2
 
 
-def test():
-    test_module()
-    test_module_vanilla_dtfinder()
-    test_stopwords()
-
-
 def test_module():
     res, _ = testmod(module, verbose=_VERBOSE)
     if res.failed != 0 or res.attempted == 0:
