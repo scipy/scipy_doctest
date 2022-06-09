@@ -123,7 +123,7 @@ def _map_verbosity(level):
 def is_deprecated(f):
     """ Check if an item is deprecated.
     """
-    with warnings.catch_warnings(record=True) as w:
+    with warnings.catch_warnings(record=True):
         warnings.simplefilter("error")
         try:
             f(**{"not a kwarg":None})

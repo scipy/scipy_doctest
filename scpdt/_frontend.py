@@ -3,10 +3,9 @@
 import sys
 import os
 import inspect
-import contextlib
 import doctest
 
-from ._impl import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
+from ._impl import DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
 from ._util import (matplotlib_make_nongui as mpl,
                     temp_cwd, rndm_state, np_errstate,
                     get_public_objects, _map_verbosity)

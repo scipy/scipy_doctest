@@ -71,7 +71,7 @@ def func6():
     """
 
 
-def func6():
+def func8():
     """
     Namedtuples (they are *not* in the namespace)
 
