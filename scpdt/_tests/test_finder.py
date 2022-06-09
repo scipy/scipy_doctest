@@ -1,5 +1,6 @@
 from . import finder_cases
 from .._util import get_all_list, get_public_objects
+from .._impl import DTFinder, DTConfig
 
 def test_get_all_list():
     items, depr, other = get_all_list(finder_cases)
@@ -51,3 +52,8 @@ def test_get_objects_skiplist():
     assert items == [finder_cases.Klass]
     assert failures == []
 
+
+def test_dtfinder_config():
+    config = DTConfig()
+    finder = DTFinder(config=config)
+    assert finder.config is config

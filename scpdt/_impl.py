@@ -357,19 +357,21 @@ class DebugDTRunner(DTRunner):
 
 
 class DTFinder(doctest.DocTestFinder):
-    """A Finder with a stopword list.
+    """A Finder with helpful defaults.
     """
-    def __init__(self, verbose=False, parser=None, recurse=True, exclude_empty=True):
-        # FIXME: verbosity bool vs integer, like testmod
-        if parser is None:
-            parser = DTParser()  # FIXME: config
-        super().__init__(verbose, parser, recurse, exclude_empty)
-
-    def find(self, obj, name=None, module=None, globs=None, extraglobs=None, config=None):
+    def __init__(self, verbose=None, parser=None, recurse=True,
+                 exclude_empty=True, config=None):
         if config is None:
             config = DTConfig()
+        self.config = config
+        if parser is None:
+            parser = DTParser()
+        verbose, dtverbose = _util._map_verbosity(verbose)
+        super().__init__(dtverbose, parser, recurse, exclude_empty)
+
+    def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
         if globs is None:
-            globs = dict(config.default_namespace)
+            globs = dict(self.config.default_namespace)
         tests = super().find(obj, name, module, globs, extraglobs)
         return tests
 

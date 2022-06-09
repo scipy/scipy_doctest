@@ -3,14 +3,13 @@
 import sys
 import os
 import inspect
-import operator
 import contextlib
 import doctest
 
 from ._impl import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
 from ._util import (matplotlib_make_nongui as mpl,
                     temp_cwd, rndm_state, np_errstate,
-                    get_public_objects)
+                    get_public_objects, _map_verbosity)
 
 
 def find_doctests(module, strategy=None,
@@ -64,11 +63,10 @@ def find_doctests(module, strategy=None,
     if config is None:
         config = DTConfig()
 
-    finder = DTFinder(exclude_empty=exclude_empty)
+    finder = DTFinder(exclude_empty=exclude_empty, config=config)
 
     if strategy is None:
-        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs,
-                            config=config)
+        tests = finder.find(module, name, globs=globs, extraglobs=extraglobs)
         return tests
 
     if strategy == "api":
@@ -86,27 +84,14 @@ def find_doctests(module, strategy=None,
     for item, name in zip(items, names):
         if inspect.ismodule(item):
             # do not recurse, only inspect the module docstring
-            _finder = DTFinder(recurse=False)
-            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs,
-                             config=config)
+            _finder = DTFinder(recurse=False, config=config)
+            t = _finder.find(item, name, globs=globs, extraglobs=extraglobs)
         else:
-            t = finder.find(item, name, globs=globs, extraglobs=extraglobs,
-                            config=config)
+            t = finder.find(item, name, globs=globs, extraglobs=extraglobs)
         tests += t
 
     return tests
 
-
-
-def _map_verbosity(level):
-    """A helper for validating the verbosity level."""
-    if level is None:
-        level = 0
-    level = operator.index(level)
-    if level not in [0, 1, 2]:
-        raise ValueError("Unknown verbosity setting : level = %s " % level)
-    dtverbose = True if level == 2 else False
-    return level, dtverbose
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
