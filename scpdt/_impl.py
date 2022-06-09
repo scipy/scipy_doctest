@@ -167,17 +167,13 @@ class DTChecker(doctest.OutputChecker):
     vanilla = doctest.OutputChecker()
 
     def __init__(self, config=None):
-
         if config is None:
             config = DTConfig()
         self.config = config
 
-        self.parse_namedtuples = self.config.parse_namedtuples
         self.atol, self.rtol = self.config.atol, self.config.rtol
-        self.ns = dict(self.config.check_namespace)
         self.rndm_markers = set(self.config.rndm_markers)
         self.rndm_markers.add('# _ignore')  # technical, private. See DTParser
-
 
     def check_output(self, want, got, optionflags):
         # cut it short if they are equal
@@ -204,9 +200,10 @@ class DTChecker(doctest.OutputChecker):
             pass
 
         # OK then, convert strings to objects
+        ns = dict(self.config.check_namespace)
         try:
-            a_want = eval(want, dict(self.ns))
-            a_got = eval(got, dict(self.ns))
+            a_want = eval(want, dict(ns))
+            a_got = eval(got, dict(ns))
         except Exception:
             # Maybe we're printing a numpy array? This produces invalid python
             # code: `print(np.arange(3))` produces "[0 1 2]" w/o commas between
@@ -238,7 +235,7 @@ class DTChecker(doctest.OutputChecker):
                 # Since they did not, it's an error.
                 return False
 
-            if not self.parse_namedtuples:
+            if not self.config.parse_namedtuples:
                 return False
             # suppose that "want"  is a tuple, and "got" is smth like
             # MoodResult(statistic=10, pvalue=0.1).
