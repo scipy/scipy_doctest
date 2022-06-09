@@ -47,37 +47,35 @@ def test_get_history():
     assert len(dct) == 6
 
 
-### Test the DebugDTRunner ####
+class TestDebugDTRunner:
+    def test_debug_runner_failure(self):
+        finder = DTFinder()
+        tests = finder.find(module.func9)
+        runner = DebugDTRunner(verbose=False)
 
-def test_debug_runner_failure():
-    finder = DTFinder()
-    tests = finder.find(module.func9)
-    runner = DebugDTRunner(verbose=False)
+        with pytest.raises(doctest.DocTestFailure) as exc:
+            for t in tests:
+                runner.run(t)
 
-    with pytest.raises(doctest.DocTestFailure) as exc:
-        for t in tests:
-            runner.run(t)
+        # pytest wraps the original exception, unwrap it
+        orig_exception = exc.value
 
-    # pytest wraps the original exception, unwrap it
-    orig_exception = exc.value
+        # DocTestFailure carries the doctest and the run result
+        assert orig_exception.test is tests[0]
+        assert orig_exception.test.name == 'func9'
+        assert orig_exception.got == 'array([1, 2, 3])\n'
+        assert orig_exception.example.want == 'array([2, 3, 4])\n'
 
-    # DocTestFailure carries the doctest and the run result
-    assert orig_exception.test is tests[0]
-    assert orig_exception.test.name == 'func9'
-    assert orig_exception.got == 'array([1, 2, 3])\n'
-    assert orig_exception.example.want == 'array([2, 3, 4])\n'
+    def test_debug_runner_exception(self):
+        finder = DTFinder()
+        tests = finder.find(module.func10)
+        runner = DebugDTRunner(verbose=False)
 
+        with pytest.raises(doctest.UnexpectedException) as exc:
+            for t in tests:
+                runner.run(t)
+        orig_exception = exc.value
 
-def test_debug_runner_exception():
-    finder = DTFinder()
-    tests = finder.find(module.func10)
-    runner = DebugDTRunner(verbose=False)
+        # exception carries the original test
+        assert orig_exception.test is tests[0]
 
-    with pytest.raises(doctest.UnexpectedException) as exc:
-        for t in tests:
-            runner.run(t)
-    orig_exception = exc.value
-
-    # exception carries the original test
-    assert orig_exception.test is tests[0]
-    

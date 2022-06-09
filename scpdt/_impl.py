@@ -64,7 +64,7 @@ class DTConfig:
                           rtol=1e-2,
                           # DTRunner configuration
                           optionflags=None,
-                          # DTFinder configuration
+                          # DTFinder/DTParser configuration
                           stopwords=None,
                           skiplist=None,
                           # Additional user configuration
@@ -74,7 +74,6 @@ class DTConfig:
                           nameerror_after_exception=False,  # Runner
     ):
         ### DTChecker configuration ###
-
         # The namespace to run examples in
         if default_namespace is None:
             default_namespace = {'np': np}
@@ -119,8 +118,7 @@ class DTConfig:
             optionflags = NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL
         self.optionflags = optionflags
 
-        ### DTFinder configuration ###
-
+        ### DTFinder/DTParser configuration ###
         # ignore examples which contain any of these stopwords
         if stopwords is None:
             stopwords = {'plt.', '.hist', '.show', '.ylim', '.subplot(',
@@ -178,7 +176,7 @@ class DTChecker(doctest.OutputChecker):
         self.atol, self.rtol = self.config.atol, self.config.rtol
         self.ns = dict(self.config.check_namespace)
         self.rndm_markers = set(self.config.rndm_markers)
-        self.rndm_markers.add('# _ignore')  # technical, private. See DTFinder
+        self.rndm_markers.add('# _ignore')  # technical, private. See DTParser
 
 
     def check_output(self, want, got, optionflags):
@@ -359,19 +357,46 @@ class DebugDTRunner(DTRunner):
 
 
 class DTFinder(doctest.DocTestFinder):
-    """A Finder with a stopword list.
+    """A Finder with helpful defaults.
     """
-    def find(self, obj, name=None, module=None, globs=None, extraglobs=None, config=None):
+    def __init__(self, verbose=None, parser=None, recurse=True,
+                 exclude_empty=True, config=None):
         if config is None:
             config = DTConfig()
-        if globs is None:
-            globs = dict(config.default_namespace)
-        tests = super().find(obj, name, module, globs, extraglobs)
+        self.config = config
+        if parser is None:
+            parser = DTParser(config)
+        verbose, dtverbose = _util._map_verbosity(verbose)
+        super().__init__(dtverbose, parser, recurse, exclude_empty)
 
-        for test in tests:
-            for example in test.examples:
-                if any(word in example.source for word in config.stopwords):
-                    # Found a stopword. Do not check the output (but do check
-                    # that the source is valid python). 
-                    example.want += "  # _ignore\n"
+    def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
+        if globs is None:
+            globs = dict(self.config.default_namespace)
+        tests = super().find(obj, name, module, globs, extraglobs)
         return tests
+
+
+class DTParser(doctest.DocTestParser):
+    """A Parser with a stopword list.
+    """
+    def __init__(self, config=None):
+        if config is None:
+            config = DTConfig()
+        self.config = config
+        # DocTestParser has no __init__, do not try calling it
+
+    def get_examples(self, string, name='<string>'):
+        stopwords = self.config.stopwords
+
+        examples = []
+        for example in self.parse(string, name):
+            # .parse returns a list of examples and intervening text
+            if not isinstance(example, doctest.Example):
+                continue
+            if any(word in example.source for word in stopwords):
+                # Found a stopword. Do not check the output (but do check
+                # that the source is valid python). 
+                example.want += "  # _ignore\n"
+            examples.append(example)
+        return examples
+

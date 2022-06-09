@@ -3,6 +3,7 @@ Assorted utilities.
 """
 import os
 import warnings
+import operator
 import shutil
 import copy
 import tempfile
@@ -85,6 +86,35 @@ def warnings_errors():
     with warnings.catch_warnings():
         warnings.simplefilter('error', Warning)
         yield
+
+
+def _map_verbosity(level):
+    """A helper for validating/constructing the verbosity level.
+
+    Validate that $ 0 <= level <= 2 $ and map the boolean flag for the
+    `doctest.DocTestFinder` et al:
+    0, 1 -> False, 2 -> True
+    See the `testmod` docstring for details.
+
+
+    Parameters
+    ----------
+    level : int or None
+        Allowed values are 0, 1 or 2. None mean 0.
+
+    Returns
+    -------
+    level : int
+    dtverbose : bool
+
+    """
+    if level is None:
+        level = 0
+    level = operator.index(level)
+    if level not in [0, 1, 2]:
+        raise ValueError("Unknown verbosity setting : level = %s " % level)
+    dtverbose = True if level == 2 else False
+    return level, dtverbose
 
 
 ### Object / Doctest selection helpers ###
