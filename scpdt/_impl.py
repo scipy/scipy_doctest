@@ -365,7 +365,7 @@ class DTFinder(doctest.DocTestFinder):
             config = DTConfig()
         self.config = config
         if parser is None:
-            parser = DTParser()
+            parser = DTParser(config)
         verbose, dtverbose = _util._map_verbosity(verbose)
         super().__init__(dtverbose, parser, recurse, exclude_empty)
 
@@ -379,10 +379,14 @@ class DTFinder(doctest.DocTestFinder):
 class DTParser(doctest.DocTestParser):
     """A Parser with a stopword list.
     """
-    def get_examples(self, string, name='<string>', config=None):
+    def __init__(self, config=None):
         if config is None:
             config = DTConfig()
-        stopwords = config.stopwords
+        self.config = config
+        # DocTestParser has no __init__, do not try calling it
+
+    def get_examples(self, string, name='<string>'):
+        stopwords = self.config.stopwords
 
         examples = []
         for example in self.parse(string, name):

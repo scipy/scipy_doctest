@@ -262,7 +262,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
     ## XXX also extraglobs, package etc
 
     if parser is None:
-        parser = DTParser()
+        parser = DTParser(config)
 
     ### mimic `doctest.tesfile` initial set-ups
     # If no name was given, then use the file's name.
