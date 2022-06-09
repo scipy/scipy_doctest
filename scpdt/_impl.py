@@ -359,19 +359,18 @@ class DebugDTRunner(DTRunner):
 class DTFinder(doctest.DocTestFinder):
     """A Finder with a stopword list.
     """
+    def __init__(self, verbose=False, parser=None, recurse=True, exclude_empty=True):
+        # FIXME: verbosity bool vs integer, like testmod
+        if parser is None:
+            parser = DTParser()  # FIXME: config
+        super().__init__(verbose, parser, recurse, exclude_empty)
+
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None, config=None):
         if config is None:
             config = DTConfig()
         if globs is None:
             globs = dict(config.default_namespace)
         tests = super().find(obj, name, module, globs, extraglobs)
-
-        for test in tests:
-            for example in test.examples:
-                if any(word in example.source for word in config.stopwords):
-                    # Found a stopword. Do not check the output (but do check
-                    # that the source is valid python). 
-                    example.want += "  # _ignore\n"
         return tests
 
 
