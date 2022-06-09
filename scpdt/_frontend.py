@@ -7,7 +7,7 @@ import operator
 import contextlib
 import doctest
 
-from ._impl import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTConfig
+from ._impl import DTChecker, DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
 from ._util import (matplotlib_make_nongui as mpl,
                     temp_cwd, rndm_state, np_errstate,
                     get_public_objects)
@@ -203,7 +203,6 @@ def testmod(m=None, name=None, globs=None, verbose=None,
 
     """
     ### mimic `doctest.testmod` initial set-ups
-
     # If no module was given, then use __main__.
     if m is None:
         m = sys.modules.get('__main__')
@@ -254,10 +253,72 @@ def testmod(m=None, name=None, globs=None, verbose=None,
                 with config.user_context_mgr():
                     with mpl(), temp_cwd():
                         runner.run(test, out=output.write)
-
     if report:
         runner.summarize()
+    return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
 
+
+def testfile(filename, module_relative=True, name=None, package=None,
+             globs=None, verbose=None, report=True, optionflags=None,
+             extraglobs=None, raise_on_error=False, parser=None,
+             encoding=None, config=None):
+
+    # config
+    if config is None:
+        config = DTConfig()
+    if globs is None:
+        globs = dict(config.default_namespace)     
+    if optionflags is None:
+        optionflags = config.optionflags
+    flags = optionflags
+
+    if extraglobs is not None:
+        raise NotImplementedError()
+    ## XXX also extraglobs, package etc
+
+    if parser is None:
+        parser = DTParser()
+
+    ### mimic `doctest.tesfile` initial set-ups
+    # If no name was given, then use the file's name.
+##    if name is None:
+##        name = os.path.basename(filename)
+
+    output = sys.stderr
+
+    # Fail fast or run all tests
+    verbose, dtverbose = _map_verbosity(verbose)
+    if raise_on_error:
+        runner = DebugDTRunner(verbose=dtverbose, optionflags=flags, config=config)
+    else:
+        runner = DTRunner(verbose=dtverbose, optionflags=flags, config=config)
+
+    ### Read the file, convert it to a test, and run it.
+    with open(filename, encoding='utf-8') as f:
+        text = f.read()
+
+    name = os.path.basename(filename)
+
+    test = parser.get_doctest(text, globs, name, filename, 0)
+
+    if verbose == 1:
+        output.write(test.name + '\n')
+    # restore (i) the errstate/print state, and (ii) np.random state
+    # after each docstring. Also make MPL backend non-GUI and close
+    # the figures.
+    # The order of context managers is actually relevant. Consider
+    # a user_context_mgr that turns warnings into errors.
+    # Additionally, suppose that MPL deprecates something and plt.something
+    # starts issuing warngings. Now all of those become errors
+    # *unless* the `mpl()` context mgr has a chance to filter them out
+    # *before* they become errors in `config.user_context_mgr()`.
+    with np_errstate():
+        with rndm_state():
+            with config.user_context_mgr():
+                with mpl(), temp_cwd():
+                    runner.run(test, out=output.write)
+    if report:
+        runner.summarize()
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
 
 
