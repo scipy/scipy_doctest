@@ -29,12 +29,17 @@ class DTConfig:
     optionflags : int
         doctest optionflags
         Default is ``NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL``
-    stopwords : list
+    stopwords : set
         If an example contains any of these stopwords, do not check the output
         (but do check that the source is valid python).
+    pseudocode : list
+        List of strings. If an example contains any of these substrings, it
+        is not doctested at all. This is similar to the ``# doctest +SKIP``
+        directive. Typical candidates for this list are pseudocode blocks
+        ``>>> from example import some_function`` or some such. 
     skiplist : set
-        A list of names which are known to fail doctesting and we like to keep
-        it that way e.g. sometimes pseudocode is acceptable etc.
+        A list of names of objects whose docstrings are known to fail doctesting
+        and we like to keep it that way.
     user_context_mgr
         A context manager to run tests in. Is entered for each DocTest
         (for API docs, this is typically a single docstring). The operation is
@@ -66,6 +71,7 @@ class DTConfig:
                           optionflags=None,
                           # DTFinder/DTParser configuration
                           stopwords=None,
+                          pseudocode=None,
                           skiplist=None,
                           # Additional user configuration
                           user_context_mgr=None,
@@ -127,6 +133,10 @@ class DTConfig:
                  '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
                  '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
         self.stopwords = stopwords
+
+        if pseudocode is None:
+            pseudocode = set()
+        self.pseudocode = pseudocode
 
         # these names are known to fail doctesting and we like to keep it that way
         # e.g. sometimes pseudocode is acceptable etc
@@ -383,13 +393,35 @@ class DTParser(doctest.DocTestParser):
         # DocTestParser has no __init__, do not try calling it
 
     def get_examples(self, string, name='<string>'):
+        """Get examples from intervening strings and examples.
+
+        How this works
+        --------------
+        This function is used (read the source!) in
+        `doctest.DocTestParser().get_doctests(...)`. Over there, `self.parse`
+        splits the input string into into a list of `Examples` and intervening
+        text strings. `get_examples` method selects `Example`s from this list.
+        Here we inject our logic for filtering out stopwords and pseudocode.
+
+        XXX: what about skipping whole blocks of pseudocode: is it not needed
+        anymore? Used to be needed for the scipy tutorials.
+
+        TODO: document the differences between stopwords, pseudocode and +SKIP.
+        """
         stopwords = self.config.stopwords
+        pseudocode = self.config.pseudocode
 
         examples = []
         for example in self.parse(string, name):
             # .parse returns a list of examples and intervening text
             if not isinstance(example, doctest.Example):
                 continue
+            if any(word in example.source for word in pseudocode):
+                # Found pseudocode. Add a `#doctest: +SKIP` directive.
+                # NB: Could have just skipped it via `continue`.
+                index = doctest.OPTIONFLAGS_BY_NAME['SKIP']
+                example.options[index] = True
+
             if any(word in example.source for word in stopwords):
                 # Found a stopword. Do not check the output (but do check
                 # that the source is valid python). 

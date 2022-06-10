@@ -3,6 +3,7 @@ import pytest
 
 from .._impl import DTConfig, DTParser, DebugDTRunner
 
+
 def test_parser_default_config():
     # Test that parser adds the _ignore marker for stopwords
     parser = DTParser()
@@ -13,6 +14,7 @@ def test_parser_default_config():
     assert len(examples) == 1
     assert examples[0].source == "1 + plt.xlim([1, 2])\n"
     assert examples[0].want == "  # _ignore\n"
+
 
 def test_parser_vanilla_config():
     # Test that no stopwords means no markers
@@ -58,4 +60,28 @@ def test_stopwords_invalid_python():
 
     assert kind is TypeError
     assert "unsupported operand type(s)" in value.args[0]
+
+
+def test_pseudocode_markers():
+    # The first string has a +SKIP, the second one doesn't
+    string = ">>> oops #doctest: +SKIP\n>>> ouch\n"
+
+    parser = doctest.DocTestParser()
+    test = parser.get_doctest(string, globs={},
+                              name='none', filename='none', lineno=0)
+    assert len(test.examples) == 2
+
+    opts_when_skipped = {doctest.OPTIONFLAGS_BY_NAME['SKIP'] : True}
+    assert test.examples[0].options == opts_when_skipped
+    assert test.examples[1].options == {}
+
+    # Now mark the second example as pseudocode
+    config = DTConfig(pseudocode=['ouch'])
+    parser = DTParser(config=config)
+    test = parser.get_doctest(string, globs={},
+                              name='none', filename='none', lineno=0)
+
+    assert len(test.examples) == 2
+    assert test.examples[0].options == opts_when_skipped
+    assert test.examples[1].options == opts_when_skipped
 
