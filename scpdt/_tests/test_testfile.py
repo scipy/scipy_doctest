@@ -13,3 +13,9 @@ def test_one_scipy_tutorial():
 
     doctestfile(path, module_relative=False, verbose=2, raise_on_error=False, config=config)
 
+
+def test_linalg_clone():
+    # run on a clone of the scipy linalg tutorial
+    path = 'scipy_linalg_tutorial_clone.rst'
+    doctestfile(path, package='scpdt._tests', verbose=2, raise_on_error=False)
+
