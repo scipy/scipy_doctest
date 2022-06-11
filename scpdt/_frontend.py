@@ -247,7 +247,73 @@ def testfile(filename, module_relative=True, name=None, package=None,
              globs=None, verbose=None, report=True, optionflags=None,
              extraglobs=None, raise_on_error=False, parser=None,
              encoding='utf-8', config=None):
+    """Test examples in the given file.
 
+    This function is an analog of the `doctest.testfile` driver from the
+    standard library.
+
+    Parameters
+    ----------
+    filename : str
+        The name of the file to run doctesting on.
+    module_relative: bool, optional
+        Whether the file name is relative to a module or a package.
+        This parameter is similar to the `doctest.testfile` parameter.
+        If True, then `filename` speficies a module-relative path (if `package`
+        is specified, then its relative to that package).
+        If False, then `filename` specifies an absolute path or a path relative
+        to the current working directory.
+        See `doctest.testfile` documentation for details.
+        Default is True. 
+    name : str, optional
+        Give the name of the test; by default use the file basename.
+    package : str, optional
+        Gives a Python package or the name of a Python package whose directory
+        should be used as the base directory for a module relative filename. 
+        If no package is specified, then the calling module's directory is used
+        as the base directory for module relative filenames. It is an error to
+        specify "package" if "module_relative" is False.
+        See `doctest.testfile` documentation for details.
+        Default is to specify no package.
+    globs : dict, optional
+        A dict to be used as the globals when executing examples;
+        By default, use `config.default_namespace`.
+    report : bool, optional
+        Prints a summary at the end when `True`, else prints nothing at the end.
+        In verbose mode, the summary is detailed, else very brief (in fact,
+        empty if all tests passed)
+        Default is True.
+   verbose : int
+        Control the run verbosity:
+        0 means only report failures,
+        1 means emit object names,
+        2 is the max verbosity from doctest (print all examples/want/got).
+        Default is 0.
+    optionflags : int, optional
+        `doctest` module optionflags for checking examples. See the stdlib
+        `doctest` module documentation for details.
+        Default is to use `config.optionflags`.
+    extraglobs : dict, optional
+        Provided for compatibility with `doctest.testmod`. Default is None.
+    raise_on_error : bool, optional
+        Raise an exception on the first unexpected exception or failure.
+        This allows failures to be post-mortem debugged.
+        Default is `False`.
+    parser: a DTParser object, optional
+        By default, a `DTParser(config)` is used.
+    encoding : str, optional
+        Encoding to use when converting the `testfile` to unicode.
+        Default is 'utf-8'.
+    config : a DTConfig instance, optional
+        Various configuration options. See the `DTconfig` docstring for details.
+
+    Returns
+    -------
+    (result, history)
+        `result` is a namedtuple ``TestResult(failed, attempted)``
+        `history` is a dict with details of which objects were examined (the
+        keys are object names and values are individual objects' ``TestResult``s)
+    """
     # initial configuration
     if config is None:
         config = DTConfig()
@@ -376,7 +442,6 @@ def _main():
             result, _ = testmod(m, verbose=verbose,
                                 raise_on_error=args.fail_fast)
         else:
-            # XXX: UNTESTED, LIKELY BROKEN
             result, _ = testfile(filename, module_relative=False,
                                  verbose=verbose, raise_on_error=args.fail_fast)
 
