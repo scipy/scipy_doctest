@@ -48,7 +48,7 @@ def find_doctests(module, strategy=None,
     tests : list
         A list of `doctest.DocTest`s that are defined by the module docstring,
         and by its contained objects’ docstrings. The selection is controlled
-        by the `strategy` argument. 
+        by the `strategy` argument.
 
     Notes
     -----
@@ -90,7 +90,6 @@ def find_doctests(module, strategy=None,
         tests += t
 
     return tests
-
 
 
 def testmod(m=None, name=None, globs=None, verbose=None,
@@ -168,7 +167,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     Notes
     -----
     The signature is made to be (mostly) consistent with `doctest.testmod`.
-    For details on the `doctest`-inherited parameters see 
+    For details on the `doctest`-inherited parameters see
     https://docs.python.org/3/library/doctest.html.
     For an overview, see ``help(doctest)``.
 
@@ -177,7 +176,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     The default doctest discovery strategy, `testmod(..., strategy=None)`, is
     inherited from the stdlib `doctest` module with all its limitations.
     For instance, it may have difficulties with complex packages, where the
-    implementation is spread across several modules. 
+    implementation is spread across several modules.
 
     For complex packages, prefer `strategy='api'`, which works as follows:
     - take the names of public objects from the `__all__` attribute of the package.
@@ -206,6 +205,8 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     # pull the the namespace to run examples in, also optionflags from `config`
     if globs is None:
         globs = dict(config.default_namespace)
+    else:
+        globs = globs.copy()
     flags = config.optionflags
 
     output = sys.stderr
@@ -245,57 +246,56 @@ def testmod(m=None, name=None, globs=None, verbose=None,
 def testfile(filename, module_relative=True, name=None, package=None,
              globs=None, verbose=None, report=True, optionflags=None,
              extraglobs=None, raise_on_error=False, parser=None,
-             encoding=None, config=None):
+             encoding='utf-8', config=None):
 
-    # config
+    # initial configuration
     if config is None:
         config = DTConfig()
     if globs is None:
-        globs = dict(config.default_namespace)     
+        globs = dict(config.default_namespace)
+    else:
+        globs = globs.copy()
     if optionflags is None:
         optionflags = config.optionflags
-    flags = optionflags
 
-    if extraglobs is not None:
-        raise NotImplementedError()
-    ## XXX also extraglobs, package etc
+    ######### mimic `doctest.tesfile` initial set-ups
+    # c.f. https://github.com/python/cpython/blob/3.10/Lib/doctest.py#L2064
+    if package and not module_relative:
+        raise ValueError("Package may only be specified for module-"
+                         "relative paths.")
 
-    if parser is None:
-        parser = DTParser(config)
+    # Relativize the path
+    text, filename = doctest._load_testfile(filename, package, module_relative,
+                                            encoding or "utf-8")
 
-    ### mimic `doctest.tesfile` initial set-ups
     # If no name was given, then use the file's name.
-##    if name is None:
-##        name = os.path.basename(filename)
+    if name is None:
+        name = os.path.basename(filename)
 
-    output = sys.stderr
+    # Assemble the globals.
+    if extraglobs is not None:
+        globs.update(extraglobs)
+    if '__name__' not in globs:
+        globs['__name__'] = '__main__'
+    ##### done copy-pasting from doctest.testfile
 
     # Fail fast or run all tests
     verbose, dtverbose = _map_verbosity(verbose)
     if raise_on_error:
-        runner = DebugDTRunner(verbose=dtverbose, optionflags=flags, config=config)
+        runner = DebugDTRunner(verbose=dtverbose, optionflags=optionflags, config=config)
     else:
-        runner = DTRunner(verbose=dtverbose, optionflags=flags, config=config)
+        runner = DTRunner(verbose=dtverbose, optionflags=optionflags, config=config)
 
-    ### Read the file, convert it to a test, and run it.
-    with open(filename, encoding='utf-8') as f:
-        text = f.read()
-
-    name = os.path.basename(filename)
-
+    ### Parse doctest examples out of the input file and run them.
+    if parser is None:
+        parser = DTParser(config)
     test = parser.get_doctest(text, globs, name, filename, 0)
 
+    output = sys.stderr
     if verbose == 1:
         output.write(test.name + '\n')
-    # restore (i) the errstate/print state, and (ii) np.random state
-    # after each docstring. Also make MPL backend non-GUI and close
-    # the figures.
-    # The order of context managers is actually relevant. Consider
-    # a user_context_mgr that turns warnings into errors.
-    # Additionally, suppose that MPL deprecates something and plt.something
-    # starts issuing warngings. Now all of those become errors
-    # *unless* the `mpl()` context mgr has a chance to filter them out
-    # *before* they become errors in `config.user_context_mgr()`.
+
+    # see testmod for discussion of these context managers
     with np_errstate():
         with rndm_state():
             with config.user_context_mgr():
@@ -338,7 +338,7 @@ def run_docstring_examples(f, globs=None, verbose=False, name='NoName',
         verbose = 0
     if optionflags is None:
         optionflags = config.optionflags
-    
+
     m = f.__module__
     import importlib
     module = importlib.import_module(m)
@@ -374,11 +374,11 @@ def _main():
             m = __import__(filename[:-3])
             del sys.path[0]
             result, _ = testmod(m, verbose=verbose,
-                                  raise_on_error=args.fail_fast)
+                                raise_on_error=args.fail_fast)
         else:
             # XXX: UNTESTED, LIKELY BROKEN
-            failures, _ = testfile(filename, module_relative=False,
-                                     verbose=verbose, optionflags=options)
+            result, _ = testfile(filename, module_relative=False,
+                                 verbose=verbose, raise_on_error=args.fail_fast)
 
         if result.failed:
             return 1

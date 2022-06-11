@@ -51,6 +51,9 @@ jobs:
       run: |
         python -m scpdt scpdt/_tests/finder_cases.py -vv
 
+    - name: Test testfile CLI
+      run: |
+        python -m scpdt ./scpdt/_tests/scipy_linalg_tutorial_clone.rst -v
 
     - name: Run testmod a scipy submodule
       run: |
@@ -59,4 +62,3 @@ jobs:
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
         python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="api")'
-
