@@ -2,6 +2,7 @@ from . import finder_cases
 from .._util import get_all_list, get_public_objects
 from .._impl import DTFinder, DTConfig
 
+
 def test_get_all_list():
     items, depr, other = get_all_list(finder_cases)
     assert sorted(items) == ['Klass', 'func']

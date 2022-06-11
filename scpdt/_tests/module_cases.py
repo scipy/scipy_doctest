@@ -14,7 +14,7 @@ def func2():
     array([1, 2, 3])
 
     Check that the comparison is with atol and rtol: give less digits than
-    what numpy by default prints  
+    what numpy by default prints
     >>> np.sin([1., 2, 3])
     array([0.8414, 0.9092, 0.1411])
 
@@ -24,6 +24,7 @@ def func2():
 
     """
 
+
 def func3():
     """
     Check that printed arrays are checked with atol/rtol
@@ -31,6 +32,7 @@ def func3():
     >>> print(a)
     [0.33  0.66  1  1.33]
     """
+
 
 def func4():
     """

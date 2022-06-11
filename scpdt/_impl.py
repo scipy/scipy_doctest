@@ -7,8 +7,9 @@ import numpy as np
 
 from . import _util
 
+
 class DTConfig:
-    """A bag class to collect various configuration bits. 
+    """A bag class to collect various configuration bits.
 
     If an attribute is None, helpful defaults are subsituted. If defaults
     are not sufficient, users should create an instance of this class,
@@ -24,7 +25,7 @@ class DTConfig:
         Additional directives which act like `# doctest: + SKIP`.
     atol : float
     rtol : float
-        Absolute and relative tolerances to check doctest examples with. 
+        Absolute and relative tolerances to check doctest examples with.
         Specifically, the check is ``np.allclose(want, got, atol=atol, rtol=rtol)``
     optionflags : int
         doctest optionflags
@@ -36,7 +37,7 @@ class DTConfig:
         List of strings. If an example contains any of these substrings, it
         is not doctested at all. This is similar to the ``# doctest +SKIP``
         directive. Typical candidates for this list are pseudocode blocks
-        ``>>> from example import some_function`` or some such. 
+        ``>>> from example import some_function`` or some such.
     skiplist : set
         A list of names of objects whose docstrings are known to fail doctesting
         and we like to keep it that way.
@@ -57,7 +58,7 @@ class DTConfig:
     nameerror_after_exception : bool
         If an example fails, next examples in the same test may raise spurious
         NameErrors. Set to True if you want to see these, or if your test
-        is actually expected to raise NameErrors. 
+        is actually expected to raise NameErrors.
         Default is False.
 
     """
@@ -105,7 +106,7 @@ class DTConfig:
                   'nan': np.nan,
                   'NaN': np.nan,
                   'inf': np.inf,
-                  'Inf': np.inf,}
+                  'Inf': np.inf, }
             self.check_namespace = check_namespace
 
         # Additional directives which act like `# doctest: + SKIP`
@@ -143,7 +144,7 @@ class DTConfig:
         if skiplist is None:
             skiplist = set(['scipy.special.sinc',  # comes from numpy
                             'scipy.misc.who',  # comes from numpy
-                            'scipy.optimize.show_options',])
+                            'scipy.optimize.show_options', ])
         self.skiplist = skiplist
 
         #### User configuration
@@ -259,7 +260,6 @@ class DTChecker(doctest.OutputChecker):
             else:
                 return self.check_output(want_again, got_again, optionflags)
 
-
         # ... and defer to numpy
         try:
             return self._do_check(a_want, a_got)
@@ -308,7 +308,6 @@ class DTRunner(doctest.DocTestRunner):
                 out("\n")
 
     def report_start(self, out, test, example):
-        self._checker._source = example.source
         return doctest.DocTestRunner.report_start(self, out, test, example)
 
     def report_success(self, out, test, example, got):
@@ -424,7 +423,7 @@ class DTParser(doctest.DocTestParser):
 
             if any(word in example.source for word in stopwords):
                 # Found a stopword. Do not check the output (but do check
-                # that the source is valid python). 
+                # that the source is valid python).
                 example.want += "  # _ignore\n"
             examples.append(example)
         return examples

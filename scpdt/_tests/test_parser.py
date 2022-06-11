@@ -71,7 +71,7 @@ def test_pseudocode_markers():
                               name='none', filename='none', lineno=0)
     assert len(test.examples) == 2
 
-    opts_when_skipped = {doctest.OPTIONFLAGS_BY_NAME['SKIP'] : True}
+    opts_when_skipped = {doctest.OPTIONFLAGS_BY_NAME['SKIP']: True}
     assert test.examples[0].options == opts_when_skipped
     assert test.examples[1].options == {}
 

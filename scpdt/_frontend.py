@@ -264,12 +264,12 @@ def testfile(filename, module_relative=True, name=None, package=None,
         If False, then `filename` specifies an absolute path or a path relative
         to the current working directory.
         See `doctest.testfile` documentation for details.
-        Default is True. 
+        Default is True.
     name : str, optional
         Give the name of the test; by default use the file basename.
     package : str, optional
         Gives a Python package or the name of a Python package whose directory
-        should be used as the base directory for a module relative filename. 
+        should be used as the base directory for a module relative filename.
         If no package is specified, then the calling module's directory is used
         as the base directory for module relative filenames. It is an error to
         specify "package" if "module_relative" is False.

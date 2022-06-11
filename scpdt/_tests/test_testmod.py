@@ -129,5 +129,4 @@ class TestNameErrorAfterException:
         output = stream.read()
 
         assert "ValueError:" in output   # the original exception
-        assert "NameError:"  in output   # the follow-up NameError
-
+        assert "NameError:" in output    # the follow-up NameError

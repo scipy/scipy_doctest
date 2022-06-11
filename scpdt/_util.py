@@ -70,6 +70,7 @@ def np_errstate():
         with np.printoptions():
             yield
 
+
 @contextmanager
 def noop_context_mgr():
     """Do nothing.
@@ -126,7 +127,7 @@ def is_deprecated(f):
     with warnings.catch_warnings(record=True):
         warnings.simplefilter("error")
         try:
-            f(**{"not a kwarg":None})
+            f(**{"not a kwarg": None})
         except DeprecationWarning:
             return True
         except Exception:
@@ -219,4 +220,3 @@ def get_public_objects(module, skiplist=None):
             continue
 
     return (items, names), failures
-
