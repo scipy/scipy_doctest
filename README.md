@@ -40,10 +40,14 @@ Its main features are
   42
   ```
 
-- A user-configurable list of stopwords. If an example contains a stopword,
+- A user-configurable list of *stopwords*. If an example contains a stopword,
   it is checked to be valid python, but the output is not checked. This can
   be useful e.g. for not littering the documentation with the output of
   `import matplotlib.pyplot as plt; plt.xlim([2.3, 4.5])`.
+
+- A user-configurable list of *pseudocode* markers. If an example contains one
+  of these markers, it is considered pseudocode and is not checked.
+  This is useful for `from example import some_functions` and similar stanzas.
 
 - *Doctest discovery* is somewhat more flexible then the standard library
   `doctest` module. Specifically, one can use `testmod(module, strategy='api')`
@@ -81,17 +85,24 @@ TestResults(failed=0, attempted=764)
 The second return value, `hist` is a dict which maps the names of the objects
 to the numbers of failures and attempts for individual examples.
 
-See the `testmod` docstring for more details. Other useful functions are
-`find_doctests` and `run_docstring_examples` (the latter mimics the behaviour
-of the eponimous function of the `doctest` module).
+For more details, see the `testmod` docstring. Other useful functions are
+`find_doctests`, `run_docstring_examples` and `testfile` (the latter two mimic
+the behavior of the eponymous functions of the `doctest` module).
 
-There is also a basic CLI, which also mimics that of the `doctest` module:
+### Command-line interface
+
+There is a basic CLI, which also mimics that of the `doctest` module:
 ```
 $ python -m scpdt foo.py
 ```
 
 Note that, just like `$ python -m doctest foo.py`, this may
 fail if `foo.py` is a part of a package due to package imports.
+
+Text files can also be CLI-checked:
+```
+$ python -m scpdt bar.rst
+```
 
 
 ### More fine-grained control
@@ -102,6 +113,7 @@ classes
 |   Class     |  `doctest` analog  |
 |-------------|--------------------|
 | `DTChecker` | `DocTestChecker`   |
+| `DTParser`  | `DocTestParser`    |
 | `DTRunner`  | `DocTestRunner`    |
 | `DTFinder`  | `DocTestFinder`    |
 | `DTContext` |       --           |
@@ -109,8 +121,8 @@ classes
 The `DTContext` class is just a bag class which holds various configuration
 settings as attributes.  An instance of this class is passed around, so user
 configuration is simply creating an instance, overriding an attribute and
-passing the instance to `testmod` or `DT*` objects/methods. Defaults are
-provided, based on a long-term usage in SciPy.
+passing the instance to `testmod` or constructors of `DT*` objects. Defaults
+are provided, based on a long-term usage in SciPy.
 
 
 ## Prior art and related work
