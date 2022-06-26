@@ -356,9 +356,13 @@ class DebugDTRunner(DTRunner):
         return r
 
     def report_unexpected_exception(self, out, test, example, exc_info):
+        super().report_unexpected_exception(out, test, example, exc_info)
+        out('\n')
         raise doctest.UnexpectedException(test, example, exc_info)
 
     def report_failure(self, out, test, example, got):
+        super().report_failure(out, test, example, got)
+        out('\n')
         raise doctest.DocTestFailure(test, example, got)
 
 
