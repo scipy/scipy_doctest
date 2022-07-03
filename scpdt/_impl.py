@@ -47,7 +47,7 @@ class DTConfig:
         roughly
 
         >>> for test in tests:
-        ...     with user_context():
+        ...     with user_context(test):
         ...         runner.run(test)
         Default is a noop.
 

@@ -235,7 +235,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         # *before* they become errors in `config.user_context_mgr()`.
         with np_errstate():
             with rndm_state():
-                with config.user_context_mgr():
+                with config.user_context_mgr(test):
                     with mpl(), temp_cwd():
                         runner.run(test, out=output.write)
     if report:
@@ -364,7 +364,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
     # see testmod for discussion of these context managers
     with np_errstate():
         with rndm_state():
-            with config.user_context_mgr():
+            with config.user_context_mgr(test):
                 with mpl(), temp_cwd():
                     runner.run(test, out=output.write)
     if report:
