@@ -50,7 +50,10 @@ def test_public_obj_discovery():
 def test_explicit_object_list():
     objs = [finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy=objs)
-    assert [test.name for test in tests] == ['Klass', 'Klass.meth']
+
+    base = 'scpdt._tests.finder_cases'
+    assert ([test.name for test in tests] ==
+            [base + '.Klass', base + '.Klass.meth'])
 
 
 def test_explicit_object_list_with_module():
@@ -59,8 +62,10 @@ def test_explicit_object_list_with_module():
     # In the `doctest`-speak: do not recurse.
     objs = [finder_cases, finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy=objs)
+
+    base = 'scpdt._tests.finder_cases'
     assert ([test.name for test in tests] ==
-            ['scpdt._tests.finder_cases', 'Klass', 'Klass.meth'])
+            [base, base + '.Klass', base + '.Klass.meth'])
 
 
 def test_run_docstring_examples():

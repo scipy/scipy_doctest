@@ -72,7 +72,7 @@ def np_errstate():
 
 
 @contextmanager
-def noop_context_mgr():
+def noop_context_mgr(test):
     """Do nothing.
 
     This is a stub context manager to serve as a default for
@@ -82,7 +82,7 @@ def noop_context_mgr():
 
 
 @contextmanager
-def warnings_errors():
+def warnings_errors(test):
     """Temporarily turn all warnings to errors."""
     with warnings.catch_warnings():
         warnings.simplefilter('error', Warning)

@@ -81,12 +81,13 @@ def find_doctests(module, strategy=None,
 
     tests = []
     for item, name in zip(items, names):
+        full_name = module.__name__ + '.' + name
         if inspect.ismodule(item):
             # do not recurse, only inspect the module docstring
             _finder = DTFinder(recurse=False, config=config)
             t = _finder.find(item, name, globs=globs, extraglobs=extraglobs)
         else:
-            t = finder.find(item, name, globs=globs, extraglobs=extraglobs)
+            t = finder.find(item, full_name, globs=globs, extraglobs=extraglobs)
         tests += t
 
     return tests
