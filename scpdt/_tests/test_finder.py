@@ -1,7 +1,9 @@
+import pytest
+
 from . import finder_cases
 from .._util import get_all_list, get_public_objects
 from .._impl import DTFinder, DTConfig
-
+from .._frontend import find_doctests
 
 def test_get_all_list():
     items, depr, other = get_all_list(finder_cases)
@@ -44,6 +46,19 @@ def test_get_objects_extra_items():
     finally:
         from importlib import reload
         reload(finder_cases)
+
+
+def test_find_doctests_extra_items():
+    # test find_doctests on a module which defines an incorrect all.
+    # Patch __all__, test, reload on exit to not depend on the test order.
+    try:
+        finder_cases.__all__ += ['spurious', 'missing']
+        with pytest.raises(ValueError):
+            find_doctests(finder_cases, strategy='api')
+    finally:
+        from importlib import reload
+        reload(finder_cases)
+
 
 
 def test_get_objects_skiplist():

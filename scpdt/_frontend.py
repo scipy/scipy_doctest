@@ -71,10 +71,11 @@ def find_doctests(module, strategy=None,
     if strategy == "api":
         (items, names), failures = get_public_objects(module,
                                                       skiplist=config.skiplist)
+        if failures:
+            mesg = "\n".join([_[2] for _ in failures])
+            raise ValueError(mesg)
         items.append(module)
         names.append(module.__name__)
-
-        # XXX: handle failures
     else:
         # strategy must then be a list of objects to look at
         if not isinstance(strategy, list):
