@@ -121,3 +121,37 @@ def manip_printoptions():
 
     >>> np.set_printoptions(linewidth=146)
     """
+
+
+def array_abbreviation():
+    """
+    Numpy abbreviates arrays, check that it works.
+
+    NB: the implementation might need to change when
+    numpy finally disallows default-creating ragged arrays.
+    Currently, `...` gets interpreted as an Ellipsis,
+    thus the `a_want/a_got` variables in DTChecker are in fact
+    object arrays.
+
+    >>> np.arange(10000)
+    array([0, 1, 2, ..., 9997, 9998, 9999])
+
+    >>> np.diag(np.arange(33)) / 30
+    array([[0., 0., 0., ..., 0., 0.,0.],
+           [0., 0.03333333, 0., ..., 0., 0., 0.],
+           [0., 0., 0.06666667, ..., 0., 0., 0.],
+           ...,
+           [0., 0., 0., ..., 1., 0., 0.],
+           [0., 0., 0., ..., 0., 1.03333333, 0.],
+           [0., 0., 0., ..., 0., 0., 1.06666667]])
+
+
+    >>> np.diag(np.arange(1, 1001, dtype=float))
+    array([[1,    0,    0, ...,    0,    0,    0],
+           [0,    2,    0, ...,    0,    0,    0],
+           [0,    0,    3, ...,    0,    0,    0],
+            ...,
+           [0,    0,    0, ...,  998,    0,    0],
+           [0,    0,    0, ...,    0,  999,    0],
+           [0,    0,    0, ...,    0,    0, 1000]])
+    """

@@ -213,8 +213,13 @@ class DTChecker(doctest.OutputChecker):
         # OK then, convert strings to objects
         ns = dict(self.config.check_namespace)
         try:
-            a_want = eval(want, dict(ns))
-            a_got = eval(got, dict(ns))
+            with warnings.catch_warnings():
+                # NumPy's ragged array deprecation of np.array([1, (2, 3)]);
+                # also array abbreviations: try `np.diag(np.arange(1000))`
+                warnings.simplefilter('ignore', np.VisibleDeprecationWarning)
+
+                a_want = eval(want, dict(ns))
+                a_got = eval(got, dict(ns))
         except Exception:
             # Maybe we're printing a numpy array? This produces invalid python
             # code: `print(np.arange(3))` produces "[0 1 2]" w/o commas between
