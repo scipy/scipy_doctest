@@ -51,6 +51,10 @@ class DTConfig:
         ...         runner.run(test)
         Default is a noop.
 
+    local_resources: dict
+        If a test needs some local files, list them here. The format is
+        ``{test.name : list-of-files}``
+        File paths are relative to path of ``test.filename``.
     parse_namedtuples : bool
         Whether to compare e.g. ``TTestResult(pvalue=0.9, statistic=42)``
         literally or extract the numbers and compare the tuple ``(0.9, 42)``.
@@ -76,6 +80,7 @@ class DTConfig:
                           skiplist=None,
                           # Additional user configuration
                           user_context_mgr=None,
+                          local_resources=None,
                           # Obscure switches
                           parse_namedtuples=True,  # Checker
                           nameerror_after_exception=False,  # Runner
@@ -151,6 +156,11 @@ class DTConfig:
         if user_context_mgr is None:
             user_context_mgr = _util.noop_context_mgr
         self.user_context_mgr = user_context_mgr
+
+        #### Local resources: None or dict {test: list-of-files-to-copy}
+        if local_resources is None:
+            local_resources = dict()
+        self.local_resources=local_resources
 
         #### Obscure switches, best leave intact
         self.parse_namedtuples = parse_namedtuples

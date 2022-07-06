@@ -36,10 +36,18 @@ def matplotlib_make_nongui():
 
 
 @contextmanager
-def temp_cwd():
-    """Switch to a temp directory, clean up when done."""
+def temp_cwd(test, local_resources):
+    """Switch to a temp directory, clean up when done.
+       Copy local files, if requested.
+    """
     cwd = os.getcwd()
     tmpdir = tempfile.mkdtemp()
+
+    if test.name in local_resources:
+        # local files requested; copy the files
+        path, _ = os.path.split(test.filename)
+        for fname in local_resources[test.name]:
+            shutil.copy(os.path.join(path, fname), tmpdir)      
     try:
         os.chdir(tmpdir)
         yield tmpdir

@@ -9,7 +9,8 @@ from . import (module_cases as module,
                stopwords_cases as stopwords,
                finder_cases,
                failure_cases,
-               failure_cases_2)
+               failure_cases_2,
+               local_file_cases)
 from .._frontend import testmod, find_doctests, run_docstring_examples
 from .._util import warnings_errors
 from .._impl import DTConfig
@@ -114,6 +115,17 @@ def test_user_context():
         testmod(failure_cases_2,
                 raise_on_error=True, strategy=[failure_cases_2.func_depr],
                 config=config)
+
+
+def test_local_files():
+    # A doctest tries to open a local file. Test that it works
+    # (internally, the file will need to be copied).
+    config = DTConfig()
+    config.local_resources={'scpdt._tests.local_file_cases.local_files':
+                            ['local_file.txt']}
+    res, _ = testmod(local_file_cases, config=config)
+    if res.failed != 0 or res.attempted == 0:
+        raise RuntimeError("Test_module::test_local_files")
 
 
 class TestNameErrorAfterException:
