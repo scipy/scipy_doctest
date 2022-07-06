@@ -241,7 +241,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         with np_errstate():
             with rndm_state():
                 with config.user_context_mgr(test):
-                    with mpl(), temp_cwd():
+                    with mpl(), temp_cwd(test, config.local_resources):
                         runner.run(test, out=output.write)
     if report:
         runner.summarize()
@@ -370,7 +370,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
     with np_errstate():
         with rndm_state():
             with config.user_context_mgr(test):
-                with mpl(), temp_cwd():
+                with mpl(), temp_cwd(test, config.local_resources):
                     runner.run(test, out=output.write)
     if report:
         runner.summarize()
