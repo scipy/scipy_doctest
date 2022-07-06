@@ -1,9 +1,15 @@
 import io
+import doctest
 from contextlib import redirect_stderr
 
 import numpy as np
 import pytest
-import doctest
+
+try:
+    import scipy
+    HAVE_SCIPY = True
+except:
+    HAVE_SCIPY = FALSE
 
 from . import (module_cases as module,
                stopwords_cases as stopwords,
@@ -117,15 +123,30 @@ def test_user_context():
                 config=config)
 
 
-def test_local_files():
-    # A doctest tries to open a local file. Test that it works
-    # (internally, the file will need to be copied).
-    config = DTConfig()
-    config.local_resources={'scpdt._tests.local_file_cases.local_files':
-                            ['local_file.txt']}
-    res, _ = testmod(local_file_cases, config=config)
-    if res.failed != 0 or res.attempted == 0:
-        raise RuntimeError("Test_module::test_local_files")
+class TestLocalFiles:
+    def test_local_files(self):
+        # A doctest tries to open a local file. Test that it works
+        # (internally, the file will need to be copied).
+        config = DTConfig()
+        config.local_resources = {'scpdt._tests.local_file_cases.local_files':
+                                  ['local_file.txt']}
+        res, _ = testmod(local_file_cases, config=config,
+                         strategy=[local_file_cases.local_files],
+                         verbose=_VERBOSE)
+        if res.failed != 0 or res.attempted == 0:
+            raise RuntimeError("Test_module::test_local_files")
+
+    @pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
+    def test_sio_octave(self):
+        # scipy/tutorial/io.rst : octave_a.mat file
+        config = DTConfig()
+        config.local_resources = {'scpdt._tests.local_file_cases.sio':
+                                  ['octave_a.mat']}
+        res, _ = testmod(local_file_cases, config=config,
+                         strategy=[local_file_cases.sio],
+                         verbose=_VERBOSE)
+        if res.failed != 0 or res.attempted == 0:
+            raise RuntimeError("Test_module::sio")
 
 
 class TestNameErrorAfterException:
