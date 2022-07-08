@@ -36,9 +36,15 @@ Its main features are
 
 - *Human-readable skip markers.* Consider
   ```
-  >>> np.random.randint(100)   # may vary
-  42
+  >>> np.random.randint(100)
+  42     # may vary
   ```
+Note that the markers (by default, `"# may vary"` and `"# random"`) are applied
+to output example's, not its source.
+
+Also note a difference with respect to the standard `# doctest: +SKIP`: the latter
+skips the example entirely, while these additional markers only skip checking
+the output. Thus the example source needs to be valid python code still.
 
 - A user-configurable list of *stopwords*. If an example contains a stopword,
   it is checked to be valid python, but the output is not checked. This can
