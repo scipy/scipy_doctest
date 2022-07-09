@@ -138,14 +138,14 @@ are provided, based on a long-term usage in SciPy.
 - `pytest-doctestplus` plugin from the `AstroPy` project has similar goals.
   The package is well established and widely used. From a user perspective, main
   differences are: (i) `pytest-doctestplus` is more sensitive to formatting,
-  including whitespace---this if numpy tweaks its output formatting, doctests
+  including whitespace---thus if numpy tweaks its output formatting, doctests
   may start failing; (ii) there is still a need for `# doctest: +FLOAT_CMP`
   directives; (iii) being a pytest plugin, `pytest-doctestplus` is tightly
   coupled to `pytest`. It thus needs to follow `pytest` releases, and
   some maintenance work may be required to adapt when `pytest` publishes a new
   release.
 
-  This takes a different approach: we closely follow the `doctest` API and
+  This project takes a different approach: we closely follow the `doctest` API and
   implementation, which are naturally way more stable then `pytest`. Cooking up
   a `pytest` plugin on top of this package is certainly doable and only needs a
   champion.
