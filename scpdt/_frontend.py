@@ -7,7 +7,7 @@ import doctest
 
 from ._impl import DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
 from ._util import (matplotlib_make_nongui as mpl,
-                    temp_cwd, rndm_state, np_errstate,
+                    temp_cwd, np_errstate,
                     get_public_objects, _map_verbosity)
 
 
@@ -239,7 +239,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         # *unless* the `mpl()` context mgr has a chance to filter them out
         # *before* they become errors in `config.user_context_mgr()`.
         with np_errstate():
-            with rndm_state():
+            with config.rndm_state():
                 with config.user_context_mgr(test):
                     with mpl(), temp_cwd(test, config.local_resources):
                         runner.run(test, out=output.write)
@@ -368,7 +368,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
 
     # see testmod for discussion of these context managers
     with np_errstate():
-        with rndm_state():
+        with config.rndm_state():
             with config.user_context_mgr(test):
                 with mpl(), temp_cwd(test, config.local_resources):
                     runner.run(test, out=output.write)

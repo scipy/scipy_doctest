@@ -884,7 +884,7 @@ algorithm. For example, the following code computes the zeroth-order
 Bessel function applied to a matrix.
 
     >>> from scipy import special, linalg
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(1638083107694713882823079058616272161)
     >>> A = rng.random((3, 3))
     >>> B = linalg.funm(A, lambda x: special.jv(0, x))
     >>> A

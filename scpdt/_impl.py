@@ -50,7 +50,9 @@ class DTConfig:
         ...     with user_context(test):
         ...         runner.run(test)
         Default is a noop.
-
+    rndm_state
+        A context manager to control the state of the random number generators.
+        The default is to make `np.random.seed(None)`, i.e. *not* reproducible.
     local_resources: dict
         If a test needs some local files, list them here. The format is
         ``{test.name : list-of-files}``
@@ -80,6 +82,7 @@ class DTConfig:
                           skiplist=None,
                           # Additional user configuration
                           user_context_mgr=None,
+                          rndm_state=None,
                           local_resources=None,
                           # Obscure switches
                           parse_namedtuples=True,  # Checker
@@ -156,6 +159,11 @@ class DTConfig:
         if user_context_mgr is None:
             user_context_mgr = _util.noop_context_mgr
         self.user_context_mgr = user_context_mgr
+
+        # random gen state
+        if rndm_state is None:
+            rndm_state = _util.default_rndm_state
+        self.rndm_state = rndm_state
 
         #### Local resources: None or dict {test: list-of-files-to-copy}
         if local_resources is None:

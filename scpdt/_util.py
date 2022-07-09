@@ -57,7 +57,7 @@ def temp_cwd(test, local_resources):
 
 
 @contextmanager
-def rndm_state():
+def scipy_rndm_state():
     """Restore the `np.random` state when done."""
     # FIXME: this matches the refguide-check behavior, but is a tad strange:
     # makes sure that the seed the old-fashioned np.random* methods is *NOT* reproducible
@@ -68,6 +68,15 @@ def rndm_state():
     with _fixed_default_rng():
         np.random.seed(None)
         yield
+
+
+@contextmanager
+def default_rndm_state():
+    """Restore the `np.random` state when done."""
+    # Make sure that the seed the old-fashioned np.random* methods is *NOT* reproducible
+    import numpy as np
+    np.random.seed(None)
+    yield
 
 
 @contextmanager
