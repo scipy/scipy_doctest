@@ -40,7 +40,7 @@ Its main features are
   42     # may vary
   ```
 Note that the markers (by default, `"# may vary"` and `"# random"`) are applied
-to output example's, not its source.
+to an example's output, not its source.
 
 Also note a difference with respect to the standard `# doctest: +SKIP`: the latter
 skips the example entirely, while these additional markers only skip checking
