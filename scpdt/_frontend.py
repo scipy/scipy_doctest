@@ -66,6 +66,7 @@ def find_doctests(module, strategy=None,
 
     if strategy is None:
         tests = finder.find(module, name, globs=globs, extraglobs=extraglobs)
+        tests = [t for t in tests if t.name not in config.skiplist]
         return tests
 
     if strategy == "api":
@@ -83,6 +84,7 @@ def find_doctests(module, strategy=None,
         items = strategy[:]
         names = [item.__name__ for item in items]
 
+    # Having collected the list of objects, extract doctests
     tests = []
     for item, name in zip(items, names):
         full_name = module.__name__ + '.' + name
