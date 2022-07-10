@@ -44,7 +44,7 @@ def test_get_history():
         runner.run(test)
 
     dct = runner.get_history()
-    assert len(dct) == 6
+    assert len(dct) == 7
 
 
 class TestDebugDTRunner:

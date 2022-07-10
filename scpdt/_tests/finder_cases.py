@@ -36,6 +36,15 @@ class Klass:
         >>> 2 + 11
         13
         """
+        pass
+
+    def meth_2(self):
+        """
+        One other method.
+
+        >>> 111 + 1
+        112
+        """
 
 
 def private_func():
