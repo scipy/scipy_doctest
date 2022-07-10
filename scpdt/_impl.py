@@ -7,6 +7,10 @@ import numpy as np
 
 from . import _util
 
+# Register the optionflag to skip whole blocks, i.e.
+# sequences of Examples without an intervening text.
+SKIPBLOCK = doctest.register_optionflag('SKIPBLOCK')
+
 
 class DTConfig:
     """A bag class to collect various configuration bits.
@@ -429,24 +433,32 @@ class DTParser(doctest.DocTestParser):
         text strings. `get_examples` method selects `Example`s from this list.
         Here we inject our logic for filtering out stopwords and pseudocode.
 
-        XXX: what about skipping whole blocks of pseudocode: is it not needed
-        anymore? Used to be needed for the scipy tutorials.
-
         TODO: document the differences between stopwords, pseudocode and +SKIP.
         """
         stopwords = self.config.stopwords
         pseudocode = self.config.pseudocode
 
+        SKIP = doctest.OPTIONFLAGS_BY_NAME['SKIP']
+        keep_skipping_this_block = False
+
         examples = []
         for example in self.parse(string, name):
             # .parse returns a list of examples and intervening text
             if not isinstance(example, doctest.Example):
+                if example:
+                    keep_skipping_this_block = False
                 continue
+
+            if SKIPBLOCK in example.options or keep_skipping_this_block:
+                # skip this one and continue skipping until there is
+                # a non-empty line of text (which signals the end of the block)
+                example.options[SKIP] = True
+                keep_skipping_this_block = True
+
             if any(word in example.source for word in pseudocode):
                 # Found pseudocode. Add a `#doctest: +SKIP` directive.
                 # NB: Could have just skipped it via `continue`.
-                index = doctest.OPTIONFLAGS_BY_NAME['SKIP']
-                example.options[index] = True
+                example.options[SKIP] = True
 
             if any(word in example.source for word in stopwords):
                 # Found a stopword. Do not check the output (but do check
