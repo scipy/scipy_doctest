@@ -55,10 +55,15 @@ the output. Thus the example source needs to be valid python code still.
   of these markers, it is considered pseudocode and is not checked.
   This is useful for `from example import some_functions` and similar stanzas.
 
+- A `# doctest: +SKIPBLOCK` option flag to skip whole blocks of pseudocode. Here
+  a 'block' is a sequence of doctest examples without any intervening text.
+
 - *Doctest discovery* is somewhat more flexible then the standard library
   `doctest` module. Specifically, one can use `testmod(module, strategy='api')`
   to only examine public objects of a module. This is helpful for complex
-  packages, with non-trivial internal file structure.
+  packages, with non-trivial internal file structure. Alternatively, the default
+  value of `strategy=None` is equivalent to the standard `doctest` module
+  behavior.
 
 - *User configuration*. Essentially all aspects of the behavior are user
   configurable via a `DTConfig` instance attributes. See the `DTConfig`

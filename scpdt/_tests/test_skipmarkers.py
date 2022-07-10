@@ -153,3 +153,39 @@ class TestMayVary:
         with pytest.raises(doctest.DocTestFailure):
             runner.run(test)
 
+
+string='''\
+
+This is an example string with doctests and skipblocks. A block is a sequence
+of examples (which start with a >>> marker) without an intervening text, like
+below
+
+>>> from some_module import some_function    # doctest: +SKIPBLOCK
+>>> some_function(42)
+
+Note how the block above will fail doctesting unless the second line is
+skipped. A standard solution is to add a +SKIP marker to every line, but this
+is ugly and we skip the whole block instead. 
+
+Once the block is over, we get back to usual doctests, which are not skipped
+
+>>> 1 + 2
+3
+
+'''
+
+def test_SKIPBLOCK():
+    parser = DTParser()
+    test = parser.get_doctest(string,
+                               globs={},
+                               name='SKIPBLOCK test',
+                               filename='none',
+                               lineno=0)
+
+    SKIP = doctest.OPTIONFLAGS_BY_NAME['SKIP']
+
+    assert len(test.examples) == 3
+    assert test.examples[0].options[SKIP] is True
+    assert test.examples[1].options[SKIP] is True
+    assert test.examples[2].options == {}    # not skipped
+
