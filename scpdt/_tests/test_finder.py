@@ -69,6 +69,37 @@ def test_get_objects_skiplist():
     assert failures == []
 
 
+def test_explicit_object_list():
+    objs = [finder_cases.Klass]
+    tests = find_doctests(finder_cases, strategy=objs)
+
+    base = 'scpdt._tests.finder_cases'
+    assert ([test.name for test in tests] ==
+            [base + '.Klass', base + '.Klass.meth'])
+
+
+def test_explicit_object_list_with_module():
+    # Module docstrings are examined literally, without looking into other objects
+    # in the module. These other objects need to be listed explicitly.
+    # In the `doctest`-speak: do not recurse.
+    objs = [finder_cases, finder_cases.Klass]
+    tests = find_doctests(finder_cases, strategy=objs)
+
+    base = 'scpdt._tests.finder_cases'
+    assert ([test.name for test in tests] ==
+            [base, base + '.Klass', base + '.Klass.meth'])
+
+
+def test_find_doctests_api():
+    # Test that the module itself is included with strategy='api'
+    objs = [finder_cases, finder_cases.Klass]
+    tests = find_doctests(finder_cases, strategy='api')
+
+    base = 'scpdt._tests.finder_cases'
+    assert ([test.name for test in tests] ==
+            [base + '.func', base + '.Klass', base + '.Klass.meth', base])
+
+
 def test_dtfinder_config():
     config = DTConfig()
     finder = DTFinder(config=config)
