@@ -97,7 +97,40 @@ class TestSkiplist:
 
         assert sorted(names) == sorted(wanted_names)
 
+    def test_get_doctests_strategy_api(self):
+        # Add a skiplist: strategy='api' skips listed items 
+        base = finder_cases.__name__  
+        skips = [base + '.func', base + '.Klass.meth_2']
+        config = DTConfig(skiplist=skips)
 
+        tests = find_doctests(finder_cases, strategy='api', config=config)
+        names = [t.name for t in tests]
+
+        # note the lack of
+        #   - `func` and `Klass.meth_2`, as requested (via the skiplist)
+        #   - *private* stuff, which is not in `__all__`
+        wanted_names = ['Klass', 'Klass.meth']
+        wanted_names = [base] + [base + '.' + n for n in wanted_names]
+
+        assert sorted(names) == sorted(wanted_names)
+
+    def test_get_doctests_strategy_list(self):
+        # Add a skiplist: strategy=<list> skips listed items 
+        base = finder_cases.__name__  
+        skips = [base + '.func', base + '.Klass.meth_2']
+        config = DTConfig(skiplist=skips)
+
+        tests = find_doctests(finder_cases,
+                              strategy=[finder_cases.Klass], config=config)
+        names = [t.name for t in tests]
+
+        # note the lack of
+        #   - `Klass.meth_2`, as requested (via the skiplist)
+        #   - the 'base' module (via the strategy=<list>)
+        wanted_names = ['Klass', 'Klass.meth']
+        wanted_names = [base + '.' + n for n in wanted_names]
+
+        assert sorted(names) == sorted(wanted_names)
 
 
 def test_explicit_object_list():

@@ -96,6 +96,9 @@ def find_doctests(module, strategy=None,
             t = finder.find(item, full_name, globs=globs, extraglobs=extraglobs)
         tests += t
 
+    # If the skiplist contains methods of objects, their doctests may have been
+    # left in the `tests` list. Remove them.
+    tests = [t for t in tests if t.name not in config.skiplist]
     return tests
 
 
