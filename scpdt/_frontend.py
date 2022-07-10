@@ -367,6 +367,10 @@ def testfile(filename, module_relative=True, name=None, package=None,
         parser = DTParser(config)
     test = parser.get_doctest(text, globs, name, filename, 0)
 
+    if test.name in config.skiplist:
+        # nothing to do, bail out
+        return doctest.TestResults(0, 0), runner.get_history()
+
     output = sys.stderr
     if verbose == 1:
         output.write(test.name + '\n')
