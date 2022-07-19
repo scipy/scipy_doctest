@@ -234,9 +234,8 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     for test in tests:
         if verbose == 1:
             output.write(test.name + '\n')
-        # restore (i) the errstate/print state, and (ii) np.random state
-        # after each docstring. Also make MPL backend non-GUI and close
-        # the figures.
+        # restore the errstate/print state after each docstring.
+        # Also make MPL backend non-GUI and close the figures.
         # The order of context managers is actually relevant. Consider
         # a user_context_mgr that turns warnings into errors.
         # Additionally, suppose that MPL deprecates something and plt.something
@@ -244,10 +243,9 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         # *unless* the `mpl()` context mgr has a chance to filter them out
         # *before* they become errors in `config.user_context_mgr()`.
         with np_errstate():
-            with config.rndm_state():
-                with config.user_context_mgr(test):
-                    with mpl(), temp_cwd(test, config.local_resources):
-                        runner.run(test, out=output.write)
+            with config.user_context_mgr(test):
+                with mpl(), temp_cwd(test, config.local_resources):
+                    runner.run(test, out=output.write)
     if report:
         runner.summarize()
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
@@ -377,10 +375,9 @@ def testfile(filename, module_relative=True, name=None, package=None,
 
     # see testmod for discussion of these context managers
     with np_errstate():
-        with config.rndm_state():
-            with config.user_context_mgr(test):
-                with mpl(), temp_cwd(test, config.local_resources):
-                    runner.run(test, out=output.write)
+        with config.user_context_mgr(test):
+            with mpl(), temp_cwd(test, config.local_resources):
+                runner.run(test, out=output.write)
     if report:
         runner.summarize()
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()

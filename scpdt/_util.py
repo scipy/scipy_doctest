@@ -67,6 +67,9 @@ def temp_cwd(test, local_resources=None):
         shutil.rmtree(tmpdir)
 
 
+# Options for the usr_context_mgr : do nothing (default), and control the random
+# state, in two flavors.
+
 @contextmanager
 def scipy_rndm_state():
     """Restore the `np.random` state when done."""
@@ -82,21 +85,12 @@ def scipy_rndm_state():
 
 
 @contextmanager
-def default_rndm_state():
+def numpy_rndm_state():
     """Restore the `np.random` state when done."""
     # Make sure that the seed the old-fashioned np.random* methods is *NOT* reproducible
     import numpy as np
     np.random.seed(None)
     yield
-
-
-@contextmanager
-def np_errstate():
-    """A context manager to restore the numpy errstate and printoptions when done."""
-    import numpy as np
-    with np.errstate():
-        with np.printoptions():
-            yield
 
 
 @contextmanager
@@ -107,6 +101,15 @@ def noop_context_mgr(test):
     ``DTConfig().user_context_mgr``, for users to override.
     """
     yield
+
+
+@contextmanager
+def np_errstate():
+    """A context manager to restore the numpy errstate and printoptions when done."""
+    import numpy as np
+    with np.errstate():
+        with np.printoptions():
+            yield
 
 
 @contextmanager
