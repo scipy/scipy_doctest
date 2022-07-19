@@ -36,14 +36,25 @@ def matplotlib_make_nongui():
 
 
 @contextmanager
-def temp_cwd(test, local_resources):
+def temp_cwd(test, local_resources=None):
     """Switch to a temp directory, clean up when done.
-       Copy local files, if requested.
+
+        Copy local files, if requested.
+
+        Parameters
+        ----------
+        test : doctest.DocTest instance
+            The current test instance
+        local_resources : dict, optional
+            If provided, maps the name of the test (`test.name` attribute) to
+            a list of filenames to copy to the tempdir. File names are relative
+            to the `test.filename`, which is, in most cases, the name of the
+            file the doctest has been extracted from.
     """
     cwd = os.getcwd()
     tmpdir = tempfile.mkdtemp()
 
-    if test.name in local_resources:
+    if local_resources and test.name in local_resources:
         # local files requested; copy the files
         path, _ = os.path.split(test.filename)
         for fname in local_resources[test.name]:
