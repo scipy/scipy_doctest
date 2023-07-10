@@ -137,7 +137,7 @@ def test_explicit_object_list():
     objs = [finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy=objs)
 
-    base = 'scpdt._tests.finder_cases'
+    base = 'scpdt.tests.finder_cases'
     assert ([test.name for test in tests] ==
             [base + '.Klass', base + '.Klass.meth', base + '.Klass.meth_2'])
 
@@ -149,7 +149,7 @@ def test_explicit_object_list_with_module():
     objs = [finder_cases, finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy=objs)
 
-    base = 'scpdt._tests.finder_cases'
+    base = 'scpdt.tests.finder_cases'
     assert ([test.name for test in tests] ==
             [base, base + '.Klass', base + '.Klass.meth', base + '.Klass.meth_2'])
 
@@ -159,7 +159,7 @@ def test_find_doctests_api():
     objs = [finder_cases, finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy='api')
 
-    base = 'scpdt._tests.finder_cases'
+    base = 'scpdt.tests.finder_cases'
     assert ([test.name for test in tests] ==
             [base + '.func', base + '.Klass', base + '.Klass.meth',
              base + '.Klass.meth_2', base])
