@@ -1,9 +1,9 @@
 import pytest
 
 from . import finder_cases
-from .._util import get_all_list, get_public_objects
-from .._impl import DTFinder, DTConfig
-from .._frontend import find_doctests
+from ..util import get_all_list, get_public_objects
+from ..impl import DTFinder, DTConfig
+from ..frontend import find_doctests
 
 def test_get_all_list():
     items, depr, other = get_all_list(finder_cases)

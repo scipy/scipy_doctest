@@ -1,5 +1,5 @@
-from .._frontend import testfile as doctestfile
-from .._impl import DTConfig
+from ..frontend import testfile as doctestfile
+from ..impl import DTConfig
 
 import pytest
 

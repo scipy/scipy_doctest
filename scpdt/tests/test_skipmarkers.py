@@ -1,7 +1,7 @@
 import doctest
 import pytest
 
-from .._impl import DTConfig, DTParser, DebugDTRunner
+from ..impl import DTConfig, DTParser, DebugDTRunner
 
 
 class TestSyntaxErrors:

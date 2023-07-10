@@ -17,9 +17,9 @@ from . import (module_cases as module,
                failure_cases,
                failure_cases_2,
                local_file_cases)
-from .._frontend import testmod, find_doctests, run_docstring_examples
-from .._util import warnings_errors
-from .._impl import DTConfig
+from ..frontend import testmod, find_doctests, run_docstring_examples
+from ..util import warnings_errors
+from ..impl import DTConfig
 
 _VERBOSE = 2
 
