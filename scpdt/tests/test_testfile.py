@@ -1,5 +1,5 @@
-from .._frontend import testfile as doctestfile
-from .._impl import DTConfig
+from ..frontend import testfile as doctestfile
+from ..impl import DTConfig
 
 import pytest
 
@@ -20,4 +20,4 @@ def test_one_scipy_tutorial():
 def test_linalg_clone():
     # run on a clone of the scipy linalg tutorial
     path = 'scipy_linalg_tutorial_clone.rst'
-    doctestfile(path, package='scpdt._tests', verbose=2, raise_on_error=False)
+    doctestfile(path, package='scpdt.tests', verbose=2, raise_on_error=False)

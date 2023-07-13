@@ -49,11 +49,11 @@ jobs:
 
     - name: Self-test CLI
       run: |
-        python -m scpdt scpdt/_tests/finder_cases.py -vv
+        python -m scpdt scpdt/tests/finder_cases.py -vv
 
     - name: Test testfile CLI
       run: |
-        python -m scpdt ./scpdt/_tests/scipy_linalg_tutorial_clone.rst -v
+        python -m scpdt ./scpdt/tests/scipy_linalg_tutorial_clone.rst -v
 
     - name: Run testmod a scipy submodule
       run: |

@@ -5,7 +5,7 @@ from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 
 import numpy as np
 
-from . import _util
+from . import util
 
 # Register the optionflag to skip whole blocks, i.e.
 # sequences of Examples without an intervening text.
@@ -157,7 +157,7 @@ class DTConfig:
 
         #### User configuration
         if user_context_mgr is None:
-            user_context_mgr = _util.noop_context_mgr
+            user_context_mgr = util.noop_context_mgr
         self.user_context_mgr = user_context_mgr
 
         #### Local resources: None or dict {test: list-of-files-to-copy}
@@ -400,7 +400,7 @@ class DTFinder(doctest.DocTestFinder):
         self.config = config
         if parser is None:
             parser = DTParser(config)
-        verbose, dtverbose = _util._map_verbosity(verbose)
+        verbose, dtverbose = util._map_verbosity(verbose)
         super().__init__(dtverbose, parser, recurse, exclude_empty)
 
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):

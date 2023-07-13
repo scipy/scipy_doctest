@@ -17,9 +17,9 @@ from . import (module_cases as module,
                failure_cases,
                failure_cases_2,
                local_file_cases)
-from .._frontend import testmod, find_doctests, run_docstring_examples
-from .._util import warnings_errors
-from .._impl import DTConfig
+from ..frontend import testmod, find_doctests, run_docstring_examples
+from ..util import warnings_errors
+from ..impl import DTConfig
 
 _VERBOSE = 2
 
@@ -97,7 +97,7 @@ class TestLocalFiles:
         # A doctest tries to open a local file. Test that it works
         # (internally, the file will need to be copied).
         config = DTConfig()
-        config.local_resources = {'scpdt._tests.local_file_cases.local_files':
+        config.local_resources = {'scpdt.tests.local_file_cases.local_files':
                                   ['local_file.txt']}
         res, _ = testmod(local_file_cases, config=config,
                          strategy=[local_file_cases.local_files],
@@ -109,7 +109,7 @@ class TestLocalFiles:
     def test_sio_octave(self):
         # scipy/tutorial/io.rst : octave_a.mat file
         config = DTConfig()
-        config.local_resources = {'scpdt._tests.local_file_cases.sio':
+        config.local_resources = {'scpdt.tests.local_file_cases.sio':
                                   ['octave_a.mat']}
         res, _ = testmod(local_file_cases, config=config,
                          strategy=[local_file_cases.sio],

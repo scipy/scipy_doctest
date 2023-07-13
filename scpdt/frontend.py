@@ -5,8 +5,8 @@ import os
 import inspect
 import doctest
 
-from ._impl import DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
-from ._util import (matplotlib_make_nongui as mpl,
+from .impl import DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
+from .util import (matplotlib_make_nongui as mpl,
                     temp_cwd, np_errstate,
                     get_public_objects, _map_verbosity)
 
