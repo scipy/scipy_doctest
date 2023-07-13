@@ -237,8 +237,6 @@ class DTChecker(doctest.OutputChecker):
             # Maybe we're printing a numpy array? This produces invalid python
             # code: `print(np.arange(3))` produces "[0 1 2]" w/o commas between
             # values. So, reinsert commas and retry.
-            # TODO: handle (1) abberivation (`print(np.arange(10000))`), and
-            #              (2) n-dim arrays with n > 1
             s_want = want.strip()
             s_got = got.strip()
             cond = (s_want.startswith("[") and s_want.endswith("]") and
@@ -246,6 +244,14 @@ class DTChecker(doctest.OutputChecker):
             if cond:
                 s_want = ", ".join(s_want[1:-1].split())
                 s_got = ", ".join(s_got[1:-1].split())
+                return self.check_output(s_want, s_got, optionflags)
+            
+            #handle array abbreviation for n-dimensional arrays, n >= 1
+            ndim_array = (s_want.startswith("array([") and s_want.endswith("])") and 
+                          s_got.startswith("array([") and s_got.endswith("])"))
+            if ndim_array:
+                s_want = ''.join(s_want.split('...,'))
+                s_got = ''.join(s_got.split('...,'))
                 return self.check_output(s_want, s_got, optionflags)
 
             # maybe we are dealing with masked arrays?

@@ -9,7 +9,7 @@ try:
     import scipy
     HAVE_SCIPY = True
 except:
-    HAVE_SCIPY = FALSE
+    HAVE_SCIPY = False
 
 from . import (module_cases as module,
                stopwords_cases as stopwords,
