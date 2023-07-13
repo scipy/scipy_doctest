@@ -247,6 +247,14 @@ class DTChecker(doctest.OutputChecker):
                 s_want = ", ".join(s_want[1:-1].split())
                 s_got = ", ".join(s_got[1:-1].split())
                 return self.check_output(s_want, s_got, optionflags)
+            
+            #handle array abbreviation for multidimensional arrays
+            multidim_array = (s_want.startswith("array([[") and s_want.endswith("]])") and
+                    s_got.startswith("array([[") and s_got.endswith("]])"))
+            if multidim_array:
+                s_want = ''.join(s_want.split('...,'))
+                s_got = ''.join(s_got.split('...,'))
+                return self.check_output(s_want, s_got, optionflags)
 
             # maybe we are dealing with masked arrays?
             # their repr uses '--' for masked values and this is invalid syntax
