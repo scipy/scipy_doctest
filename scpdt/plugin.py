@@ -10,6 +10,29 @@ from _pytest.outcomes import skip
 from scpdt.impl import DTChecker, DTConfig, DTParser, DTFinder
 
 
+def pytest_addoption(parser):
+    """
+    Register argparse-style options and ini-style config values,
+    called once at the beginning of a test run.
+    """
+    parser.addoption(
+        "--doctest-scpt", 
+        action="store_true",
+        help="Enable doctesting for pydata libraries."
+        )
+    parser.addoption(
+        "--doctest-only", 
+        action="store_true",
+        help="Perform doctests only using the scpdt tool."
+        )
+    parser.addini(
+        "doctest_optionflags",
+        "Option flags for doctests",
+        type="args",
+        default=["NORMALIZE_WHITESPACE", "ELLIPSIS", "IGNORE_EXCEPTION_DETAIL"]
+        )
+
+
 def pytest_configure(config):
     """
     Allow plugins and conftest files to perform initial configuration.
