@@ -1,8 +1,7 @@
 """
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
-
-# import doctest
+import numpy as np
 from _pytest import doctest
 
 from scpdt.impl import DTChecker, DTConfig
@@ -21,4 +20,4 @@ def _get_checker():
     """
     Override function to return the DTChecker
     """
-    return DTChecker(config=DTConfig())
+    return DTChecker(config=DTConfig(default_namespace={'np': np}))
