@@ -21,4 +21,4 @@ def _get_checker():
     """
     Override function to return the DTChecker
     """
-    return DTChecker()
+    return DTChecker(config=DTConfig())
