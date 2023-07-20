@@ -10,6 +10,7 @@ def test_array_abbreviation(pytester):
     file_content = """
     def array_abbreviation():
         '''
+        >>> import numpy as np
         >>> np.arange(10000)
         array([0, 1, 2, ..., 9997, 9998, 9999])
 
