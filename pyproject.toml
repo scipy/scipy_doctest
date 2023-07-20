@@ -21,7 +21,7 @@ dependencies  = [
     "pytest",
 ]
 
-[project.optional-dependenices]
+[project.optional-dependencies]
 test = [
     "scipy",
     "matplotlib",
