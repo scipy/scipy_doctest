@@ -25,6 +25,5 @@ def test_array_abbreviation(pytester):
     pytester.makepyfile(file_content)
 
     result = pytester.runpytest("--doctest-modules")
-    print(f"==================================>{result}")
     
     assert result.ret == pytest.ExitCode.OK

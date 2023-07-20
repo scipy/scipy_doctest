@@ -1,7 +1,7 @@
 """
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
-import numpy as np
+
 from _pytest import doctest
 
 from scpdt.impl import DTChecker, DTConfig
@@ -18,6 +18,6 @@ def pytest_configure(config):
 
 def _get_checker():
     """
-    Override function to return the DTChecker
+    Override function to return an instance of DTChecker with default configurations
     """
-    return DTChecker(config=DTConfig(default_namespace={'np': np}))
+    return DTChecker(config=DTConfig())
