@@ -62,3 +62,7 @@ jobs:
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
         python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="api")'
+
+    - name: Test pytest plugin
+      run: |
+        python -m pytest --doctest-modules
