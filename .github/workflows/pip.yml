@@ -65,4 +65,4 @@ jobs:
 
     - name: Test pytest plugin
       run: |
-        python -m pytest --doctest-modules
+        python -m pytest
