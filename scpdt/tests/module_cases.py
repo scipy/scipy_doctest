@@ -10,6 +10,7 @@ def func2():
     """
     Check that `np.` is imported and the array repr is recognized. Also check
     that whitespace is irrelevant for the checker.
+    >>> import numpy as np
     >>> np.array([1,         2,          3.0])
     array([1, 2, 3])
 
@@ -28,6 +29,7 @@ def func2():
 def func3():
     """
     Check that printed arrays are checked with atol/rtol
+    >>> import numpy as np
     >>> a = np.array([1, 2, 3, 4]) / 3
     >>> print(a)
     [0.33  0.66  1  1.33]
@@ -38,7 +40,7 @@ def func4():
     """
     Test `# may vary` markers : these should not break doctests (but the code
     should still be valid, otherwise it's an error).
-
+    >>> import numpy as np
     >>> np.random.randint(50)
     42      # may vary
 
@@ -53,7 +55,7 @@ def func4():
 def func5():
     """
     Object addresses are ignored:
-
+    >>> import numpy as np
     >>> np.array([1, 2, 3]).data
     <memory at 0x7f119b952400>
     """
@@ -103,6 +105,7 @@ def func7():
     Multiline namedtuples + nested tuples, see scipy/gh-16082
 
     >>> from scipy import stats
+    >>> import numpy as np
     >>> a = np.arange(10)
     >>> stats.describe(a)
     DescribeResult(nobs=10, minmax=(0, 9), mean=4.5,
@@ -118,7 +121,7 @@ def func7():
 
 def manip_printoptions():
     """Manipulate np.printoptions.
-
+    >>> import numpy as np
     >>> np.set_printoptions(linewidth=146)
     """
 
@@ -132,7 +135,7 @@ def array_abbreviation():
     Currently, `...` gets interpreted as an Ellipsis,
     thus the `a_want/a_got` variables in DTChecker are in fact
     object arrays.
-
+    >>> import numpy as np
     >>> np.arange(10000)
     array([0, 1, 2, ..., 9997, 9998, 9999])
 

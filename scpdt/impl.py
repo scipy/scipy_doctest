@@ -91,7 +91,7 @@ class DTConfig:
         ### DTChecker configuration ###
         # The namespace to run examples in
         if default_namespace is None:
-            default_namespace = {'np': np}
+            default_namespace = {}
         self.default_namespace = default_namespace
 
         # The namespace to do checks in
@@ -200,6 +200,7 @@ class DTChecker(doctest.OutputChecker):
         self.rndm_markers.add('# _ignore')  # technical, private. See DTParser
 
     def check_output(self, want, got, optionflags):
+
         # cut it short if they are equal
         if want == got:
             return True
