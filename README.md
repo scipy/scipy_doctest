@@ -136,6 +136,47 @@ passing the instance to `testmod` or constructors of `DT*` objects. Defaults
 are provided, based on a long-term usage in SciPy.
 
 
+## The Scpdt Pytest Plugin
+
+The pytest plugin enables the use of scpdt tools to perform doctests. 
+
+Presently, pytest is configured to utilize scpdt's `DTChecker` for comparing the expected result (`want`) of test examples to the actual result (`got`) produced by the doctest runner.
+
+To utilize the pytest plugin, follow these steps:
+
+1. Install the scpdt tool
+
+Ensure you have the scpdt tool installed from GitHub. You can install it using pip with the following command:
+
+```bash
+pip install git+https://github.com/ev-br/scpdt.git@main
+```
+
+2. Register/Load the Plugin
+
+Next, you need to register or load the pytest plugin in either your test module or your `conftest.py` file. 
+
+To do this, add the following line of code:
+
+```python
+# in your conftest.py file or test module
+
+pytest_plugins = "scpdt"
+```
+For more information, check out this document on [Requiring/Loading plugins in a test module or conftest file](https://docs.pytest.org/en/stable/how-to/writing_plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file)
+
+3. Run Doctests
+
+Once the plugin is registered, you can run your doctests using the scpdt pytest plugin by executing the following command:
+
+```bash
+python -m pytest --doctest-modules
+```
+
+By following these steps, you will be able to effectively use the scpdt pytest plugin for doctests in your Python projects.
+
+ Happy testing!
+
 ## Prior art and related work
 
 - `pytest` provides some limited floating-point aware `NumericLiteralChecker`.
