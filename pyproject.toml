@@ -1,22 +1,40 @@
 [build-system]
-requires = ["flit_core >=3.2,<4",
-            "numpy"
-]
+requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
 name = "scpdt"
-authors = [{name = "Evgeni Burovski et al", email = "evgeny.burovskiy@gmail.com"}]
+authors = [
+    {name = "Evgeni Burovski et al", email = "evgeny.burovskiy@gmail.com"}
+    ]
 readme = "README.md"
+requires-python = ">=3.8"
+license={file = "LICENSE"}
 dynamic = ["version", "description"]
 classifiers = [
-    "License :: OSI Approved :: BSD License",
-    "Private :: Do Not Upload"
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3",
+    "Framework :: Pytest"
+]
+dependencies  = [
+    "numpy>=1.19.5",
+    "pytest",
 ]
 
-requires  = [
-    "numpy>=1.19.5"
+[project.optional-dependencies]
+test = [
+    "scipy",
+    "matplotlib",
+    "pytest"
 ]
 
 [project.urls]
 Home = "https://github.com/ev-br/scpdt"
+
+[tool.pytest.ini_options]
+addopts = "--verbose --color=yes"
+
+# specify project entrypoints to make each plugin discoverable by pytest
+# ref: https://docs.pytest.org/en/latest/how-to/writing_plugins.html#making-your-plugin-installable-by-others
+[project.entry-points.pytest11]
+scpdt = "scpdt.plugin"
