@@ -64,5 +64,6 @@ jobs:
         python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="api")'
 
     - name: Test pytest plugin
+      # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
       run: |
         python -m pytest scpdt/tests/module_cases.py --doctest-modules
