@@ -2,7 +2,7 @@ import pytest
 from pathlib import PosixPath
 
 
-from . import module_cases, failure_cases, failure_cases_2
+from . import module_cases, failure_cases, failure_cases_2, stopwords_cases
 
 pytest_plugins = ['pytester']
 
@@ -23,3 +23,13 @@ def test_failure_cases(pytester):
         python_file = PosixPath(path_str)
         result = pytester.inline_run(python_file, "--doctest-modules")
     assert result.ret == pytest.ExitCode.TESTS_FAILED
+    
+
+"""
+Test that pytest uses the DTParser for doctests
+"""
+def test_stopword_cases(pytester):
+    path_str = stopwords_cases.__file__
+    python_file = PosixPath(path_str)
+    result = pytester.inline_run(python_file, "--doctest-modules")
+    assert result.ret == pytest.ExitCode.OK
