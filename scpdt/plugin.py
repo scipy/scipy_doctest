@@ -3,13 +3,17 @@ A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
 
 
+import pytest
 from _pytest import doctest
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 from _pytest.outcomes import skip
+from pathlib import Path
+
 
 from scpdt.impl import DTChecker, DTConfig, DTParser, DTFinder
 
+pytest_version = pytest.__version__
 
 def pytest_addoption(parser):
     """
@@ -17,12 +21,12 @@ def pytest_addoption(parser):
     called once at the beginning of a test run.
     """
     parser.addoption(
-        "--doctest-scpt", 
+        "--doctest-scpdt",
         action="store_true",
-        default="False",
-        help="Enable doctesting for pydata libraries.",
+        default=False,
+        help="Run doctests in all .py modules using the scpdt tool",
         dest="doctestscpdt"
-        )
+    )
     parser.addoption(
         "--doctest-only", 
         action="store_true",
@@ -34,13 +38,18 @@ def pytest_addoption(parser):
         type="args",
         default=["NORMALIZE_WHITESPACE", "ELLIPSIS", "IGNORE_EXCEPTION_DETAIL"]
         )
+    parser.addini(
+        "doctest_scpdt",
+        help="Enable running doctests using the scpdt tool",
+        default=True
+    )
 
 
 def pytest_configure(config):
     """
     Allow plugins and conftest files to perform initial configuration.
     """
-    if not config.getoption("doctestscpdt"):
+    if not any([config.option.doctestscpdt, config.getini("doctest_scpdt")]):
         return
 
     doctest._get_checker = _get_checker
@@ -149,3 +158,4 @@ def _get_parser():
     Return instance of DTParser with default configuration
     """
     return DTParser(config=DTConfig())
+
