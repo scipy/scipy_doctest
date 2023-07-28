@@ -2,6 +2,7 @@
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
 
+
 from _pytest import doctest
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
@@ -18,7 +19,9 @@ def pytest_addoption(parser):
     parser.addoption(
         "--doctest-scpt", 
         action="store_true",
-        help="Enable doctesting for pydata libraries."
+        default="False",
+        help="Enable doctesting for pydata libraries.",
+        dest="doctestscpdt"
         )
     parser.addoption(
         "--doctest-only", 
@@ -37,6 +40,8 @@ def pytest_configure(config):
     """
     Allow plugins and conftest files to perform initial configuration.
     """
+    if not config.getoption("doctestscpdt"):
+        return
 
     doctest._get_checker = _get_checker
     doctest.DoctestModule = DTModule
