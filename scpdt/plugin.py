@@ -1,14 +1,18 @@
 """
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
+import os
+import shutil
 
 from _pytest import doctest
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 from _pytest.outcomes import skip
 
-from scpdt.impl import DTChecker, DTConfig, DTParser, DTFinder
+from scpdt.impl import DTChecker, DTParser, DTFinder
+from scpdt.tests.conftest import user_config
 
+copied_files = []
 
 def pytest_configure(config):
     """
@@ -19,12 +23,33 @@ def pytest_configure(config):
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
 
+def pytest_unconfigure(config):
+    if len(copied_files) > 0:
+        try:
+            for filepath in copied_files:
+                os.remove(filepath)
+        except FileNotFoundError:
+            pass
+
 
 def _get_checker():
     """
     Override function to return an instance of DTChecker with default configurations
     """
-    return DTChecker(config=DTConfig())
+    return DTChecker(config=user_config)
+
+
+def copy_local_files(local_resources):
+    cwd = os.getcwd()
+    for key, value in local_resources.items():
+        path = os.path.abspath(value[0])
+        basename = os.path.basename(path)
+        filepath = os.path.join(cwd, basename)
+        if os.path.exists(filepath):
+            continue
+        shutil.copy(path, cwd)
+        copied_files.append(filepath)    
+    return
 
 
 class DTModule(DoctestModule):
@@ -57,11 +82,12 @@ class DTModule(DoctestModule):
                     skip("unable to import module %r" % self.path)
                 else:
                     raise
-
+        if len(user_config.local_resources) > 0:
+            copy_local_files(user_config.local_resources)
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
-        finder = DTFinder(config=DTConfig())
+        finder = DTFinder(config=user_config)
 
         # the rest remains unchanged
         optionflags = doctest.get_optionflags(self)
@@ -120,4 +146,4 @@ def _get_parser():
     """
     Return instance of DTParser with default configuration
     """
-    return DTParser(config=DTConfig())
+    return DTParser(config=user_config)
