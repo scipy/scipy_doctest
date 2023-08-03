@@ -41,7 +41,7 @@ def _get_checker():
 
 def copy_local_files(local_resources, destination_dir):
     for key, value in local_resources.items():
-        path = os.path.abspath(value[0])
+        path = value[0]
         basename = os.path.basename(path)
         filepath = os.path.join(destination_dir, basename)
         if not os.path.exists(filepath):
