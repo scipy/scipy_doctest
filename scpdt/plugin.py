@@ -39,17 +39,15 @@ def _get_checker():
     return DTChecker(config=user_config)
 
 
-def copy_local_files(local_resources):
-    cwd = os.getcwd()
+def copy_local_files(local_resources, destination_dir):
     for key, value in local_resources.items():
         path = os.path.abspath(value[0])
         basename = os.path.basename(path)
-        filepath = os.path.join(cwd, basename)
-        if os.path.exists(filepath):
-            continue
-        shutil.copy(path, cwd)
-        copied_files.append(filepath)    
-    return
+        filepath = os.path.join(destination_dir, basename)
+        if not os.path.exists(filepath):
+            shutil.copy(path, destination_dir)
+            copied_files.append(filepath)    
+    return copied_files
 
 
 class DTModule(DoctestModule):
@@ -83,7 +81,7 @@ class DTModule(DoctestModule):
                 else:
                     raise
         if len(user_config.local_resources) > 0:
-            copy_local_files(user_config.local_resources)
+            copy_local_files(user_config.local_resources, os.getcwd())
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
