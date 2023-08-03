@@ -1,8 +1,4 @@
-import pytest
 from scpdt.impl import DTConfig
-import os
-import shutil
-
 
 
 user_config = DTConfig()
