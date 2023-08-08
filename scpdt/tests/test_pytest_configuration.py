@@ -4,17 +4,22 @@ from pathlib import PosixPath, Path
 
 from . import module_cases, failure_cases, failure_cases_2, stopwords_cases, local_file_cases
 from scpdt.plugin import copy_local_files
-from scpdt.tests.conftest import user_config
+from scpdt.tests.conftest import config
 
 pytest_plugins = ['pytester']
 
 
 @pytest.fixture(autouse=True)
 def copy_files():
+    """
+    Copy necessary local files for doctests to the temporary directory used by pytester. 
+    The files to be copied are defined by the `local_resources` attribute of a DTConfig instance.
+    When testing is done, all copied files are deleted.
+    """
     dirname = os.path.dirname(Path(__file__))
-    for key, value in user_config.local_resources.items():
+    for key, value in config.local_resources.items():
         value[0] = os.path.join(dirname, os.path.basename(value[0]))
-    copied_files = copy_local_files(user_config.local_resources, os.getcwd())
+    copied_files = copy_local_files(config.local_resources, os.getcwd())
     try: 
         yield copied_files
     finally:

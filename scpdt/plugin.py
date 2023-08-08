@@ -10,7 +10,7 @@ from _pytest.pathlib import import_path
 from _pytest.outcomes import skip
 
 from scpdt.impl import DTChecker, DTParser, DTFinder
-from scpdt.tests.conftest import user_config
+from scpdt.tests.conftest import config
 
 copied_files = []
 
@@ -24,6 +24,9 @@ def pytest_configure(config):
     doctest.DoctestTextfile = DTTextfile
 
 def pytest_unconfigure(config):
+    """
+    Delete all local files copied to the current working directory
+    """
     if len(copied_files) > 0:
         try:
             for filepath in copied_files:
@@ -36,10 +39,14 @@ def _get_checker():
     """
     Override function to return an instance of DTChecker with default configurations
     """
-    return DTChecker(config=user_config)
+    return DTChecker(config=config)
 
 
 def copy_local_files(local_resources, destination_dir):
+    """
+    Copy necessary local files for doctests to the current working directory. 
+    The files to be copied are defined by the `local_resources` attribute of a DTConfig instance.
+    """
     for key, value in local_resources.items():
         path = value[0]
         basename = os.path.basename(path)
@@ -80,12 +87,15 @@ class DTModule(DoctestModule):
                     skip("unable to import module %r" % self.path)
                 else:
                     raise
-        if len(user_config.local_resources) > 0:
-            copy_local_files(user_config.local_resources, os.getcwd())
+
+        # if local files are specified by the `local_resources` attribute, copy them to the current working directory
+        if len(config.local_resources) > 0:
+            copy_local_files(config.local_resources, os.getcwd())
+
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
-        finder = DTFinder(config=user_config)
+        finder = DTFinder(config=config)
 
         # the rest remains unchanged
         optionflags = doctest.get_optionflags(self)
@@ -121,6 +131,10 @@ class DTTextfile(DoctestTextfile):
 
         optionflags = doctest.get_optionflags(self)
 
+        # if local files are specified by the `local_resources` attribute, copy them to the current working directory
+        if len(config.local_resources) > 0:
+            copy_local_files(config.local_resources, os.getcwd())
+
         runner = doctest._get_runner(
             verbose=False,
             optionflags=optionflags,
@@ -144,4 +158,4 @@ def _get_parser():
     """
     Return instance of DTParser with default configuration
     """
-    return DTParser(config=user_config)
+    return DTParser(config=config)
