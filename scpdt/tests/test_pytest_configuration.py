@@ -18,7 +18,9 @@ def copy_files():
     """
     dirname = os.path.dirname(Path(__file__))
     for key, value in config.local_resources.items():
-        value[0] = os.path.join(dirname, os.path.basename(value[0]))
+        # Update the filepath of each filename
+        for i in range(0, len(value)):
+            value[i] = os.path.join(dirname, os.path.basename(value[i]))
     copied_files = copy_local_files(config.local_resources, os.getcwd())
     try: 
         yield copied_files

@@ -47,13 +47,15 @@ def copy_local_files(local_resources, destination_dir):
     Copy necessary local files for doctests to the current working directory. 
     The files to be copied are defined by the `local_resources` attribute of a DTConfig instance.
     """
+    import pdb
+    pdb.set_trace()
     for key, value in local_resources.items():
-        path = value[0]
-        basename = os.path.basename(path)
-        filepath = os.path.join(destination_dir, basename)
-        if not os.path.exists(filepath):
-            shutil.copy(path, destination_dir)
-            copied_files.append(filepath)    
+        for i in range(0, len(value)):
+            basename = os.path.basename(value[i])
+            filepath = os.path.join(destination_dir, basename)
+            if not os.path.exists(filepath):
+                shutil.copy(value[i], destination_dir)
+                copied_files.append(filepath)    
     return copied_files
 
 
