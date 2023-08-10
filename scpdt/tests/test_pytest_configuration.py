@@ -4,7 +4,7 @@ from pathlib import PosixPath, Path
 
 from . import module_cases, failure_cases, failure_cases_2, stopwords_cases, local_file_cases
 from scpdt.plugin import copy_local_files
-from scpdt.tests.conftest import config
+from scpdt.conftest import dt_config
 
 pytest_plugins = ['pytester']
 
@@ -16,20 +16,27 @@ def copy_files():
     The files to be copied are defined by the `local_resources` attribute of a DTConfig instance.
     When testing is done, all copied files are deleted.
     """
-    dirname = os.path.dirname(Path(__file__))
-    for key, value in config.local_resources.items():
-        # Update the filepath of each filename
-        for i in range(0, len(value)):
-            value[i] = os.path.join(dirname, os.path.basename(value[i]))
-    copied_files = copy_local_files(config.local_resources, os.getcwd())
-    try: 
+    try:
+        dirname = os.path.dirname(Path(__file__))
+
+        # Update the file path of each filename
+        for value in dt_config.local_resources.values():
+            for i, path in enumerate(value):
+                value[i] = os.path.join(dirname, os.path.basename(path))
+
+        # Copy the files
+        copied_files = copy_local_files(dt_config.local_resources, os.getcwd())
+
         yield copied_files
+
     finally:
+        # Perform clean-up
         for filepath in copied_files:
             try:
                 os.remove(filepath)
             except FileNotFoundError:
                 pass
+
 
 """
 Test that pytest uses the DTChecker for doctests

@@ -10,7 +10,7 @@ from _pytest.pathlib import import_path
 from _pytest.outcomes import skip
 
 from scpdt.impl import DTChecker, DTParser, DTFinder
-from scpdt.tests.conftest import config
+from scpdt.conftest import dt_config
 
 copied_files = []
 
@@ -25,9 +25,11 @@ def pytest_configure(config):
 
 def pytest_unconfigure(config):
     """
-    Delete all local files copied to the current working directory
+    Called before test process is exited.
     """
-    if len(copied_files) > 0:
+
+    # Delete all local files copied to the current working directory
+    if copied_files:
         try:
             for filepath in copied_files:
                 os.remove(filepath)
@@ -39,7 +41,7 @@ def _get_checker():
     """
     Override function to return an instance of DTChecker with default configurations
     """
-    return DTChecker(config=config)
+    return DTChecker(config=dt_config)
 
 
 def copy_local_files(local_resources, destination_dir):
@@ -47,15 +49,14 @@ def copy_local_files(local_resources, destination_dir):
     Copy necessary local files for doctests to the current working directory. 
     The files to be copied are defined by the `local_resources` attribute of a DTConfig instance.
     """
-    import pdb
-    pdb.set_trace()
-    for key, value in local_resources.items():
-        for i in range(0, len(value)):
-            basename = os.path.basename(value[i])
-            filepath = os.path.join(destination_dir, basename)
-            if not os.path.exists(filepath):
-                shutil.copy(value[i], destination_dir)
-                copied_files.append(filepath)    
+    for value in local_resources.values():
+        for filepath in value:
+            basename = os.path.basename(filepath)
+            dest_path = os.path.join(destination_dir, basename)
+
+            if not os.path.exists(dest_path):
+                shutil.copy(filepath, destination_dir)
+                copied_files.append(dest_path)    
     return copied_files
 
 
@@ -91,13 +92,13 @@ class DTModule(DoctestModule):
                     raise
 
         # if local files are specified by the `local_resources` attribute, copy them to the current working directory
-        if len(config.local_resources) > 0:
-            copy_local_files(config.local_resources, os.getcwd())
+        if dt_config.local_resources:
+            copy_local_files(dt_config.local_resources, os.getcwd())
 
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
-        finder = DTFinder(config=config)
+        finder = DTFinder(config=dt_config)
 
         # the rest remains unchanged
         optionflags = doctest.get_optionflags(self)
@@ -134,8 +135,8 @@ class DTTextfile(DoctestTextfile):
         optionflags = doctest.get_optionflags(self)
 
         # if local files are specified by the `local_resources` attribute, copy them to the current working directory
-        if len(config.local_resources) > 0:
-            copy_local_files(config.local_resources, os.getcwd())
+        if dt_config.local_resources:
+            copy_local_files(dt_config.local_resources, os.getcwd())
 
         runner = doctest._get_runner(
             verbose=False,
@@ -160,4 +161,4 @@ def _get_parser():
     """
     Return instance of DTParser with default configuration
     """
-    return DTParser(config=config)
+    return DTParser(config=dt_config)
