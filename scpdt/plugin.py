@@ -9,7 +9,7 @@ from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 from _pytest.outcomes import skip
 
-from scpdt.impl import DTChecker, DTParser, DTFinder
+from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
 from scpdt.conftest import dt_config
 
 copied_files = []
@@ -19,6 +19,7 @@ def pytest_configure(config):
     Allow plugins and conftest files to perform initial configuration.
     """
 
+    doctest._get_runner = _get_runner
     doctest._get_checker = _get_checker
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
@@ -39,7 +40,7 @@ def pytest_unconfigure(config):
 
 def _get_checker():
     """
-    Override function to return an instance of DTChecker with default configurations
+    Override function to return an instance of DTChecker
     """
     return DTChecker(config=dt_config)
 
@@ -99,16 +100,16 @@ class DTModule(DoctestModule):
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
         finder = DTFinder(config=dt_config)
-
-        # the rest remains unchanged
         optionflags = doctest.get_optionflags(self)
-        runner = doctest._get_runner(
+
+        # We plugin scpdt's `DebugDTRunner`
+        runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
-            checker=_get_checker(),
-            continue_on_failure=doctest._get_continue_on_failure(self.config),
+            checker=_get_checker()
         )
 
+        # the rest remains unchanged
         for test in finder.find(module, module.__name__):
             if test.examples:  # skip empty doctests
                 yield doctest.DoctestItem.from_parent(
@@ -138,11 +139,11 @@ class DTTextfile(DoctestTextfile):
         if dt_config.local_resources:
             copy_local_files(dt_config.local_resources, os.getcwd())
 
-        runner = doctest._get_runner(
+        # We plugin scpdt's `DebugDTRunner`
+        runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
-            checker=_get_checker(),
-            continue_on_failure=doctest._get_continue_on_failure(self.config)
+            checker=_get_checker()
         )
 
         # We plug in an instance of `DTParser` which parses the doctest examples from the text file and
@@ -159,6 +160,13 @@ class DTTextfile(DoctestTextfile):
 
 def _get_parser():
     """
-    Return instance of DTParser with default configuration
+    Return instance of DTParser
     """
     return DTParser(config=dt_config)
+
+
+def _get_runner(checker, verbose, optionflags):
+    """
+    Override function to return instance of DebugDTRunner
+    """
+    return DebugDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)

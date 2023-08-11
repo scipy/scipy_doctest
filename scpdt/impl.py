@@ -6,6 +6,7 @@ from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 import numpy as np
 
 from . import util
+from .util import np_errstate, matplotlib_make_nongui
 
 # Register the optionflag to skip whole blocks, i.e.
 # sequences of Examples without an intervening text.
@@ -318,6 +319,7 @@ class DTRunner(doctest.DocTestRunner):
     def __init__(self, checker=None, verbose=None, optionflags=None, config=None):
         if config is None:
             config = DTConfig()
+        self.config = config
         if checker is None:
             checker = DTChecker(config)
         self.nameerror_after_exception = config.nameerror_after_exception
@@ -375,10 +377,19 @@ class DebugDTRunner(DTRunner):
     Almost verbatim copy of `doctest.DebugRunner`.
     """
     def run(self, test, compileflags=None, out=None, clear_globs=True):
-        r = super().run(test, compileflags, out, False)
-        if clear_globs:
-            test.globs.clear()
-        return r
+        """
+        Run tests in context managers:
+        np_errstate: restores the numpy errstate and printoptions when done
+        user_context_manager: allows user to plug in their own context manager
+        matplotlib_make_nongui: temporarily make the matplotlib backend non-GUI
+        """
+        with np_errstate():
+            with self.config.user_context_mgr(test):
+                with matplotlib_make_nongui():
+                    r = super().run(test, compileflags=compileflags, out=out, clear_globs=False)
+                    if clear_globs:
+                        test.globs.clear()
+                    return r
 
     def report_unexpected_exception(self, out, test, example, exc_info):
         super().report_unexpected_exception(out, test, example, exc_info)
