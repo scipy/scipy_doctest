@@ -66,7 +66,7 @@ jobs:
     - name: Test pytest plugin
       # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
       run: |
-        test_files=("scpdt/tests/module_cases.py" "scpdt/tests/stopwords_cases.py")
+        test_files=("scpdt/tests/module_cases.py" "scpdt/tests/stopwords_cases.py" "scpdt/tests/local_file_cases.py")
           for file in "${test_files[@]}"; do
             python -m pytest "${file}" --doctest-modules
           done
