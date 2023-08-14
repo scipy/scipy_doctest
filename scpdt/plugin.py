@@ -104,7 +104,7 @@ class DTModule(DoctestModule):
         finder = DTFinder(config=dt_config)
         optionflags = doctest.get_optionflags(self)
 
-        # We plugin scpdt's `DebugDTRunner`
+        # We plugin `PytestDTRunner`
         runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
@@ -141,7 +141,7 @@ class DTTextfile(DoctestTextfile):
         if dt_config.local_resources:
             copy_local_files(dt_config.local_resources, os.getcwd())
 
-        # We plugin scpdt's `DebugDTRunner`
+        # We plugin `PytestDTRunner`
         runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
@@ -170,19 +170,9 @@ def _get_parser():
 def _get_runner(checker, verbose, optionflags):
     import doctest
     """
-    Override function to return instance of DebugDTRunner
+    Override function to return instance of PytestDTRunner
     """
     class PytestDTRunner(DebugDTRunner):
-
-        def __init__(self, checker=None, verbose=None, optionflags=None, config=None, continue_on_failure=True):
-            super().__init__(checker=checker, verbose=verbose, optionflags=optionflags, config=config)
-            """
-            If `continue_on_failure is True, failures and exceptions are collected in the out stream. 
-            If it's False, the failure or exception is raised immediately, potentially stopping further 
-            execution of the particular doctest
-            """
-            self.continue_on_failure = continue_on_failure
-
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
             Run tests in context managers:
@@ -200,7 +190,7 @@ def _get_runner(checker, verbose, optionflags):
         """
         def report_failure(self, out, test, example, got):
             failure = doctest.DocTestFailure(test, example, got)
-            if self.continue_on_failure:
+            if self.config.nameerror_after_exception:
                 out.append(failure)
             else:
                 raise failure
@@ -211,7 +201,7 @@ def _get_runner(checker, verbose, optionflags):
             if isinstance(exc_info[1], bdb.BdbQuit):
                 outcomes.exit("Quitting debugger")
             failure = doctest.UnexpectedException(test, example, exc_info)
-            if self.continue_on_failure:
+            if self.config.nameerror_after_exception:
                 out.append(failure)
             else:
                 raise failure

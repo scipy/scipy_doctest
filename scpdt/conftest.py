@@ -9,3 +9,5 @@ dt_config.local_resources = {'scpdt.tests.local_file_cases.local_files':
                             'scpdt.tests.local_file_cases.sio':
                                   ['scpdt/tests/octave_a.mat']   
                                   }
+
+dt_config.nameerror_after_exception = True
