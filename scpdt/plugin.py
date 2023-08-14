@@ -1,16 +1,19 @@
 """
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
+import bdb
 import os
 import shutil
 
-from _pytest import doctest
+from _pytest import doctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
-from _pytest.outcomes import skip
+from _pytest.outcomes import skip, OutcomeException
 
-from scpdt.impl import DTChecker, DTParser, DTFinder
+from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
 from scpdt.conftest import dt_config
+from .util import np_errstate, matplotlib_make_nongui
+
 
 copied_files = []
 
@@ -19,6 +22,7 @@ def pytest_configure(config):
     Allow plugins and conftest files to perform initial configuration.
     """
 
+    doctest._get_runner = _get_runner
     doctest._get_checker = _get_checker
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
@@ -39,7 +43,7 @@ def pytest_unconfigure(config):
 
 def _get_checker():
     """
-    Override function to return an instance of DTChecker with default configurations
+    Override function to return an instance of DTChecker
     """
     return DTChecker(config=dt_config)
 
@@ -99,16 +103,16 @@ class DTModule(DoctestModule):
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
         finder = DTFinder(config=dt_config)
-
-        # the rest remains unchanged
         optionflags = doctest.get_optionflags(self)
-        runner = doctest._get_runner(
+
+        # We plug in `PytestDTRunner`
+        runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
-            checker=_get_checker(),
-            continue_on_failure=doctest._get_continue_on_failure(self.config),
+            checker=_get_checker()
         )
 
+        # the rest remains unchanged
         for test in finder.find(module, module.__name__):
             if test.examples:  # skip empty doctests
                 yield doctest.DoctestItem.from_parent(
@@ -138,11 +142,11 @@ class DTTextfile(DoctestTextfile):
         if dt_config.local_resources:
             copy_local_files(dt_config.local_resources, os.getcwd())
 
-        runner = doctest._get_runner(
+        # We plug in `PytestDTRunner`
+        runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
-            checker=_get_checker(),
-            continue_on_failure=doctest._get_continue_on_failure(self.config)
+            checker=_get_checker()
         )
 
         # We plug in an instance of `DTParser` which parses the doctest examples from the text file and
@@ -159,6 +163,55 @@ class DTTextfile(DoctestTextfile):
 
 def _get_parser():
     """
-    Return instance of DTParser with default configuration
+    Return instance of DTParser
+    Please refer to `testmod` source for a discussion of the order of context managers.
     """
     return DTParser(config=dt_config)
+
+
+def _get_runner(checker, verbose, optionflags):
+    import doctest
+    """
+    Override function to return instance of PytestDTRunner
+    """
+    class PytestDTRunner(DebugDTRunner):
+        def run(self, test, compileflags=None, out=None, clear_globs=False):
+            """
+            Run tests in context managers.
+            Restore the errstate/print state after each docstring.
+            Also make MPL backend non-GUI and close the figures.
+            The order of context managers is actually relevant. Consider
+            user_context_mgr that turns warnings into errors.
+            Additionally, suppose that MPL deprecates something and plt.something
+            starts issuing warngings. Now all of those become errors
+            *unless* the `mpl()` context mgr has a chance to filter them out
+            *before* they become errors in `config.user_context_mgr()`.
+            """
+            with np_errstate():
+                with dt_config.user_context_mgr(test):
+                    with matplotlib_make_nongui():
+                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+
+        """
+        Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
+        DTConfig's `nameerror_after_exception` attribute in place of doctest's `continue_on_failure`.
+        """
+        def report_failure(self, out, test, example, got):
+            failure = doctest.DocTestFailure(test, example, got)
+            if dt_config.nameerror_after_exception:
+                out.append(failure)
+            else:
+                raise failure
+
+        def report_unexpected_exception(self, out, test, example, exc_info):
+            if isinstance(exc_info[1], OutcomeException):
+                raise exc_info[1]
+            if isinstance(exc_info[1], bdb.BdbQuit):
+                outcomes.exit("Quitting debugger")
+            failure = doctest.UnexpectedException(test, example, exc_info)
+            if dt_config.nameerror_after_exception:
+                out.append(failure)
+            else:
+                raise failure
+            
+    return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)

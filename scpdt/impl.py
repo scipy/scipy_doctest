@@ -375,7 +375,7 @@ class DebugDTRunner(DTRunner):
     Almost verbatim copy of `doctest.DebugRunner`.
     """
     def run(self, test, compileflags=None, out=None, clear_globs=True):
-        r = super().run(test, compileflags, out, False)
+        r = super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
         if clear_globs:
             test.globs.clear()
         return r
