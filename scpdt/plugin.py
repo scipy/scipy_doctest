@@ -14,6 +14,7 @@ from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
 from scpdt.conftest import dt_config
 from .util import np_errstate, matplotlib_make_nongui
 
+
 copied_files = []
 
 def pytest_configure(config):
@@ -104,7 +105,7 @@ class DTModule(DoctestModule):
         finder = DTFinder(config=dt_config)
         optionflags = doctest.get_optionflags(self)
 
-        # We plugin `PytestDTRunner`
+        # We plug in `PytestDTRunner`
         runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
@@ -141,7 +142,7 @@ class DTTextfile(DoctestTextfile):
         if dt_config.local_resources:
             copy_local_files(dt_config.local_resources, os.getcwd())
 
-        # We plugin `PytestDTRunner`
+        # We plug in `PytestDTRunner`
         runner = _get_runner(
             verbose=False,
             optionflags=optionflags,
@@ -163,6 +164,7 @@ class DTTextfile(DoctestTextfile):
 def _get_parser():
     """
     Return instance of DTParser
+    Please refer to `testmod` source for a discussion of the order of context managers.
     """
     return DTParser(config=dt_config)
 
@@ -175,22 +177,28 @@ def _get_runner(checker, verbose, optionflags):
     class PytestDTRunner(DebugDTRunner):
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
-            Run tests in context managers:
-            np_errstate: restores the numpy errstate and printoptions when done
-            user_context_manager: allows user to plug in their own context manager
-            matplotlib_make_nongui: temporarily make the matplotlib backend non-GUI
+            Run tests in context managers.
+            Restore the errstate/print state after each docstring.
+            Also make MPL backend non-GUI and close the figures.
+            The order of context managers is actually relevant. Consider
+            user_context_mgr that turns warnings into errors.
+            Additionally, suppose that MPL deprecates something and plt.something
+            starts issuing warngings. Now all of those become errors
+            *unless* the `mpl()` context mgr has a chance to filter them out
+            *before* they become errors in `config.user_context_mgr()`.
             """
             with np_errstate():
-                with self.config.user_context_mgr(test):
+                with dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
                         super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
-  
+
         """
-        Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner`.
+        Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
+        DTConfig's `nameerror_after_exception` attribute in place of doctest's `continue_on_failure`.
         """
         def report_failure(self, out, test, example, got):
             failure = doctest.DocTestFailure(test, example, got)
-            if self.config.nameerror_after_exception:
+            if dt_config.nameerror_after_exception:
                 out.append(failure)
             else:
                 raise failure
@@ -201,9 +209,9 @@ def _get_runner(checker, verbose, optionflags):
             if isinstance(exc_info[1], bdb.BdbQuit):
                 outcomes.exit("Quitting debugger")
             failure = doctest.UnexpectedException(test, example, exc_info)
-            if self.config.nameerror_after_exception:
+            if dt_config.nameerror_after_exception:
                 out.append(failure)
             else:
                 raise failure
-
+            
     return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)

@@ -318,7 +318,6 @@ class DTRunner(doctest.DocTestRunner):
     def __init__(self, checker=None, verbose=None, optionflags=None, config=None):
         if config is None:
             config = DTConfig()
-        self.config = config
         if checker is None:
             checker = DTChecker(config)
         self.nameerror_after_exception = config.nameerror_after_exception
