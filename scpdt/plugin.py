@@ -1,16 +1,18 @@
 """
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
+import bdb
 import os
 import shutil
 
-from _pytest import doctest
+from _pytest import doctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
-from _pytest.outcomes import skip
+from _pytest.outcomes import skip, OutcomeException
 
 from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
 from scpdt.conftest import dt_config
+from .util import np_errstate, matplotlib_make_nongui
 
 copied_files = []
 
@@ -166,7 +168,52 @@ def _get_parser():
 
 
 def _get_runner(checker, verbose, optionflags):
+    import doctest
     """
     Override function to return instance of DebugDTRunner
     """
-    return DebugDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)
+    class PytestDTRunner(DebugDTRunner):
+
+        def __init__(self, checker=None, verbose=None, optionflags=None, config=None, continue_on_failure=True):
+            super().__init__(checker=checker, verbose=verbose, optionflags=optionflags, config=config)
+            """
+            If `continue_on_failure is True, failures and exceptions are collected in the out stream. 
+            If it's False, the failure or exception is raised immediately, potentially stopping further 
+            execution of the particular doctest
+            """
+            self.continue_on_failure = continue_on_failure
+
+        def run(self, test, compileflags=None, out=None, clear_globs=False):
+            """
+            Run tests in context managers:
+            np_errstate: restores the numpy errstate and printoptions when done
+            user_context_manager: allows user to plug in their own context manager
+            matplotlib_make_nongui: temporarily make the matplotlib backend non-GUI
+            """
+            with np_errstate():
+                with self.config.user_context_mgr(test):
+                    with matplotlib_make_nongui():
+                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+  
+        """
+        Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner`.
+        """
+        def report_failure(self, out, test, example, got):
+            failure = doctest.DocTestFailure(test, example, got)
+            if self.continue_on_failure:
+                out.append(failure)
+            else:
+                raise failure
+
+        def report_unexpected_exception(self, out, test, example, exc_info):
+            if isinstance(exc_info[1], OutcomeException):
+                raise exc_info[1]
+            if isinstance(exc_info[1], bdb.BdbQuit):
+                outcomes.exit("Quitting debugger")
+            failure = doctest.UnexpectedException(test, example, exc_info)
+            if self.continue_on_failure:
+                out.append(failure)
+            else:
+                raise failure
+
+    return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)
