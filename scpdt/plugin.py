@@ -16,6 +16,7 @@ from .util import np_errstate, matplotlib_make_nongui
 
 
 copied_files = []
+modules = []
 
 def pytest_configure(config):
     """
@@ -114,7 +115,6 @@ class DTModule(DoctestModule):
 
         for test in finder.find(module, module.__name__):
             if test.examples:  # skip empty doctests
-                # add name of module and function containing docstring example to the doctest log
                 generate_log(module, test)
                 yield doctest.DoctestItem.from_parent(
                     self, name=test.name, runner=runner, dtest=test
@@ -218,17 +218,11 @@ def _get_runner(checker, verbose, optionflags):
     return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)
 
 
-modules = []
-
 def generate_log(module, test):
-    """
-    Generate a list of modules and their functions whose
-    docstring examples have been doctested
-    """
     if test.examples:
         with open('doctest.log', 'a') as LOGFILE:
             if module.__name__ not in modules:
-                LOGFILE.write(module.__name__ + "\n")
+                LOGFILE.write("\n" + module.__name__ + "\n")
                 LOGFILE.write("="*len(module.__name__) + "\n")
                 modules.append(module.__name__)
             LOGFILE.write(test.name + "\n")
