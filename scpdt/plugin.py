@@ -226,10 +226,9 @@ def generate_log(module, test):
     docstring examples have been doctested
     """
     if test.examples:
-        function_name = (test.name).split('.')[-1]
         with open('doctest.log', 'a') as LOGFILE:
             if module.__name__ not in modules:
                 LOGFILE.write(module.__name__ + "\n")
                 LOGFILE.write("="*len(module.__name__) + "\n")
                 modules.append(module.__name__)
-            LOGFILE.write(function_name + "\n")
+            LOGFILE.write(test.name + "\n")
