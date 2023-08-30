@@ -4,6 +4,7 @@ A pytest plugin that provides enhanced doctesting for Pydata libraries
 import bdb
 import os
 import shutil
+import numpy as np
 
 from _pytest import doctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
@@ -113,6 +114,14 @@ class DTModule(DoctestModule):
             checker=_get_checker()
         )
 
+        for method in module.__dict__.values():
+            if _is_numpy_ufunc(method):
+                for test in finder.find(method, module=module):
+                    if test.examples:  # skip empty doctests
+                        generate_log(module, test)
+                        yield doctest.DoctestItem.from_parent(
+                            self, name=test.name, runner=runner, dtest=test)
+                        
         for test in finder.find(module, module.__name__):
             if test.examples:  # skip empty doctests
                 generate_log(module, test)
@@ -226,3 +235,12 @@ def generate_log(module, test):
                 LOGFILE.write("="*len(module.__name__) + "\n")
                 modules.append(module.__name__)
             LOGFILE.write(test.name + "\n")
+
+
+def _is_numpy_ufunc(method):
+    while True:
+        try:
+            method = method.__wrapped__
+        except AttributeError:
+            break
+    return isinstance(method, np.ufunc)
