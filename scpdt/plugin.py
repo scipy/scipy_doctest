@@ -2,6 +2,7 @@
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
 import bdb
+import inspect
 import os
 import shutil
 import numpy as np
@@ -111,6 +112,7 @@ class DTModule(DoctestModule):
                 rootpath=self.config.rootpath
             )
         else:
+
             try:
                 module = import_path(
                     self.path,
@@ -140,13 +142,25 @@ class DTModule(DoctestModule):
             checker=_get_checker()
         )
 
+        
         def collect_and_yield_tests(module, finder, runner, method=None):
-            for test in finder.find(method or module, module=module):
-                if test.examples: # skip empty doctests
-                    generate_log(module, test)
-                    yield doctest.DoctestItem.from_parent(
-                        self, name=test.name, runner=runner, dtest=test
-                    )
+            if inspect.ismodule(module):
+                for test in finder.find(method or module, module=module):
+                    if test.examples: # skip empty doctests
+                        generate_log(module, test)
+                        yield doctest.DoctestItem.from_parent(
+                            self, name=test.name, runner=runner, dtest=test
+                        )
+            else:
+                for entry in dir(module):
+                    if inspect.ismodule(entry):
+                        for test in finder.find(method or entry, module=entry):
+                            if test.examples: # skip empty doctests
+                                generate_log(entry, test)
+                                yield doctest.DoctestItem.from_parent(
+                                    self, name=test.name, runner=runner, dtest=test
+                                )
+                
 
         for method in module.__dict__.values():
             if _is_numpy_ufunc(method):
