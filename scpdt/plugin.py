@@ -5,6 +5,7 @@ import bdb
 import os
 import shutil
 import numpy as np
+import pytest
 
 from _pytest import doctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
@@ -14,6 +15,8 @@ from _pytest.outcomes import skip, OutcomeException
 from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
 from scpdt.conftest import dt_config
 from .util import np_errstate, matplotlib_make_nongui
+
+pytest_version = pytest.__version__
 
 
 copied_files = []
@@ -41,6 +44,29 @@ def pytest_unconfigure(config):
                 os.remove(filepath)
         except FileNotFoundError:
             pass
+
+
+"""
+These helper functions are used to handle file paths and extensions of different pytest versions
+"""
+if pytest_version < '7.0':
+    def _filepath(path):
+        return path.basename
+    def _suffix(path):
+        return path.ext
+else:
+    def _filepath(path):
+        return path.name
+    def _suffix(path):
+        return path.suffix
+
+
+def pytest_collect_file(file_path, parent):
+    """
+    This hook ensures Cython files (.pyx) are collected by pytest
+    """
+    if _suffix(file_path) == ".pyx":
+        return DTModule.from_parent(parent, path=file_path)
 
 
 def _get_checker():
