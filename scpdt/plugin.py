@@ -2,8 +2,10 @@
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
 import bdb
+import inspect
 import os
 import shutil
+import numpy as np
 
 from _pytest import doctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
@@ -104,12 +106,26 @@ class DTModule(DoctestModule):
             checker=DTChecker(config=self.config.dt_config)
         )
 
-        # the rest remains unchanged
-        for test in finder.find(module, module.__name__):
-            if test.examples:  # skip empty doctests
-                yield doctest.DoctestItem.from_parent(
-                    self, name=test.name, runner=runner, dtest=test
-                )
+        def collect_and_yield_tests(module, finder, runner, method=None):
+            """
+            Search for docstring examples within the specified module or method.
+            """
+            try:
+                for entry in dir(module):
+                    entry = getattr(module, entry)
+                    if inspect.ismodule(entry):
+                        for test in finder.find(method or entry, module=entry):
+                            if test.examples: # skip empty doctests
+                                yield doctest.DoctestItem.from_parent(
+                                    self, name=test.name, runner=runner, dtest=test
+                                )
+            except:
+                pass
+                
+        for method in module.__dict__.values():
+            if _is_numpy_ufunc(method):
+                yield from collect_and_yield_tests(module, finder, runner, method)
+        yield from collect_and_yield_tests(module, finder, runner)
 
 
 class DTTextfile(DoctestTextfile):
