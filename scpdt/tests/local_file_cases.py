@@ -8,6 +8,8 @@ dt_config.local_resources = {'scpdt.tests.local_file_cases.local_files':
                                   ['scpdt/tests/octave_a.mat']   
                                   }
 
+__all__ = ['local_files', 'sio']
+
 def local_files():
     """
     A doctest that tries to read a local file

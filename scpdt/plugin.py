@@ -2,7 +2,6 @@
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
 import bdb
-import inspect
 import os
 import shutil
 import numpy as np
@@ -15,6 +14,7 @@ from _pytest.outcomes import skip, OutcomeException
 from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
 from scpdt.conftest import dt_config
 from .util import np_errstate, matplotlib_make_nongui
+from scpdt.frontend import find_doctests
 
 
 copied_files = []
@@ -106,27 +106,17 @@ class DTModule(DoctestModule):
             checker=DTChecker(config=self.config.dt_config)
         )
 
-        def collect_and_yield_tests(module, finder, runner, method=None):
-            """
-            Search for docstring examples within the specified module or method.
-            """
-            try:
-                for entry in dir(module):
-                    entry = getattr(module, entry)
-                    if inspect.ismodule(entry):
-                        for test in finder.find(method or entry, module=entry):
-                            if test.examples: # skip empty doctests
-                                yield doctest.DoctestItem.from_parent(
-                                    self, name=test.name, runner=runner, dtest=test
-                                )
-            except:
-                pass
-                
-        for method in module.__dict__.values():
-            if _is_numpy_ufunc(method):
-                yield from collect_and_yield_tests(module, finder, runner, method)
-        yield from collect_and_yield_tests(module, finder, runner)
-
+        try:
+            # discover doctests in public, non-deprecated objects in the module
+            for test in find_doctests(module, name=module.__name__, strategy="api"):
+                if test.examples: # skip empty doctests
+                    generate_log(module, test)
+                    yield doctest.DoctestItem.from_parent(
+                        self, name=test.name, runner=runner, dtest=test
+                    )
+        except:
+            pass
+        
 
 class DTTextfile(DoctestTextfile):
     """
@@ -215,3 +205,14 @@ def _get_runner(config, checker, verbose, optionflags):
                 raise failure
             
     return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=config.dt_config)
+
+
+modules = []
+def generate_log(module, test):
+    if test.examples:
+        with open('doctest.log', 'a') as LOGFILE:
+            if module.__name__ not in modules:
+                LOGFILE.write("\n" + module.__name__ + "\n")
+                LOGFILE.write("="*len(module.__name__) + "\n")
+                modules.append(module.__name__)
+            LOGFILE.write(test.name + "\n")
