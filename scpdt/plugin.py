@@ -42,6 +42,22 @@ def pytest_unconfigure(config):
             pass
 
 
+def pytest_ignore_collect(collection_path, config):
+    """
+    Ignore the tests directory and test modules
+    """
+    path_str = str(collection_path)
+    if "tests" in path_str or "test_" in path_str:
+        return True
+    
+
+def _get_checker():
+    """
+    Override function to return an instance of DTChecker
+    """
+    return DTChecker(config=dt_config)
+
+
 def copy_local_files(local_resources, destination_dir):
     """
     Copy necessary local files for doctests to the current working directory. 
