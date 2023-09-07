@@ -46,9 +46,10 @@ def pytest_ignore_collect(collection_path, config):
     """
     Ignore the tests directory and test modules
     """
-    path_str = str(collection_path)
-    if "tests" in path_str or "test_" in path_str:
-        return True
+    if config.getoption("--doctest-modules"):
+        path_str = str(collection_path)
+        if "tests" in path_str or "test_" in path_str:
+            return True
     
 
 def _get_checker():
