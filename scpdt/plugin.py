@@ -4,14 +4,13 @@ A pytest plugin that provides enhanced doctesting for Pydata libraries
 import bdb
 import os
 import shutil
-import numpy as np
 
 from _pytest import doctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 from _pytest.outcomes import skip, OutcomeException
 
-from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
+from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
 from .util import np_errstate, matplotlib_make_nongui
 from scpdt.frontend import find_doctests
@@ -50,7 +49,30 @@ def pytest_ignore_collect(collection_path, config):
         path_str = str(collection_path)
         if "tests" in path_str or "test_" in path_str:
             return True
+        
     
+def pytest_collection_modifyitems(config, items):
+    seen_test_names = set()
+    unique_items = []
+
+    for item in items:
+        item_name = str(item).split('.')[-1].strip('>')
+        
+        # Extract the module name from the DocTest item
+        dtest = item.dtest
+        path = str(dtest).split(' ')[3]
+        dtest_module = os.path.basename(path).split(':')[0]
+
+        # Combine item name and module name to create a unique identifier
+        unique_test_name = f"{item_name}.{dtest_module}"
+
+        if unique_test_name not in seen_test_names:
+            seen_test_names.add(unique_test_name)
+            unique_items.append(item)
+
+    # Replace the original list of test items with the unique ones
+    items[:] = unique_items
+
 
 def _get_checker():
     """
@@ -122,12 +144,11 @@ class DTModule(DoctestModule):
             optionflags=optionflags,
             checker=DTChecker(config=self.config.dt_config)
         )
-
+    
         try:
             # discover doctests in public, non-deprecated objects in the module
-            for test in find_doctests(module, name=module.__name__, strategy="api"):
+            for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
                 if test.examples: # skip empty doctests
-                    generate_log(module, test)
                     yield doctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test
                     )
@@ -226,10 +247,9 @@ def _get_runner(config, checker, verbose, optionflags):
 
 modules = []
 def generate_log(module, test):
-    if test.examples:
-        with open('doctest.log', 'a') as LOGFILE:
-            if module.__name__ not in modules:
-                LOGFILE.write("\n" + module.__name__ + "\n")
-                LOGFILE.write("="*len(module.__name__) + "\n")
-                modules.append(module.__name__)
-            LOGFILE.write(test.name + "\n")
+    with open('doctest.log', 'a') as LOGFILE:
+        if module.__name__ not in modules:
+            LOGFILE.write("\n" + module.__name__ + "\n")
+            LOGFILE.write("="*len(module.__name__) + "\n")
+            modules.append(module.__name__)
+        LOGFILE.write(test.name + "\n")

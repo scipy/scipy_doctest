@@ -7,6 +7,7 @@ import numpy as np
 
 from . import util
 
+
 # Register the optionflag to skip whole blocks, i.e.
 # sequences of Examples without an intervening text.
 SKIPBLOCK = doctest.register_optionflag('SKIPBLOCK')
