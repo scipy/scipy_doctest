@@ -52,20 +52,39 @@ def pytest_ignore_collect(collection_path, config):
         
     
 def pytest_collection_modifyitems(config, items):
+    """
+    Remove duplicate test items
+    """
     if config.getoption("--doctest-modules"):
         seen_test_names = set()
         unique_items = []
 
         for item in items:
             item_name = str(item).split('.')[-1].strip('>')
+
+            # in case the preceding item is a function or a class
+            obj_name = str(item).split('.')[-2]
+            
             
             # Extract the module name from the DocTest item
             dtest = item.dtest
-            path = str(dtest).split(' ')[3]
-            dtest_module = os.path.basename(path).split(':')[0]
+            path = str(dtest).split(' ')[3].split(':')[0]
+            dtest_module = os.path.basename(path)
+            try:
+                 module = import_path(
+                    path,
+                    root=config.rootpath,
+                    mode=config.getoption("importmode"),
+                )
+            except ImportError:
+                module = None
 
-            # Combine item name and module name to create a unique identifier
-            unique_test_name = f"{item_name}.{dtest_module}"
+            # Combine object name(if it exists), item name and module name to create a unique identifier
+            if module is not None and hasattr(module, obj_name) and callable(getattr(module, obj_name)):
+                unique_test_name = f"{obj_name}.{item_name}.{dtest_module}"
+
+            else:
+                unique_test_name = f"{item_name}.{dtest_module}"
 
             if unique_test_name not in seen_test_names:
                 seen_test_names.add(unique_test_name)
@@ -73,6 +92,7 @@ def pytest_collection_modifyitems(config, items):
 
         # Replace the original list of test items with the unique ones
         items[:] = unique_items
+
 
 
 def _get_checker():
