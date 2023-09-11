@@ -52,26 +52,27 @@ def pytest_ignore_collect(collection_path, config):
         
     
 def pytest_collection_modifyitems(config, items):
-    seen_test_names = set()
-    unique_items = []
+    if config.getoption("--doctest-modules"):
+        seen_test_names = set()
+        unique_items = []
 
-    for item in items:
-        item_name = str(item).split('.')[-1].strip('>')
-        
-        # Extract the module name from the DocTest item
-        dtest = item.dtest
-        path = str(dtest).split(' ')[3]
-        dtest_module = os.path.basename(path).split(':')[0]
+        for item in items:
+            item_name = str(item).split('.')[-1].strip('>')
+            
+            # Extract the module name from the DocTest item
+            dtest = item.dtest
+            path = str(dtest).split(' ')[3]
+            dtest_module = os.path.basename(path).split(':')[0]
 
-        # Combine item name and module name to create a unique identifier
-        unique_test_name = f"{item_name}.{dtest_module}"
+            # Combine item name and module name to create a unique identifier
+            unique_test_name = f"{item_name}.{dtest_module}"
 
-        if unique_test_name not in seen_test_names:
-            seen_test_names.add(unique_test_name)
-            unique_items.append(item)
+            if unique_test_name not in seen_test_names:
+                seen_test_names.add(unique_test_name)
+                unique_items.append(item)
 
-    # Replace the original list of test items with the unique ones
-    items[:] = unique_items
+        # Replace the original list of test items with the unique ones
+        items[:] = unique_items
 
 
 def _get_checker():
