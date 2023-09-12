@@ -18,6 +18,7 @@ from scpdt.frontend import find_doctests
 
 copied_files = []
 
+
 def pytest_configure(config):
     """
     Allow plugins and conftest files to perform initial configuration.
@@ -25,7 +26,6 @@ def pytest_configure(config):
     config.dt_config = dt_config
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
-
 
 def pytest_unconfigure(config):
     """
@@ -53,22 +53,37 @@ def pytest_ignore_collect(collection_path, config):
     
 def pytest_collection_modifyitems(config, items):
     """
-    Remove duplicate test items
+    Remove duplicate Doctest items.
+
+    Doctest items are collected from all public modules, including the __all__ attribute in __init__.py.
+    This may lead to Doctest items being collected and tested more than once.
+    We therefore need to remove the duplicate items by creating a new list with only unique items.
+
+    This hook is executed after test collection and allows you to modify the list of collected items.
     """
+
     if config.getoption("--doctest-modules"):
         seen_test_names = set()
         unique_items = []
 
         for item in items:
+            # Extract the item name, e.g., 'gauss_spline'
+            # Example item: <DoctestItem scipy.signal._bsplines.gauss_spline>
             item_name = str(item).split('.')[-1].strip('>')
 
-            # in case the preceding item is a function or a class
+            # In case the preceding string represents a function or a class,
+            # We need to keep the object name as both items represent different functions
+            # eg:   <DoctestItem scipy.signal._ltisys.bode>
+            #       <DoctestItem scipy.signal._ltisys.lti.bode>
             obj_name = str(item).split('.')[-2]
             
-            # Extract the module name from the DocTest item
+            # Extract the module path and name from the item's dtest attribute
+            # Example dtest: <DocTest scipy.signal.__init__.gauss_spline from /scipy/build-install/lib/python3.10/site-packages/scipy/signal/_bsplines.py:226 (5 examples)>
             dtest = item.dtest
             path = str(dtest).split(' ')[3].split(':')[0]
             dtest_module = os.path.basename(path)
+
+            # Import the module to check if the object name is an attribute of the module
             try:
                 module = import_path(
                     path,
@@ -78,12 +93,13 @@ def pytest_collection_modifyitems(config, items):
             except ImportError:
                 module = None
 
-            # Combine object name(if it exists), item name and module name to create a unique identifier
+            # Combine object name (if it exists), item name, and module name to create a unique identifier
             if module is not None  and obj_name != '__init__' and hasattr(module, obj_name) and callable(getattr(module, obj_name)):
                 unique_test_name = f"{dtest_module}.{obj_name}.{item_name}"
             else:
-                unique_test_name = f"{item_name}.{dtest_module}"
+                unique_test_name = f"{dtest_module}.{item_name}"
 
+            # Check if the test name is unique and add it to the unique_items list if it is
             if unique_test_name not in seen_test_names:
                 seen_test_names.add(unique_test_name)
                 unique_items.append(item)
