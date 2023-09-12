@@ -183,6 +183,7 @@ class DTModule(DoctestModule):
             # discover doctests in public, non-deprecated objects in the module
             for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
                 if test.examples: # skip empty doctests
+                    generate_log(module=module)
                     yield doctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test
                     )
@@ -252,7 +253,8 @@ def _get_runner(config, checker, verbose, optionflags):
             with np_errstate():
                 with config.dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
-                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        r = super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        generate_log(test=test, result=r)
 
         """
         Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
@@ -280,10 +282,12 @@ def _get_runner(config, checker, verbose, optionflags):
 
 
 modules = []
-def generate_log(module, test):
+def generate_log(module=None, test=None, result=None):
     with open('doctest.log', 'a') as LOGFILE:
-        if module.__name__ not in modules:
-            LOGFILE.write("\n" + module.__name__ + "\n")
-            LOGFILE.write("="*len(module.__name__) + "\n")
-            modules.append(module.__name__)
-        LOGFILE.write(test.name + "\n")
+        if module:
+            if module.__name__ not in modules:
+                LOGFILE.write("\n" + module.__name__ + "\n")
+                LOGFILE.write("="*len(module.__name__) + "\n")
+                modules.append(module.__name__)
+        if test and result:
+            LOGFILE.write(f"{test.name} ({result.failed}, {result.attempted})\n")
