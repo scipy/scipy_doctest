@@ -21,11 +21,10 @@ def pytest_configure(config):
     """
     Allow plugins and conftest files to perform initial configuration.
     """
-
-    doctest._get_runner = _get_runner
-    doctest._get_checker = _get_checker
+    config.dt_config = dt_config
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
+
 
 def pytest_unconfigure(config):
     """
@@ -39,13 +38,6 @@ def pytest_unconfigure(config):
                 os.remove(filepath)
         except FileNotFoundError:
             pass
-
-
-def _get_checker():
-    """
-    Override function to return an instance of DTChecker
-    """
-    return DTChecker(config=dt_config)
 
 
 def copy_local_files(local_resources, destination_dir):
@@ -96,20 +88,20 @@ class DTModule(DoctestModule):
                     raise
 
         # if local files are specified by the `local_resources` attribute, copy them to the current working directory
-        if dt_config.local_resources:
-            copy_local_files(dt_config.local_resources, os.getcwd())
+        if self.config.dt_config.local_resources:
+            copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
-        finder = DTFinder(config=dt_config)
+        finder = DTFinder(config=self.config.dt_config)
         optionflags = doctest.get_optionflags(self)
 
         # We plug in `PytestDTRunner`
-        runner = _get_runner(
+        runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
-            checker=_get_checker()
+            checker=DTChecker(config=self.config.dt_config)
         )
 
         # the rest remains unchanged
@@ -139,19 +131,19 @@ class DTTextfile(DoctestTextfile):
         optionflags = doctest.get_optionflags(self)
 
         # if local files are specified by the `local_resources` attribute, copy them to the current working directory
-        if dt_config.local_resources:
-            copy_local_files(dt_config.local_resources, os.getcwd())
+        if self.config.dt_config.local_resources:
+            copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
         # We plug in `PytestDTRunner`
-        runner = _get_runner(
+        runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
-            checker=_get_checker()
+            checker=DTChecker(config=self.config.dt_config)
         )
 
         # We plug in an instance of `DTParser` which parses the doctest examples from the text file and
         # filters out stopwords and pseudocode.
-        parser = _get_parser()
+        parser = DTParser(config=self.config.dt_config)
 
         # the rest remains unchanged
         test = parser.get_doctest(text, globs, name, filename, 0)
@@ -161,15 +153,7 @@ class DTTextfile(DoctestTextfile):
             )
 
 
-def _get_parser():
-    """
-    Return instance of DTParser
-    Please refer to `testmod` source for a discussion of the order of context managers.
-    """
-    return DTParser(config=dt_config)
-
-
-def _get_runner(checker, verbose, optionflags):
+def _get_runner(config, checker, verbose, optionflags):
     import doctest
     """
     Override function to return instance of PytestDTRunner
@@ -188,7 +172,7 @@ def _get_runner(checker, verbose, optionflags):
             *before* they become errors in `config.user_context_mgr()`.
             """
             with np_errstate():
-                with dt_config.user_context_mgr(test):
+                with config.dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
                         super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
 
@@ -198,7 +182,7 @@ def _get_runner(checker, verbose, optionflags):
         """
         def report_failure(self, out, test, example, got):
             failure = doctest.DocTestFailure(test, example, got)
-            if dt_config.nameerror_after_exception:
+            if config.dt_config.nameerror_after_exception:
                 out.append(failure)
             else:
                 raise failure
@@ -209,9 +193,9 @@ def _get_runner(checker, verbose, optionflags):
             if isinstance(exc_info[1], bdb.BdbQuit):
                 outcomes.exit("Quitting debugger")
             failure = doctest.UnexpectedException(test, example, exc_info)
-            if dt_config.nameerror_after_exception:
+            if config.dt_config.nameerror_after_exception:
                 out.append(failure)
             else:
                 raise failure
             
-    return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=dt_config)
+    return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=config.dt_config)
