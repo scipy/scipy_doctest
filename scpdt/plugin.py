@@ -169,7 +169,7 @@ class DTModule(DoctestModule):
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
-        finder = DTFinder(config=self.config.dt_config)
+        # finder = DTFinder(config=self.config.dt_config)
         optionflags = doctest.get_optionflags(self)
 
         # We plug in `PytestDTRunner`
