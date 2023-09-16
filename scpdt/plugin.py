@@ -10,12 +10,14 @@ from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 from _pytest.outcomes import skip, OutcomeException
 
-from scpdt.impl import DTChecker, DTParser, DTFinder, DebugDTRunner
+from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
 from .util import np_errstate, matplotlib_make_nongui
+from scpdt.frontend import find_doctests
 
 
 copied_files = []
+
 
 def pytest_configure(config):
     """
@@ -24,7 +26,6 @@ def pytest_configure(config):
     config.dt_config = dt_config
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
-
 
 def pytest_unconfigure(config):
     """
@@ -38,6 +39,80 @@ def pytest_unconfigure(config):
                 os.remove(filepath)
         except FileNotFoundError:
             pass
+
+
+def pytest_ignore_collect(collection_path, config):
+    """
+    Ignore the tests directory and test modules
+    """
+    if config.getoption("--doctest-modules"):
+        path_str = str(collection_path)
+        if "tests" in path_str or "test_" in path_str:
+            return True
+        
+    
+def pytest_collection_modifyitems(config, items):
+    """
+    Remove duplicate Doctest items.
+
+    Doctest items are collected from all public modules, including the __all__ attribute in __init__.py.
+    This may lead to Doctest items being collected and tested more than once.
+    We therefore need to remove the duplicate items by creating a new list with only unique items.
+
+    This hook is executed after test collection and allows you to modify the list of collected items.
+    """
+
+    if config.getoption("--doctest-modules"):
+        seen_test_names = set()
+        unique_items = []
+
+        for item in items:
+            # Extract the item name, e.g., 'gauss_spline'
+            # Example item: <DoctestItem scipy.signal._bsplines.gauss_spline>
+            item_name = str(item).split('.')[-1].strip('>')
+
+            # In case the preceding string represents a function or a class,
+            # We need to keep the object name as both items represent different functions
+            # eg:   <DoctestItem scipy.signal._ltisys.bode>
+            #       <DoctestItem scipy.signal._ltisys.lti.bode>
+            obj_name = str(item).split('.')[-2]
+            
+            # Extract the module path and name from the item's dtest attribute
+            # Example dtest: <DocTest scipy.signal.__init__.gauss_spline from /scipy/build-install/lib/python3.10/site-packages/scipy/signal/_bsplines.py:226 (5 examples)>
+            dtest = item.dtest
+            path = str(dtest).split(' ')[3].split(':')[0]
+            dtest_module = os.path.basename(path)
+
+            # Import the module to check if the object name is an attribute of the module
+            try:
+                module = import_path(
+                    path,
+                    root=config.rootpath,
+                    mode=config.getoption("importmode"),
+                )
+            except ImportError:
+                module = None
+
+            # Combine object name (if it exists), item name, and module name to create a unique identifier
+            if module is not None  and obj_name != '__init__' and hasattr(module, obj_name) and callable(getattr(module, obj_name)):
+                unique_test_name = f"{dtest_module}.{obj_name}.{item_name}"
+            else:
+                unique_test_name = f"{dtest_module}.{item_name}"
+
+            # Check if the test name is unique and add it to the unique_items list if it is
+            if unique_test_name not in seen_test_names:
+                seen_test_names.add(unique_test_name)
+                unique_items.append(item)
+
+        # Replace the original list of test items with the unique ones
+        items[:] = unique_items
+
+
+def _get_checker():
+    """
+    Override function to return an instance of DTChecker
+    """
+    return DTChecker(config=dt_config)
 
 
 def copy_local_files(local_resources, destination_dir):
@@ -94,7 +169,7 @@ class DTModule(DoctestModule):
         # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
         # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
         # from the python module or file and filters out stopwords and pseudocode.
-        finder = DTFinder(config=self.config.dt_config)
+        # finder = DTFinder(config=self.config.dt_config)
         optionflags = doctest.get_optionflags(self)
 
         # We plug in `PytestDTRunner`
@@ -103,14 +178,18 @@ class DTModule(DoctestModule):
             optionflags=optionflags,
             checker=DTChecker(config=self.config.dt_config)
         )
-
-        # the rest remains unchanged
-        for test in finder.find(module, module.__name__):
-            if test.examples:  # skip empty doctests
-                yield doctest.DoctestItem.from_parent(
-                    self, name=test.name, runner=runner, dtest=test
-                )
-
+    
+        try:
+            # discover doctests in public, non-deprecated objects in the module
+            for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
+                if test.examples: # skip empty doctests
+                    generate_log(module=module)
+                    yield doctest.DoctestItem.from_parent(
+                        self, name=test.name, runner=runner, dtest=test
+                    )
+        except:
+            pass
+        
 
 class DTTextfile(DoctestTextfile):
     """
@@ -174,7 +253,8 @@ def _get_runner(config, checker, verbose, optionflags):
             with np_errstate():
                 with config.dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
-                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        r = super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        generate_log(test=test, result=r)
 
         """
         Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
@@ -199,3 +279,15 @@ def _get_runner(config, checker, verbose, optionflags):
                 raise failure
             
     return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=config.dt_config)
+
+
+modules = []
+def generate_log(module=None, test=None, result=None):
+    with open('doctest.log', 'a') as LOGFILE:
+        if module:
+            if module.__name__ not in modules:
+                LOGFILE.write("\n" + module.__name__ + "\n")
+                LOGFILE.write("="*len(module.__name__) + "\n")
+                modules.append(module.__name__)
+        if test and result:
+            LOGFILE.write(f"{test.name} ({result.failed}, {result.attempted})\n")

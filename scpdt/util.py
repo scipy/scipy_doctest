@@ -251,3 +251,4 @@ def get_public_objects(module, skiplist=None):
             continue
 
     return (items, names), failures
+
