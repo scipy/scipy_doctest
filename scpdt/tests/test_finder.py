@@ -16,7 +16,7 @@ def test_get_all_list_no_all():
     try:
         del finder_cases.__all__
         items, depr, other = get_all_list(finder_cases)
-        assert sorted(items) == ['Klass', 'func', 'private_func']
+        assert items == []
     finally:
         from importlib import reload
         reload(finder_cases)

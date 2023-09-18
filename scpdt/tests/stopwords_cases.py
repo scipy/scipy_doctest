@@ -1,3 +1,5 @@
+__all__ = ['func8']
+
 def func8():
     """Handle MPL stopwords.
     >>> import matplotlib.pyplot as plt

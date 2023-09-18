@@ -168,17 +168,15 @@ def is_deprecated(f):
 
 def get_all_list(module):
     """Return a copy of the __all__ list with irrelevant items removed.
-
-    - If __all__ is missing, process the output of `dir(module)`.
+    The __all__list explicitly specifies which objects should be considered public.
+    - If strategy="api" and __all__ is missing, return an empty list.
     - Also return a list of deprecated items and "other" items, which failed
       to classify.
     """
     if hasattr(module, "__all__"):
         all_list = copy.deepcopy(module.__all__)
     else:
-        all_list = copy.deepcopy(dir(module))
-        all_list = [name for name in all_list
-                    if not name.startswith("_")]
+        all_list = []
     for name in ['absolute_import', 'division', 'print_function']:
         try:
             all_list.remove(name)
