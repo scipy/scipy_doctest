@@ -26,7 +26,7 @@ def pytest_configure(config):
     config.dt_config = dt_config
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
-    
+
 
 def pytest_unconfigure(config):
     """
@@ -83,6 +83,10 @@ def pytest_collection_modifyitems(config, items):
             dtest = item.dtest
             path = str(dtest).split(' ')[3].split(':')[0]
 
+            # Don't collect objects imported from NumPy
+            if "numpy" in path:
+                continue
+
             # Import the module to check if the object name is an attribute of the module
             try:
                 module = import_path(
@@ -94,7 +98,7 @@ def pytest_collection_modifyitems(config, items):
                 module = None
 
             # Combine the module path, object name (if it exists) and item name to create a unique identifier
-            if module is not None  and obj_name != '__init__' and hasattr(module, obj_name) and callable(getattr(module, obj_name)):
+            if module is not None  and obj_name != '__init__' and hasattr(module, obj_name) and callable(getattr(module, obj_name)) and obj_name != item_name:
                 unique_test_name = f"{path}/{obj_name}.{item_name}"
             else:
                 unique_test_name = f"{path}/{item_name}"
