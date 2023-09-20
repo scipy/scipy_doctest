@@ -250,3 +250,17 @@ def get_public_objects(module, skiplist=None):
 
     return (items, names), failures
 
+
+modules = []
+def generate_log(module, test):
+    """Generate a log of the doctested items"""
+    with open('doctest.log', 'a') as LOGFILE:
+        try:
+            if module.__name__ not in modules:
+                LOGFILE.write("\n" + module.__name__ + "\n")
+                LOGFILE.write("="*len(module.__name__) + "\n")
+                modules.append(module.__name__)
+            LOGFILE.write(f"{test}\n")
+        except AttributeError:
+            LOGFILE.write(f"{test}\n")
+
