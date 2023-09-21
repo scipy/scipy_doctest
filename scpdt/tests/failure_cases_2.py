@@ -1,3 +1,5 @@
+__all__ = ['func_depr', 'func_name_error']
+
 def func_depr():
     """
     A test case for the user context mgr to turn warnings to errors.

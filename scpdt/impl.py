@@ -408,8 +408,10 @@ class DTFinder(doctest.DocTestFinder):
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
         if globs is None:
             globs = dict(self.config.default_namespace)
-        tests = super().find(obj, name, module, globs, extraglobs)
-        return tests
+        # XXX: does this make similar checks in testmod/testfile duplicate?
+        if module not in self.config.skiplist:   
+            tests = super().find(obj, name, module, globs, extraglobs)
+            return tests
 
 
 class DTParser(doctest.DocTestParser):

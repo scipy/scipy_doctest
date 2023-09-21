@@ -1,3 +1,4 @@
+__all__ = ['func9', 'func10']
 
 def func9():
     """
