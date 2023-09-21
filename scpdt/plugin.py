@@ -83,10 +83,6 @@ def pytest_collection_modifyitems(config, items):
             dtest = item.dtest
             path = str(dtest).split(' ')[3].split(':')[0]
 
-            # Don't collect objects imported from NumPy
-            if "numpy" in path:
-                continue
-
             # Import the module to check if the object name is an attribute of the module
             try:
                 module = import_path(
