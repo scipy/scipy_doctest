@@ -260,6 +260,7 @@ def _get_runner(config, checker, verbose, optionflags):
             with np_errstate():
                 with config.dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
+                        # XXX: might want to add the filter to `testmod`, too
                         with warnings.catch_warnings():
                             warnings.filterwarnings("ignore", category=DeprecationWarning)
                             super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
