@@ -153,7 +153,7 @@ pip install git+https://github.com/ev-br/scpdt.git@main
 
 2. **Configure Your Doctesting Experience**
 
-To tailor your doctesting experience, you can make utilize an instance of `DTConfig`.
+To tailor your doctesting experience, you can utilize an instance of `DTConfig`.
 An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/ev-br/scpdt#tailoring-your-doctesting-experience) section.
 
 3. **Run Doctests**
