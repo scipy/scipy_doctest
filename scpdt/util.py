@@ -253,7 +253,15 @@ def get_public_objects(module, skiplist=None):
 
 modules = []
 def generate_log(module, test):
-    """Generate a log of the doctested items"""
+    """
+    Generate a log of the doctested items.
+    
+    This function logs the items being doctested to a file named 'doctest.log'.
+    
+    Args:
+        module (module): The module being doctested.
+        test (str): The name of the doctest item.
+    """
     with open('doctest.log', 'a') as LOGFILE:
         try:
             if module.__name__ not in modules:

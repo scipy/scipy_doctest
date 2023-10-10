@@ -22,19 +22,23 @@ copied_files = []
 
 def pytest_configure(config):
     """
-    Allow plugins and conftest files to perform initial configuration.
+    Perform initial configuration for the pytest plugin.
     """
+
+    # Create a dt config attribute within pytest's config object for easy access.
     config.dt_config = dt_config
+
+    # Override doctest's objects with the plugin's alternative implementation.
     doctest.DoctestModule = DTModule
     doctest.DoctestTextfile = DTTextfile
 
 
 def pytest_unconfigure(config):
     """
-    Called before test process is exited.
+    Called before exiting the test process.
     """
 
-    # Delete all local files copied to the current working directory
+    # Delete all locally copied files in the current working directory
     if copied_files:
         try:
             for filepath in copied_files:
@@ -45,7 +49,9 @@ def pytest_unconfigure(config):
 
 def pytest_ignore_collect(collection_path, config):
     """
-    Ignore the tests directory and test modules
+    Determine whether to ignore the specified collection path.
+    This function is used to exclude the 'tests' directory and test modules when
+    the '--doctest-modules' option is used.
     """
     if config.getoption("--doctest-modules"):
         path_str = str(collection_path)
@@ -55,15 +61,14 @@ def pytest_ignore_collect(collection_path, config):
     
 def pytest_collection_modifyitems(config, items):
     """
-    Remove duplicate Doctest items.
+    This hook is executed after test collection and allows you to modify the list of collected items.
+
+    The function removes duplicate Doctest items.
 
     Doctest items are collected from all public modules, including the __all__ attribute in __init__.py.
     This may lead to Doctest items being collected and tested more than once.
     We therefore need to remove the duplicate items by creating a new list with only unique items.
-
-    This hook is executed after test collection and allows you to modify the list of collected items.
     """
-
     if config.getoption("--doctest-modules"):
         seen_test_names = set()
         unique_items = []
@@ -108,9 +113,13 @@ def pytest_collection_modifyitems(config, items):
         # Replace the original list of test items with the unique ones
         items[:] = unique_items
     
+        # Generate a log of the unique items to be doctested
+        # Extract the DoctestItem name
         for item in items:
             dtest = item.dtest
             path = str(dtest).split(' ')[3].split(':')[0]
+
+            # Import the module being doctested
             try:
                 module = import_path(
                     path,
@@ -120,13 +129,23 @@ def pytest_collection_modifyitems(config, items):
             except ImportError:
                 module = None
             
+            # Use the module and item name to generate a log entry
             generate_log(module, item.name)
 
 
 def copy_local_files(local_resources, destination_dir):
     """
-    Copy necessary local files for doctests to the current working directory. 
-    The files to be copied are defined by the `local_resources` attribute of a DTConfig instance.
+    Copy necessary local files for doctests to the current working directory.
+    
+    This function copies files specified in the `local_resources` attribute of a DTConfig instance
+    to the specified `destination_dir`.
+    
+    Args:
+        local_resources (dict): A dictionary of resources to be copied.
+        destination_dir (str): The destination directory where files will be copied.
+    
+    Returns:
+        list: A list of paths to the copied files.
     """
     for value in local_resources.values():
         for filepath in value:
@@ -141,13 +160,14 @@ def copy_local_files(local_resources, destination_dir):
 
 class DTModule(DoctestModule):
     """
-    This class extends the DoctestModule class provided by pytest. 
-    The purpose of DTModule is to override the behavior of the collect method, 
-    which is called by pytest to collect and generate test items for doctests in the 
-    specified module or file.
+    This class extends the DoctestModule class provided by pytest.
+    
+    DTModule is responsible for overriding the behavior of the collect method.
+    The collect method is called by pytest to collect and generate test items for doctests
+    in the specified module or file.
     """
     def collect(self):
-        # This code is copy-pasted from the `_pytest.doctest` module(pytest 7.4.0):
+        # Part of this code is copy-pasted from the `_pytest.doctest` module(pytest 7.4.0):
         # https://github.com/pytest-dev/pytest/blob/448563caaac559b8a3195edc58e8806aca8d2c71/src/_pytest/doctest.py#L497
         if self.path.name == "setup.py":
             return
@@ -170,17 +190,13 @@ class DTModule(DoctestModule):
                 else:
                     raise
 
-        # if local files are specified by the `local_resources` attribute, copy them to the current working directory
+        # Copy local files specified by the `local_resources` attribute to the current working directory
         if self.config.dt_config.local_resources:
             copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
-        # The `_pytest.doctest` module uses the internal doctest parsing mechanism.
-        # We plugin scpdt's `DTFinder` that uses the `DTParser` which parses the doctest examples 
-        # from the python module or file and filters out stopwords and pseudocode.
-        # finder = DTFinder(config=self.config.dt_config)
         optionflags = doctest.get_optionflags(self)
 
-        # We plug in `PytestDTRunner`
+        # Plug in the custom runner: `PytestDTRunner` 
         runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
@@ -188,7 +204,7 @@ class DTModule(DoctestModule):
         )
     
         try:
-            # discover doctests in public, non-deprecated objects in the module
+            # We utilize scpdt's `find_doctests` function to discover doctests in public, non-deprecated objects in the module
             for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
                 if test.examples: # skip empty doctests
                     yield doctest.DoctestItem.from_parent(
@@ -200,13 +216,14 @@ class DTModule(DoctestModule):
 
 class DTTextfile(DoctestTextfile):
     """
-    This class extends the DoctestTextfile class provided by pytest. 
-    The purpose of DTTextfile is to override the behavior of the collect method, 
-    which is called by pytest to collect and generate test items for doctests in 
-    the specified text files.
+    This class extends the DoctestTextfile class provided by pytest.
+    
+    DTTextfile is responsible for overriding the behavior of the collect method.
+    The collect method is called by pytest to collect and generate test items for doctests
+    in the specified text files.
     """
     def collect(self):
-        # This code is copy-pasted from `_pytest.doctest` module(pytest 7.4.0):
+        # Part of this code is copy-pasted from `_pytest.doctest` module(pytest 7.4.0):
         # https://github.com/pytest-dev/pytest/blob/448563caaac559b8a3195edc58e8806aca8d2c71/src/_pytest/doctest.py#L417
         encoding = self.config.getini("doctest_encoding")
         text = self.path.read_text(encoding)
@@ -216,22 +233,22 @@ class DTTextfile(DoctestTextfile):
 
         optionflags = doctest.get_optionflags(self)
 
-        # if local files are specified by the `local_resources` attribute, copy them to the current working directory
+        # Copy local files specified by the `local_resources` attribute to the current working directory
         if self.config.dt_config.local_resources:
             copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
-        # We plug in `PytestDTRunner`
+        # Plug in the custom runner: `PytestDTRunner`
         runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
             checker=DTChecker(config=self.config.dt_config)
         )
 
-        # We plug in an instance of `DTParser` which parses the doctest examples from the text file and
+        # Plug in an instance of `DTParser` which parses the doctest examples from the text file and
         # filters out stopwords and pseudocode.
         parser = DTParser(config=self.config.dt_config)
 
-        # the rest remains unchanged
+        # This part of the code is unchanged
         test = parser.get_doctest(text, globs, name, filename, 0)
         if test.examples:
             yield doctest.DoctestItem.from_parent(
@@ -240,20 +257,27 @@ class DTTextfile(DoctestTextfile):
 
 
 def _get_runner(config, checker, verbose, optionflags):
+    """
+    Override function to return an instance of PytestDTRunner.
+    
+    This function creates and returns an instance of PytestDTRunner, a custom runner class
+    that extends the behavior of DebugDTRunner for running doctests in pytest.
+    """
     import doctest
-    """
-    Override function to return instance of PytestDTRunner
-    """
+
     class PytestDTRunner(DebugDTRunner):
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
             Run tests in context managers.
+            
             Restore the errstate/print state after each docstring.
-            Also make MPL backend non-GUI and close the figures.
+            Also, make MPL backend non-GUI and close the figures.
+            
             The order of context managers is actually relevant. Consider
             user_context_mgr that turns warnings into errors.
+            
             Additionally, suppose that MPL deprecates something and plt.something
-            starts issuing warngings. Now all of those become errors
+            starts issuing warnings. Now all of those become errors
             *unless* the `mpl()` context mgr has a chance to filter them out
             *before* they become errors in `config.user_context_mgr()`.
             """

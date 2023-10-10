@@ -140,42 +140,129 @@ are provided, based on a long-term usage in SciPy.
 
 The pytest plugin enables the use of scpdt tools to perform doctests. 
 
-Presently, pytest is configured to utilize scpdt's `DTChecker` for comparing the expected result (`want`) of test examples to the actual result (`got`) produced by the doctest runner.
+Follow the given instructions to utilize the pytest plugin for doctesting.
 
-To utilize the pytest plugin, follow these steps:
+### Running doctests on Scipy
+1. **Install plugin**
 
-1. Install the scpdt tool
-
-Ensure you have the scpdt tool installed from GitHub. You can install it using pip with the following command:
+Start by installing the pytest plugin via pip:
 
 ```bash
 pip install git+https://github.com/ev-br/scpdt.git@main
 ```
 
-2. Register/Load the Plugin
+2. **Configure Your Doctesting Experience**
 
-Next, you need to register or load the pytest plugin in either your test module or your `conftest.py` file. 
+To tailor your doctesting experience, you can utilize an instance of `DTConfig`.
+An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/ev-br/scpdt#tailoring-your-doctesting-experience) section.
+
+3. **Run Doctests**
+
+Doctesting is configured to execute on SciPy using the `dev.py` module.
+
+To run all doctests, use the following command:
+```bash
+python dev.py test --doctests
+```
+
+To run doctests on specific SciPy modules, e.g: `cluster`, use the following command:
+
+```bash
+python dev.py test --doctests -s cluster
+```
+
+In case you encounter an `ImportPathMismatchError`, a known pytest bug, resolve it by setting the `PY_IGNORE_IMPORTMISMATCH` environment variable:
+
+```bash
+export PY_IGNORE_IMPORTMISMATCH=1
+```
+For more information, see this [github issue](https://github.com/ev-br/scpdt/issues/92).
+
+### Running Doctests on Other Packages/Projects
+
+If you want to run doctests on packages or projects other than SciPy, follow these steps:
+
+1. **Install the plugin**
+
+```bash
+pip install git+https://github.com/ev-br/scpdt.git@main
+```
+
+2. **Register or Load the Plugin**
+
+Next, you need to register or load the pytest plugin within your test module or `conftest.py` file. 
 
 To do this, add the following line of code:
 
 ```python
-# in your conftest.py file or test module
+# In your conftest.py file or test module
 
 pytest_plugins = "scpdt"
 ```
-For more information, check out this document on [Requiring/Loading plugins in a test module or conftest file](https://docs.pytest.org/en/stable/how-to/writing_plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file)
 
-3. Run Doctests
+Check out the [pytest documentation](https://docs.pytest.org/en/stable/how-to/writing_plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file) for more information on requiring/loading plugins in a test module or `conftest.py` file.
 
-Once the plugin is registered, you can run your doctests using the scpdt pytest plugin by executing the following command:
+3. **Configure your doctesting experience**
+
+An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/ev-br/scpdt#tailoring-your-doctesting-experience) section.
+
+4. **Run doctests** 
+
+Once the plugin is registered, you can run your doctests by executing the following command:
 
 ```bash
 python -m pytest --doctest-modules
 ```
+or
+```bash
+pytest --pyargs <your-package> --doctest-modules
+```
 
-By following these steps, you will be able to effectively use the scpdt pytest plugin for doctests in your Python projects.
+### Tailoring Your Doctesting Experience
 
- Happy testing!
+[DTConfig](https://github.com/ev-br/scpdt/blob/671083d65b54111770cee71c9bc790ac652d59ab/scpdt/impl.py#L16) offers a variety of attributes that allow you to fine-tune your doctesting experience. 
+
+These attributes include:
+1. **default_namespace (dict):** Defines the namespace in which examples are executed.
+2. **check_namespace (dict):** Specifies the namespace for conducting checks.
+3. **rndm_markers (set):** Provides additional directives which act like `# doctest: + SKIP`.
+4. **atol (float) and rtol (float):** Sets absolute and relative tolerances for validating doctest examples. 
+Specifically, it governs the check using `np.allclose(want, got, atol=atol, rtol=rtol)`.
+5. **optionflags (int):** These are doctest option flags.
+The default setting includes `NORMALIZE_WHITESPACE` | `ELLIPSIS` | `IGNORE_EXCEPTION_DETAIL`.
+6. **stopwords (set):** If an example contains any of these stopwords, the output is not checked (though the source's validity is still assessed).
+7. **pseudocode (list):** Lists strings that, when found in an example, result in no doctesting. This resembles the `# doctest +SKIP` directive and is useful for pseudocode blocks or similar cases.
+8. **skiplist (set):** A list of names of objects with docstrings known to fail doctesting and are intentionally excluded from testing.
+9. **user_context_mgr:** A context manager for running tests. 
+Typically, it is entered for each DocTest (especially in API documentation), ensuring proper testing isolation.
+10. **local_resources (dict):** Specifies local files needed for specific tests. The format is `{test.name: list-of-files}`. File paths are relative to the path of `test.filename`.
+11. **parse_namedtuples (bool):** Determines whether to perform a literal comparison (e.g., `TTestResult(pvalue=0.9, statistic=42)`) or extract and compare the tuple values (e.g., `(0.9, 42)`). The default is `True`.
+12. **nameerror_after_exception (bool):** Controls whether subsequent examples in the same test, after one has failed, may raise spurious NameErrors. Set to `True` if you want to observe these errors or if your test is expected to raise NameErrors. The default is `False`.
+
+To set any of these attributes, create an instance of `DTConfig` called `dt_config`. 
+This instance is already set as an [attribute of pytest's `Config` object](https://github.com/ev-br/scpdt/blob/671083d65b54111770cee71c9bc790ac652d59ab/scpdt/plugin.py#L27).
+
+**Example:**
+
+```python
+dt_config = DTConfig()
+dt_config.stopwords = {'plt.', '.hist', '.show'}
+dt_config.local_resources = {
+    'scpdt.tests.local_file_cases.local_files': ['scpdt/tests/local_file.txt'],
+    'scpdt.tests.local_file_cases.sio': ['scpdt/tests/octave_a.mat']
+}
+dt_config.skiplist = {
+    'scipy.special.sinc',
+    'scipy.misc.who',
+    'scipy.optimize.show_options'
+}
+```
+
+If you don't set these attributes, the [default settings](https://github.com/ev-br/scpdt/blob/671083d65b54111770cee71c9bc790ac652d59ab/scpdt/impl.py#L73) of the attributes are used.
+
+By following these steps, you will be able to effectively use the Scpdt pytest plugin for doctests in your Python projects.
+
+Happy testing!
 
 ## Prior art and related work
 
