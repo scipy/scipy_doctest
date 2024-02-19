@@ -52,6 +52,14 @@ jobs:
       run: |
         python -m scpdt scpdt/tests/finder_cases.py -vv
 
+    - name: Test pytest plugin
+      # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
+      run: |
+        test_files=("scpdt/tests/module_cases.py" "scpdt/tests/stopwords_cases.py" "scpdt/tests/local_file_cases.py")
+          for file in "${test_files[@]}"; do
+            python -m pytest "${file}" --doctest-modules
+          done
+
     - name: Test testfile CLI
       run: |
         python -m scpdt ./scpdt/tests/scipy_linalg_tutorial_clone.rst -v
@@ -65,10 +73,3 @@ jobs:
         python -mpip install pooch
         python -c'from scipy import ndimage; from scpdt import testmod; testmod(ndimage, verbose=True, strategy="api")'
 
-    - name: Test pytest plugin
-      # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
-      run: |
-        test_files=("scpdt/tests/module_cases.py" "scpdt/tests/stopwords_cases.py" "scpdt/tests/local_file_cases.py")
-          for file in "${test_files[@]}"; do
-            python -m pytest "${file}" --doctest-modules
-          done
