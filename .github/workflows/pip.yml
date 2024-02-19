@@ -15,8 +15,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.8']
+        python-version: ['3.10']
         os:  [ubuntu-latest]
+        pytest: ['"pytest<8.0"']
         # pip cache paths
         include:
         - os: ubuntu-latest
@@ -40,7 +41,7 @@ jobs:
     # Install dependencies 
     - name: Install
       run: |
-        python -m pip install numpy scipy matplotlib pytest
+        python -m pip install numpy scipy matplotlib ${{matrix.pytest}}
         python -m pip install -e .
 
     - name: Self-test
@@ -61,7 +62,8 @@ jobs:
 
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
-        python -c'from scipy import linalg; from scpdt import testmod; testmod(linalg, verbose=True, strategy="api")'
+        python -mpip install pooch
+        python -c'from scipy import ndimage; from scpdt import testmod; testmod(ndimage, verbose=True, strategy="api")'
 
     - name: Test pytest plugin
       # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
