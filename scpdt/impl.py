@@ -68,6 +68,9 @@ class DTConfig:
         NameErrors. Set to True if you want to see these, or if your test
         is actually expected to raise NameErrors.
         Default is False.
+    pytest_extra_skips : list
+        A list of names/modules to skip when run under pytest plugin. Ignored
+        otherwise.
 
     """
     def __init__(self, *, # DTChecker configuration
@@ -88,6 +91,7 @@ class DTConfig:
                           # Obscure switches
                           parse_namedtuples=True,  # Checker
                           nameerror_after_exception=False,  # Runner
+                          pytest_extra_skips=None,        # plugin/collection
     ):
         ### DTChecker configuration ###
         # The namespace to run examples in
@@ -141,7 +145,8 @@ class DTConfig:
                  'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
                  '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
                  '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
-                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('}
+                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim('
+                 'ax.set('}
         self.stopwords = stopwords
 
         if pseudocode is None:
@@ -169,6 +174,11 @@ class DTConfig:
         #### Obscure switches, best leave intact
         self.parse_namedtuples = parse_namedtuples
         self.nameerror_after_exception = nameerror_after_exception
+
+        #### pytest plugin additional switches
+        if pytest_extra_skips is None:
+            pytest_extra_skips = []
+        self.pytest_extra_skips = pytest_extra_skips
 
 
 def try_convert_namedtuple(got):
