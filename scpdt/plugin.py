@@ -168,7 +168,7 @@ class DTModule(DoctestModule):
         if self.config.dt_config.local_resources:
             copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
-        optionflags = doctest.get_optionflags(self)
+        optionflags = dt_config.optionflags
 
         # Plug in the custom runner: `PytestDTRunner` 
         runner = _get_runner(self.config,
