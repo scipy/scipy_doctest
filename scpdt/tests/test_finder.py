@@ -156,7 +156,6 @@ def test_explicit_object_list_with_module():
 
 def test_find_doctests_api():
     # Test that the module itself is included with strategy='api'
-    objs = [finder_cases, finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy='api')
 
     base = 'scpdt.tests.finder_cases'

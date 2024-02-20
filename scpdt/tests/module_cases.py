@@ -1,4 +1,7 @@
-__all__ = ['func', 'func2', 'func3', 'func4', 'func5', 'func6', 'func8', 'func7', 'manip_printoptions', 'array_abbreviation']
+__all__ = [
+    'func', 'func2', 'func3', 'func4', 'func5', 'func6', 'func8',
+    'func7', 'manip_printoptions', 'array_abbreviation'
+]
 
 def func():
     """

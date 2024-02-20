@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 
 try:
-    import scipy
+    import scipy    # noqa
     HAVE_SCIPY = True
-except:
+except Exception:
     HAVE_SCIPY = False
 
 from . import (module_cases as module,
@@ -17,7 +17,7 @@ from . import (module_cases as module,
                failure_cases,
                failure_cases_2,
                local_file_cases)
-from ..frontend import testmod as _testmod, find_doctests, run_docstring_examples
+from ..frontend import testmod as _testmod, run_docstring_examples
 from ..util import warnings_errors
 from ..impl import DTConfig
 
@@ -59,7 +59,6 @@ def test_run_docstring_examples():
 
 def test_global_state():
     # Make sure doctesting does not alter the global state, as much as reasonable
-    objs = [module.manip_printoptions]
     opts = np.get_printoptions()
     _testmod(module)
     new_opts = np.get_printoptions()
@@ -68,7 +67,7 @@ def test_global_state():
 
 def test_module_debugrunner():
     with pytest.raises((doctest.UnexpectedException, doctest.DocTestFailure)):
-        res = _testmod(failure_cases, raise_on_error=True)
+        _testmod(failure_cases, raise_on_error=True)
 
 
 def test_verbosity_1():
