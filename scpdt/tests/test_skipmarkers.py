@@ -5,7 +5,9 @@ from ..impl import DTConfig, DTParser, DebugDTRunner
 
 
 class TestSyntaxErrors:
-    """Syntax errors trigger a doctest failure *unless* marked with +SKIP or as pseudocode.
+    """Syntax errors trigger a doctest failure *unless* marked.
+
+    Either mark it with +SKIP or as pseudocode.
     """
     def test_invalid_python(self):
         # This string raises

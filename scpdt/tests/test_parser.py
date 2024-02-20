@@ -1,6 +1,3 @@
-import doctest
-import pytest
-
 from ..impl import DTConfig, DTParser, DebugDTRunner
 
 
