@@ -167,8 +167,8 @@ class DTModule(DoctestModule):
                     raise
 
         # Copy local files specified by the `local_resources` attribute to the current working directory
-        if self.config.dt_config.local_resources:
-            copy_local_files(self.config.dt_config.local_resources, os.getcwd())
+    #    if self.config.dt_config.local_resources:
+    #        copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
         optionflags = dt_config.optionflags
 
@@ -257,6 +257,8 @@ def _get_runner(config, checker, verbose, optionflags):
             *before* they become errors in `config.user_context_mgr()`.
             """
             dt_config = config.dt_config
+
+            breakpoint()
 
             with np_errstate():
                 with dt_config.user_context_mgr(test):

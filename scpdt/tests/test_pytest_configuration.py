@@ -8,7 +8,7 @@ from scpdt.conftest import dt_config
 
 pytest_plugins = ['pytester']
 
-
+'''
 @pytest.fixture(autouse=True)
 def copy_files():
     """
@@ -36,7 +36,7 @@ def copy_files():
                 os.remove(filepath)
             except FileNotFoundError:
                 pass
-
+'''
 
 def test_module_cases(pytester):
     """Test that pytest uses the DTChecker for doctests."""
@@ -63,7 +63,7 @@ def test_stopword_cases(pytester):
     assert result.ret == pytest.ExitCode.OK
 
 
-@pytest.mark.xfail
+#@pytest.mark.xfail
 def test_local_file_cases(pytester):
     """Test that local files are found for use in doctests.
 
@@ -72,5 +72,18 @@ def test_local_file_cases(pytester):
     """
     path_str = local_file_cases.__file__
     python_file = PosixPath(path_str)
+
+  #  pytester.makeconftest(
+  #      """
+  #      import pytest
+  #      from scpdt.conftest import dt_config
+  #
+  #      dt_config.local_resources = {'scpdt.tests.local_file_cases.local_files':
+  #                                   ['local_file.txt']}
+  #      """
+  #  )
+
+  #  breakpoint()
+
     result = pytester.inline_run(python_file, "--doctest-modules")
     assert result.ret == pytest.ExitCode.OK

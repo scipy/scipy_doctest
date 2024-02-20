@@ -54,6 +54,8 @@ def temp_cwd(test, local_resources=None):
     cwd = os.getcwd()
     tmpdir = tempfile.mkdtemp()
 
+    breakpoint()
+
     if local_resources and test.name in local_resources:
         # local files requested; copy the files
         path, _ = os.path.split(test.filename)
