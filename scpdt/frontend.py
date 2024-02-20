@@ -229,7 +229,9 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         runner = DTRunner(verbose=dtverbose, optionflags=flags, config=config)
 
     ### Find, parse, and run all tests in the given module.
-    tests = find_doctests(m, strategy, name, exclude_empty, globs, extraglobs, config=config)
+    tests = find_doctests(
+        m, strategy, name, exclude_empty, globs, extraglobs, config=config
+    )
 
     for test in tests:
         if verbose == 1:
@@ -356,9 +358,13 @@ def testfile(filename, module_relative=True, name=None, package=None,
     # Fail fast or run all tests
     verbose, dtverbose = _map_verbosity(verbose)
     if raise_on_error:
-        runner = DebugDTRunner(verbose=dtverbose, optionflags=optionflags, config=config)
+        runner = DebugDTRunner(
+            verbose=dtverbose, optionflags=optionflags, config=config
+        )
     else:
-        runner = DTRunner(verbose=dtverbose, optionflags=optionflags, config=config)
+        runner = DTRunner(
+            verbose=dtverbose, optionflags=optionflags, config=config
+        )
 
     ### Parse doctest examples out of the input file and run them.
     if parser is None:
