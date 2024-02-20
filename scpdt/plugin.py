@@ -13,10 +13,11 @@ from _pytest.pathlib import import_path
 
 from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
-from scpdt.util import np_errstate, matplotlib_make_nongui
+from scpdt.util import np_errstate, matplotlib_make_nongui, temp_cwd
 from scpdt.frontend import find_doctests
 
 
+# XXX: unused global?
 copied_files = []
 
 
@@ -107,6 +108,7 @@ def pytest_collection_modifyitems(config, items):
         items[:] = unique_items
     
 
+# XXX: unused?
 def copy_local_files(local_resources, destination_dir):
     """
     Copy necessary local files for doctests to the current working directory.
@@ -254,10 +256,14 @@ def _get_runner(config, checker, verbose, optionflags):
             *unless* the `mpl()` context mgr has a chance to filter them out
             *before* they become errors in `config.user_context_mgr()`.
             """
+            dt_config = config.dt_config
+
             with np_errstate():
-                with config.dt_config.user_context_mgr(test):
+                with dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
-                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        # XXX: local_resourses needed? they seem to be, w/o pytest
+                        with temp_cwd(test, dt_config.local_resources):
+                            super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
 
         """
         Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
