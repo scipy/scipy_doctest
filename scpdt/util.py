@@ -58,7 +58,7 @@ def temp_cwd(test, local_resources=None):
         # local files requested; copy the files
         path, _ = os.path.split(test.filename)
         for fname in local_resources[test.name]:
-            shutil.copy(os.path.join(path, fname), tmpdir)      
+            shutil.copy(os.path.join(path, fname), tmpdir)
     try:
         os.chdir(tmpdir)
         yield tmpdir
