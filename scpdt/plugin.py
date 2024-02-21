@@ -13,7 +13,7 @@ from _pytest.outcomes import skip, OutcomeException
 
 from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
-from .util import np_errstate, matplotlib_make_nongui, generate_log
+from .util import np_errstate, matplotlib_make_nongui
 from scpdt.frontend import find_doctests
 
 

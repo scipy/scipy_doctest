@@ -251,6 +251,7 @@ def get_public_objects(module, skiplist=None):
     return (items, names), failures
 
 
+# XXX: not used ATM
 modules = []
 def generate_log(module, test):
     """
