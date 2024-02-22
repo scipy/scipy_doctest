@@ -181,7 +181,7 @@ class DTModule(DoctestModule):
             # We utilize scpdt's `find_doctests` function to discover doctests in public, non-deprecated objects in the module
             # NB: additional postprocessing in pytest_collection_modifyitems
             for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
-#                if test.examples: # skip empty doctests  # FIXME: put this back (simplifies comparing the logs)
+                if test.examples: # skip empty doctests
                     yield doctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test
                     )
