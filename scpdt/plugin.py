@@ -181,7 +181,7 @@ class DTModule(DoctestModule):
             # We utilize scpdt's `find_doctests` function to discover doctests in public, non-deprecated objects in the module
             # NB: additional postprocessing in pytest_collection_modifyitems
             for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
-#                if test.examples: # skip empty doctests  # FIXME: put this back (simplifies comparing the logs)
+                if test.examples: # skip empty doctests
                     yield doctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test
                     )
@@ -259,10 +259,7 @@ def _get_runner(config, checker, verbose, optionflags):
             with np_errstate():
                 with config.dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
-                        # XXX: might want to add the filter to `testmod`, too
-                        with warnings.catch_warnings():
-                            warnings.filterwarnings("ignore", category=DeprecationWarning)
-                            super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
 
         """
         Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
