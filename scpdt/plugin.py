@@ -5,15 +5,15 @@ import bdb
 import os
 import shutil
 import warnings
+import doctest
 
-from _pytest import doctest, outcomes
+from _pytest import doctest as pydoctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
-from _pytest.outcomes import skip, OutcomeException
 
 from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
-from .util import np_errstate, matplotlib_make_nongui
+from scpdt.util import np_errstate, matplotlib_make_nongui
 from scpdt.frontend import find_doctests
 
 
@@ -29,8 +29,8 @@ def pytest_configure(config):
     config.dt_config = dt_config
 
     # Override doctest's objects with the plugin's alternative implementation.
-    doctest.DoctestModule = DTModule
-    doctest.DoctestTextfile = DTTextfile
+    pydoctest.DoctestModule = DTModule
+    pydoctest.DoctestTextfile = DTTextfile
 
 
 def pytest_unconfigure(config):
@@ -160,7 +160,7 @@ class DTModule(DoctestModule):
                 )
             except ImportError:
                 if self.config.getvalue("doctest_ignore_import_errors"):
-                    skip("unable to import module %r" % self.path)
+                    outcomes.skip("unable to import module %r" % self.path)
                 else:
                     raise
 
@@ -182,7 +182,7 @@ class DTModule(DoctestModule):
             # NB: additional postprocessing in pytest_collection_modifyitems
             for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
                 if test.examples: # skip empty doctests
-                    yield doctest.DoctestItem.from_parent(
+                    yield pydoctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test
                     )
         except:
@@ -206,7 +206,7 @@ class DTTextfile(DoctestTextfile):
         name = self.path.name
         globs = {"__name__": "__main__"}
 
-        optionflags = doctest.get_optionflags(self)
+        optionflags = pydoctest.get_optionflags(self)
 
         # Copy local files specified by the `local_resources` attribute to the current working directory
         if self.config.dt_config.local_resources:
@@ -226,7 +226,7 @@ class DTTextfile(DoctestTextfile):
         # This part of the code is unchanged
         test = parser.get_doctest(text, globs, name, filename, 0)
         if test.examples:
-            yield doctest.DoctestItem.from_parent(
+            yield pydoctest.DoctestItem.from_parent(
                 self, name=test.name, runner=runner, dtest=test
             )
 
@@ -238,8 +238,6 @@ def _get_runner(config, checker, verbose, optionflags):
     This function creates and returns an instance of PytestDTRunner, a custom runner class
     that extends the behavior of DebugDTRunner for running doctests in pytest.
     """
-    import doctest
-
     class PytestDTRunner(DebugDTRunner):
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
@@ -273,7 +271,7 @@ def _get_runner(config, checker, verbose, optionflags):
                 raise failure
 
         def report_unexpected_exception(self, out, test, example, exc_info):
-            if isinstance(exc_info[1], OutcomeException):
+            if isinstance(exc_info[1], outcomes.OutcomeException):
                 raise exc_info[1]
             if isinstance(exc_info[1], bdb.BdbQuit):
                 outcomes.exit("Quitting debugger")
