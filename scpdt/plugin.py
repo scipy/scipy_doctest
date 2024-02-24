@@ -5,8 +5,9 @@ import bdb
 import os
 import shutil
 import warnings
+import doctest
 
-from _pytest import doctest, outcomes
+from _pytest import doctest as pydoctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 from _pytest.outcomes import skip, OutcomeException
@@ -29,8 +30,8 @@ def pytest_configure(config):
     config.dt_config = dt_config
 
     # Override doctest's objects with the plugin's alternative implementation.
-    doctest.DoctestModule = DTModule
-    doctest.DoctestTextfile = DTTextfile
+    pydoctest.DoctestModule = DTModule
+    pydoctest.DoctestTextfile = DTTextfile
 
 
 def pytest_unconfigure(config):
@@ -182,7 +183,7 @@ class DTModule(DoctestModule):
             # NB: additional postprocessing in pytest_collection_modifyitems
             for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
                 if test.examples: # skip empty doctests
-                    yield doctest.DoctestItem.from_parent(
+                    yield pydoctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test
                     )
         except:
@@ -206,7 +207,7 @@ class DTTextfile(DoctestTextfile):
         name = self.path.name
         globs = {"__name__": "__main__"}
 
-        optionflags = doctest.get_optionflags(self)
+        optionflags = pydoctest.get_optionflags(self)
 
         # Copy local files specified by the `local_resources` attribute to the current working directory
         if self.config.dt_config.local_resources:
@@ -226,7 +227,7 @@ class DTTextfile(DoctestTextfile):
         # This part of the code is unchanged
         test = parser.get_doctest(text, globs, name, filename, 0)
         if test.examples:
-            yield doctest.DoctestItem.from_parent(
+            yield pydoctest.DoctestItem.from_parent(
                 self, name=test.name, runner=runner, dtest=test
             )
 
@@ -238,8 +239,6 @@ def _get_runner(config, checker, verbose, optionflags):
     This function creates and returns an instance of PytestDTRunner, a custom runner class
     that extends the behavior of DebugDTRunner for running doctests in pytest.
     """
-    import doctest
-
     class PytestDTRunner(DebugDTRunner):
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
