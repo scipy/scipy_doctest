@@ -10,11 +10,10 @@ import doctest
 from _pytest import doctest as pydoctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
-from _pytest.outcomes import skip, OutcomeException
 
 from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
-from .util import np_errstate, matplotlib_make_nongui
+from scpdt.util import np_errstate, matplotlib_make_nongui
 from scpdt.frontend import find_doctests
 
 
@@ -161,7 +160,7 @@ class DTModule(DoctestModule):
                 )
             except ImportError:
                 if self.config.getvalue("doctest_ignore_import_errors"):
-                    skip("unable to import module %r" % self.path)
+                    outcomes.skip("unable to import module %r" % self.path)
                 else:
                     raise
 
@@ -272,7 +271,7 @@ def _get_runner(config, checker, verbose, optionflags):
                 raise failure
 
         def report_unexpected_exception(self, out, test, example, exc_info):
-            if isinstance(exc_info[1], OutcomeException):
+            if isinstance(exc_info[1], outcomes.OutcomeException):
                 raise exc_info[1]
             if isinstance(exc_info[1], bdb.BdbQuit):
                 outcomes.exit("Quitting debugger")
