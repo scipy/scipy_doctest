@@ -258,7 +258,6 @@ def _get_runner(config, checker, verbose, optionflags):
             """
             dt_config = config.dt_config
 
-            breakpoint()
 
             with np_errstate():
                 with dt_config.user_context_mgr(test):
