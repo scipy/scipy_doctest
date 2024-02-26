@@ -334,8 +334,7 @@ class DTRunner(doctest.DocTestRunner):
         self.nameerror_after_exception = config.nameerror_after_exception
         if optionflags is None:
             optionflags = config.optionflags
-        doctest.DocTestRunner.__init__(self, checker=checker, verbose=verbose,
-                                       optionflags=optionflags)
+        super().__init__(checker=checker, verbose=verbose, optionflags=optionflags)
 
     def _report_item_name(self, out, item_name, new_line=False):
         if item_name is not None:
@@ -344,12 +343,12 @@ class DTRunner(doctest.DocTestRunner):
                 out("\n")
 
     def report_start(self, out, test, example):
-        return doctest.DocTestRunner.report_start(self, out, test, example)
+        return super().report_start(out, test, example)
 
     def report_success(self, out, test, example, got):
         if self._verbose:
             self._report_item_name(out, test.name, new_line=True)
-        return doctest.DocTestRunner.report_success(self, out, test, example, got)
+        return super().report_success(out, test, example, got)
 
     def report_unexpected_exception(self, out, test, example, exc_info):
         if not self.nameerror_after_exception:
@@ -367,8 +366,7 @@ class DTRunner(doctest.DocTestRunner):
 
     def report_failure(self, out, test, example, got):
         self._report_item_name(out, test.name)
-        return doctest.DocTestRunner.report_failure(self, out, test,
-                                                    example, got)
+        return super().report_failure(out, test, example, got)
 
     def get_history(self):
         """Return a dict with names of items which were run.
