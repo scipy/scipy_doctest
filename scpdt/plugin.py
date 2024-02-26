@@ -13,11 +13,8 @@ from _pytest.pathlib import import_path
 
 from scpdt.impl import DTChecker, DTParser, DebugDTRunner
 from scpdt.conftest import dt_config
-from scpdt.util import np_errstate, matplotlib_make_nongui
+from scpdt.util import np_errstate, matplotlib_make_nongui, temp_cwd
 from scpdt.frontend import find_doctests
-
-
-copied_files = []
 
 
 def pytest_configure(config):
@@ -31,20 +28,6 @@ def pytest_configure(config):
     # Override doctest's objects with the plugin's alternative implementation.
     pydoctest.DoctestModule = DTModule
     pydoctest.DoctestTextfile = DTTextfile
-
-
-def pytest_unconfigure(config):
-    """
-    Called before exiting the test process.
-    """
-
-    # Delete all locally copied files in the current working directory
-    if copied_files:
-        try:
-            for filepath in copied_files:
-                os.remove(filepath)
-        except FileNotFoundError:
-            pass
 
 
 def pytest_ignore_collect(collection_path, config):
@@ -105,31 +88,6 @@ def pytest_collection_modifyitems(config, items):
 
         # Replace the original list of test items with the unique ones
         items[:] = unique_items
-    
-
-def copy_local_files(local_resources, destination_dir):
-    """
-    Copy necessary local files for doctests to the current working directory.
-    
-    This function copies files specified in the `local_resources` attribute of a DTConfig instance
-    to the specified `destination_dir`.
-    
-    Args:
-        local_resources (dict): A dictionary of resources to be copied.
-        destination_dir (str): The destination directory where files will be copied.
-    
-    Returns:
-        list: A list of paths to the copied files.
-    """
-    for value in local_resources.values():
-        for filepath in value:
-            basename = os.path.basename(filepath)
-            dest_path = os.path.join(destination_dir, basename)
-
-            if not os.path.exists(dest_path):
-                shutil.copy(filepath, destination_dir)
-                copied_files.append(dest_path)    
-    return copied_files
 
 
 class DTModule(DoctestModule):
@@ -163,10 +121,6 @@ class DTModule(DoctestModule):
                     outcomes.skip("unable to import module %r" % self.path)
                 else:
                     raise
-
-        # Copy local files specified by the `local_resources` attribute to the current working directory
-        if self.config.dt_config.local_resources:
-            copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
         optionflags = dt_config.optionflags
 
@@ -207,10 +161,6 @@ class DTTextfile(DoctestTextfile):
         globs = {"__name__": "__main__"}
 
         optionflags = pydoctest.get_optionflags(self)
-
-        # Copy local files specified by the `local_resources` attribute to the current working directory
-        if self.config.dt_config.local_resources:
-            copy_local_files(self.config.dt_config.local_resources, os.getcwd())
 
         # Plug in the custom runner: `PytestDTRunner`
         runner = _get_runner(self.config,
@@ -254,10 +204,15 @@ def _get_runner(config, checker, verbose, optionflags):
             *unless* the `mpl()` context mgr has a chance to filter them out
             *before* they become errors in `config.user_context_mgr()`.
             """
+            dt_config = config.dt_config
+
+
             with np_errstate():
-                with config.dt_config.user_context_mgr(test):
+                with dt_config.user_context_mgr(test):
                     with matplotlib_make_nongui():
-                        super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
+                        # XXX: local_resourses needed? they seem to be, w/o pytest
+                        with temp_cwd(test, dt_config.local_resources):
+                            super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
 
         """
         Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
