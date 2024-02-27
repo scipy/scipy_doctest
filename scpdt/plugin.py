@@ -17,6 +17,19 @@ from scpdt.util import np_errstate, matplotlib_make_nongui, temp_cwd
 from scpdt.frontend import find_doctests
 
 
+def pytest_addoption(parser):
+    group = parser.getgroup("collect")
+
+    group.addoption(
+        "--doctest-collect",
+        action="store",
+        default="None",
+        help="Doctest collection strategy: vanilla pytest ('None', default), or 'api'",
+        choices=("None", "api"),
+        dest="collection_strategy"
+    )
+
+
 def pytest_configure(config):
     """
     Perform initial configuration for the pytest plugin.
@@ -58,7 +71,9 @@ def pytest_collection_modifyitems(config, items):
     # pytest-y runs in between DTModule.collect and this hook (should that something
     # be the proper home for all collection?)
 
-    if config.getoption("--doctest-modules"):
+    need_filter_unique = config.getvalue("collection_strategy") == 'api'
+
+    if config.getoption("--doctest-modules") and need_filter_unique:
         unique_items = []
 
         for item in items:
@@ -79,6 +94,11 @@ def pytest_collection_modifyitems(config, items):
             # scipy.stats.distributions is not
             extra_skips = config.dt_config.pytest_extra_skips
 
+            # NB: The below looks at the name of a test module/object. A seemingly less
+            # hacky alternative is to populate a set of seen `item.dtest` attributes
+            # (which are actual DocTest objects). The issue with that is it's tricky
+            # for skips. Do we skip linalg.det or linalg._basic.det? (collection order
+            # is not guaranteed)
             parent_full_name = item.parent.module.__name__
             is_public = "._" not in parent_full_name
             is_duplicate = parent_full_name in  extra_skips or item.name in extra_skips
@@ -131,10 +151,15 @@ class DTModule(DoctestModule):
             checker=DTChecker(config=self.config.dt_config)
         )
 
+        # strategy='api': discover doctests in public, non-deprecated objects in module
+        # strategy=None : use vanilla stdlib doctest discovery
+        strategy = self.config.getvalue("collection_strategy")
+        if strategy == 'None':
+            strategy = None
+
         try:
-            # We utilize scpdt's `find_doctests` function to discover doctests in public, non-deprecated objects in the module
             # NB: additional postprocessing in pytest_collection_modifyitems
-            for test in find_doctests(module, strategy="api", name=module.__name__, config=dt_config):
+            for test in find_doctests(module, strategy=strategy, name=module.__name__, config=dt_config):
                 if test.examples: # skip empty doctests
                     yield pydoctest.DoctestItem.from_parent(
                         self, name=test.name, runner=runner, dtest=test

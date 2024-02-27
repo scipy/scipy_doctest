@@ -211,11 +211,18 @@ An in-depth explanation is given in the [tailoring your doctesting experience](h
 Once the plugin is registered, you can run your doctests by executing the following command:
 
 ```bash
-python -m pytest --doctest-modules
+$ python -m pytest --doctest-modules
 ```
 or
 ```bash
-pytest --pyargs <your-package> --doctest-modules
+$ pytest --pyargs <your-package> --doctest-modules
+```
+
+The default all doctests are collected. To only collect public objects, `strategy="api"`,
+use the command flag
+
+```bash
+$ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
 ```
 
 ### Tailoring Your Doctesting Experience
