@@ -78,8 +78,11 @@ $ pytest --pyargs scpdt
 
 ## Usage
 
-The API of the package closely follows that of the standard `doctest` module.
-We strive to provide drop-in replacements, or nearly so.
+The API of the package has two layers: the basic layer follows the API of the
+standard library `doctest` module, and we strive to provide drop-in replacements,
+or nearly so.
+
+The other layer is the `pytest` plugin.
 
 
 ### Basic usage
@@ -100,7 +103,7 @@ For more details, see the `testmod` docstring. Other useful functions are
 `find_doctests`, `run_docstring_examples` and `testfile` (the latter two mimic
 the behavior of the eponymous functions of the `doctest` module).
 
-### Command-line interface
+#### Command-line interface
 
 There is a basic CLI, which also mimics that of the `doctest` module:
 ```
@@ -116,7 +119,7 @@ $ python -m scpdt bar.rst
 ```
 
 
-### More fine-grained control
+#### More fine-grained control
 
 More fine-grained control of the functionality is available via the following
 classes
@@ -136,7 +139,7 @@ passing the instance to `testmod` or constructors of `DT*` objects. Defaults
 are provided, based on a long-term usage in SciPy.
 
 
-## The Scpdt Pytest Plugin
+### The Scpdt Pytest Plugin
 
 The pytest plugin enables the use of scpdt tools to perform doctests. 
 
@@ -170,13 +173,6 @@ To run doctests on specific SciPy modules, e.g: `cluster`, use the following com
 ```bash
 python dev.py test --doctests -s cluster
 ```
-
-In case you encounter an `ImportPathMismatchError`, a known pytest bug, resolve it by setting the `PY_IGNORE_IMPORTMISMATCH` environment variable:
-
-```bash
-export PY_IGNORE_IMPORTMISMATCH=1
-```
-For more information, see this [github issue](https://github.com/ev-br/scpdt/issues/92).
 
 ### Running Doctests on Other Packages/Projects
 
@@ -278,10 +274,9 @@ Happy testing!
   some maintenance work may be required to adapt when `pytest` publishes a new
   release.
 
-  This project takes a different approach: we closely follow the `doctest` API and
-  implementation, which are naturally way more stable then `pytest`. Cooking up
-  a `pytest` plugin on top of this package is certainly doable and only needs a
-  champion.
+  This project takes a different approach: in addition to plugging into `pytest`,
+  we closely follow the `doctest` API and implementation, which are naturally
+  way more stable then `pytest`.
 
 - `NumPy` and `SciPy` use modified doctesting in their `refguide-check` utilities.
   These utilities are tightly coupled to their libraries, and have been reported
