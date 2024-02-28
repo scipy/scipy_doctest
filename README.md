@@ -218,7 +218,7 @@ or
 $ pytest --pyargs <your-package> --doctest-modules
 ```
 
-The default all doctests are collected. To only collect public objects, `strategy="api"`,
+By default, all doctests are collected. To only collect public objects, `strategy="api"`,
 use the command flag
 
 ```bash
