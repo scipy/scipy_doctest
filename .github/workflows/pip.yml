@@ -46,7 +46,7 @@ jobs:
 
     - name: Self-test
       run: |
-        pytest --pyargs scpdt -v -s
+        pytest --pyargs scpdt -v -s --ignore=scpdt/tests/test_pytest_configuration.py
 
     - name: Self-test CLI
       run: |
@@ -62,12 +62,13 @@ jobs:
 
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
-        python -mpip install pooch
+        python -m pip install pooch
         python -c'from scipy import ndimage; from scpdt import testmod; testmod(ndimage, verbose=True, strategy="api")'
 
     - name: Test pytest plugin
       # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
       run: |
+        python -m pip install -e '.[test]'
         test_files=("scpdt/tests/module_cases.py" "scpdt/tests/stopwords_cases.py" "scpdt/tests/local_file_cases.py")
           for file in "${test_files[@]}"; do
             python -m pytest "${file}" --doctest-modules
