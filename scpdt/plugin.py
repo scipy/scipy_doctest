@@ -54,6 +54,10 @@ def pytest_ignore_collect(collection_path, config):
         if "tests" in path_str or "test_" in path_str:
             return True
 
+    for entry in config.dt_config.pytest_extra_skips:
+        if entry in str(collection_path):
+            return True
+
 
 def pytest_collection_modifyitems(config, items):
     """
@@ -101,7 +105,7 @@ def pytest_collection_modifyitems(config, items):
             # is not guaranteed)
             parent_full_name = item.parent.module.__name__
             is_public = "._" not in parent_full_name
-            is_duplicate = parent_full_name in  extra_skips or item.name in extra_skips
+            is_duplicate = parent_full_name in extra_skips or item.name in extra_skips
 
             if is_public and not is_duplicate:
                 unique_items.append(item)
@@ -185,7 +189,7 @@ class DTTextfile(DoctestTextfile):
         name = self.path.name
         globs = {"__name__": "__main__"}
 
-        optionflags = pydoctest.get_optionflags(self)
+        optionflags = dt_config.optionflags
 
         # Plug in the custom runner: `PytestDTRunner`
         runner = _get_runner(self.config,
@@ -230,7 +234,6 @@ def _get_runner(config, checker, verbose, optionflags):
             *before* they become errors in `config.user_context_mgr()`.
             """
             dt_config = config.dt_config
-
 
             with np_errstate():
                 with dt_config.user_context_mgr(test):
