@@ -163,8 +163,10 @@ def _is_deprecated(module):
 
     res = False
     try:
-        getattr(module, names[0])
-        res = False
+        with warnings.catch_warnings() as w:
+            warnings.simplefilter('error', DeprecationWarning)
+            getattr(module, names[0])
+            res = False
     except DeprecationWarning:
         res = True
 
