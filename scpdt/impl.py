@@ -68,10 +68,21 @@ class DTConfig:
         NameErrors. Set to True if you want to see these, or if your test
         is actually expected to raise NameErrors.
         Default is False.
-    pytest_extra_skips : list
-        A list of names/modules to skip when run under pytest plugin. Ignored
-        otherwise.
-
+    pytest_extra_ignore : list
+        A list of names/modules to ignore when run under pytest plugin. This is
+        equivalent to using `--ignore=...` cmdline switch.
+    pytest_extra_skip : dict
+        Names/modules to skip when run under pytest plugin. This is
+        equivalent to decorating the doctest with `@pytest.mark.skip` or adding
+        `# doctest: + SKIP` to its examples.
+        Each key is a doctest name to skip, and the corresponding value is
+        a string. If not empty, the string value is used as the skip reason.
+    pytest_extra_xfail : dict
+        Names/modules to xfail when run under pytest plugin. This is
+        equivalent to decorating the doctest with `@pytest.mark.xfail` or
+        adding `# may vary` to the outputs of all examples.
+        Each key is a doctest name to skip, and the corresponding value is
+        a string. If not empty, the string value is used as the skip reason.
     """
     def __init__(self, *, # DTChecker configuration
                           default_namespace=None,
@@ -91,13 +102,14 @@ class DTConfig:
                           # Obscure switches
                           parse_namedtuples=True,  # Checker
                           nameerror_after_exception=False,  # Runner
-                          pytest_extra_skips=None,        # plugin/collection
+                          # plugin
+                          pytest_extra_ignore=None,
+                          pytest_extra_skip=None,
+                          pytest_extra_xfail=None,
     ):
         ### DTChecker configuration ###
         # The namespace to run examples in
-        if default_namespace is None:
-            default_namespace = {}
-        self.default_namespace = default_namespace
+        self.default_namespace = default_namespace or {}
 
         # The namespace to do checks in
         if check_namespace is None:
@@ -167,18 +179,16 @@ class DTConfig:
         self.user_context_mgr = user_context_mgr
 
         #### Local resources: None or dict {test: list-of-files-to-copy}
-        if local_resources is None:
-            local_resources = dict()
-        self.local_resources=local_resources
+        self.local_resources=local_resources or dict()
 
         #### Obscure switches, best leave intact
         self.parse_namedtuples = parse_namedtuples
         self.nameerror_after_exception = nameerror_after_exception
 
         #### pytest plugin additional switches
-        if pytest_extra_skips is None:
-            pytest_extra_skips = []
-        self.pytest_extra_skips = pytest_extra_skips
+        self.pytest_extra_ignore = pytest_extra_ignore or []
+        self.pytest_extra_skip = pytest_extra_skip or {}
+        self.pytest_extra_xfail = pytest_extra_xfail or {}
 
 
 def try_convert_namedtuple(got):

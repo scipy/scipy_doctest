@@ -7,7 +7,9 @@ import shutil
 import warnings
 import doctest
 
-from _pytest import doctest as pydoctest, outcomes
+
+import pytest
+from _pytest import doctest as pydoctest, mark, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 
@@ -54,9 +56,48 @@ def pytest_ignore_collect(collection_path, config):
         if "tests" in path_str or "test_" in path_str:
             return True
 
-    for entry in config.dt_config.pytest_extra_skips:
+    for entry in config.dt_config.pytest_extra_ignore:
         if entry in str(collection_path):
             return True
+
+
+def is_private(item):
+    """Decide if an DocTestItem `item` is private.
+
+    Private items are ignored in pytest_collect_modifyitem`.
+    """
+    # Here we look at the name of a test module/object. A seemingly less
+    # hacky alternative is to populate a set of seen `item.dtest` attributes
+    # (which are actual DocTest objects). The issue with that is it's tricky
+    # for explicit skips/ignores. Do we skip linalg.det or linalg._basic.det?
+    # (collection order is not guaranteed)
+    parent_full_name = item.parent.module.__name__
+    is_private = "._" in parent_full_name
+    return is_private
+
+
+def _maybe_add_markers(item, config):
+    """Add xfail/skip markers to `item` if DTConfig says so.
+
+    Modifies the item in-place.
+    """
+    dt_config = config.dt_config
+
+    extra_skip = dt_config.pytest_extra_skip
+    skip_it = item.name in extra_skip
+    if item.name in extra_skip:
+        reason = extra_skip[item.name] or ''
+        item.add_marker(
+            pytest.mark.skip(reason=reason)
+        )
+
+    extra_xfail = dt_config.pytest_extra_xfail
+    fail_it = item.name in extra_xfail
+    if fail_it:
+        reason = extra_xfail[item.name] or ''
+        item.add_marker(
+            pytest.mark.xfail(reason=reason)
+        )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -73,45 +114,45 @@ def pytest_collection_modifyitems(config, items):
     # XXX: The logic in this function can probably be folded into DTModule.collect.
     # I (E.B.) quickly tried it and it does not seem to just work. Apparently something
     # pytest-y runs in between DTModule.collect and this hook (should that something
-    # be the proper home for all collection?)
+    # be the proper home for all collection?).
+    # Also note that DTTextfile needs _maybe_add_markers, too.
 
-    need_filter_unique = config.getvalue("collection_strategy") == 'api'
+    need_filter_unique = (
+        config.getoption("--doctest-modules") and
+        config.getvalue("collection_strategy") == 'api'
+    )
 
-    if config.getoption("--doctest-modules") and need_filter_unique:
-        unique_items = []
+    unique_items = []
 
-        for item in items:
-            assert isinstance(item.parent, DTModule)
-
+    for item in items:
+        if isinstance(item.parent, DTModule) and need_filter_unique:
             # objects are collected twice: from their public module + from the impl module
             # e.g. for `levy_stable` we have
             # (Pdb) p item.name, item.parent.name
             # ('scipy.stats.levy_stable', 'build-install/lib/python3.10/site-packages/scipy/stats/__init__.py')
+            # and
             # ('scipy.stats.distributions.levy_stable', 'distributions.py')
             # so we filter out the second occurence
             #
             # There are two options:
-            #  - either the impl module has a leading underscore, or
-            #  - it needs to be explicitly listed in 'extra_skips' config key
+            #  - either the impl module has a leading underscore (scipy.linalg._basic), or
+            #  - it needs to be explicitly listed in the 'extra_ignore' config key (distributions.py)
             #
             # Note that the last part cannot be automated: scipy.cluster.vq is public, but
             # scipy.stats.distributions is not
-            extra_skips = config.dt_config.pytest_extra_skips
-
-            # NB: The below looks at the name of a test module/object. A seemingly less
-            # hacky alternative is to populate a set of seen `item.dtest` attributes
-            # (which are actual DocTest objects). The issue with that is it's tricky
-            # for skips. Do we skip linalg.det or linalg._basic.det? (collection order
-            # is not guaranteed)
+            extra_ignore = config.dt_config.pytest_extra_ignore
             parent_full_name = item.parent.module.__name__
-            is_public = "._" not in parent_full_name
-            is_duplicate = parent_full_name in extra_skips or item.name in extra_skips
+            is_duplicate = parent_full_name in extra_ignore or item.name in extra_ignore
 
-            if is_public and not is_duplicate:
-                unique_items.append(item)
+            if is_duplicate or is_private(item):
+                # ignore it
+                continue
 
-        # Replace the original list of test items with the unique ones
-        items[:] = unique_items
+        _maybe_add_markers(item, config)
+        unique_items.append(item)
+
+    # Replace the original list of test items with the unique ones
+    items[:] = unique_items
 
 
 class DTModule(DoctestModule):
