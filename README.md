@@ -267,6 +267,73 @@ By following these steps, you will be able to effectively use the Scpdt pytest p
 
 Happy testing!
 
+## Rough edges and sharp bits
+
+Here is a (non-exhaustive) list of possible gotchas:
+
+- *In-place development builds*.
+
+Some tools (looking at you `meson-python`) simulate in-place builds with a
+`build-install` directory. If this directory is located under the project root,
+`pytest` is getting confused by duplicated items under the root and build-install
+folders.
+
+The solution is to make pytest only look into the `build-install` directory
+(the specific path to `build-install` may vary):
+
+```
+$ pytest build-install/lib/python3.10/site-packages/scipy/ --doctest-modules
+```
+
+instead of `$ pytest --pyargs scipy`.
+
+If push comes to shove, you may try using the magic env variable:
+` PY_IGNORE_IMPORTMISMATCH=1 pytest ...`,
+however the need usually indicates an issue with the package itself.
+(see [gh-107](https://github.com/ev-br/scpdt/pull/107) for an example).
+
+- *Optional dependencies are not that optional*
+
+If your package contains optional dependencies, doctests do not know about them
+being optional. So you either guard the imports in doctests (yikes!), or
+the collections fails if dependencies are not available.
+
+The solution is to explicitly `--ignore` the paths to modules with optionals.
+(or use `DTConfig.pytest_extra_ignore` list):
+
+```
+$ pytest --ignore=/build-install/lib/scipy/python3.10/site-packages/scipy/_lib ...
+```
+
+Note that installed packages are no different:
+
+```
+$ pytest --pyargs scipy --doctest-modules --ignore=/path/to/installed/scipy/_lib
+```
+
+- *Doctest collection strategies*
+
+The default collection strategy follows `doctest` module and `pytest`. This leads
+to duplicates if your package has the split between public and \_private modules,
+where  public modules re-export things from private ones. The solution is to
+use `$ pytest --doctest-collect=api` CLI switch: with this, only public
+objects will be collected.
+
+The decision on what is public is as follows: an object is public iff
+
+- it is included into the `__all__` list of a public module;
+- the name of the object does not have a leading underscore;
+- the name of the module from which the object is collected does not have
+  a leading underscore.
+
+Consider an example: `scipy.linalg.det` is defined in `scipy/linalg/_basic.py`,
+so it is collected twice, from `_basic.py` and from `__init__.py`. The rule above
+leads to
+
+- `scipy.linalg._basic.det`, collected from `scipy/linalg/_basic.py`, is private.
+- `scipy.linalg.det`, collected from `scipy/linalg/__init__.py`, is public.
+
+
 ## Prior art and related work
 
 - `pytest` provides some limited floating-point aware `NumericLiteralChecker`.
