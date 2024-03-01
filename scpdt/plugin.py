@@ -155,6 +155,22 @@ def pytest_collection_modifyitems(config, items):
     items[:] = unique_items
 
 
+def _is_deprecated(module):
+    """Detect if a module is deprecated (i.e., raises or warns on getattr)."""
+    names = dir(module)
+    if not names:
+        return False
+
+    res = False
+    try:
+        getattr(module, names[0])
+        res = False
+    except DeprecationWarning:
+        res = True
+
+    return res
+
+
 class DTModule(DoctestModule):
     """
     This class extends the DoctestModule class provided by pytest.
@@ -187,6 +203,10 @@ class DTModule(DoctestModule):
                 else:
                     raise
 
+        if _is_deprecated(module):
+            # bail out early
+            return
+
         optionflags = dt_config.optionflags
 
         # Plug in the custom runner: `PytestDTRunner` 
@@ -202,15 +222,12 @@ class DTModule(DoctestModule):
         if strategy == 'None':
             strategy = None
 
-        try:
-            # NB: additional postprocessing in pytest_collection_modifyitems
-            for test in find_doctests(module, strategy=strategy, name=module.__name__, config=dt_config):
-                if test.examples: # skip empty doctests
-                    yield pydoctest.DoctestItem.from_parent(
-                        self, name=test.name, runner=runner, dtest=test
-                    )
-        except:
-            pass
+        # NB: additional postprocessing in pytest_collection_modifyitems
+        for test in find_doctests(module, strategy=strategy, name=module.__name__, config=dt_config):
+            if test.examples: # skip empty doctests
+                yield pydoctest.DoctestItem.from_parent(
+                    self, name=test.name, runner=runner, dtest=test
+                )
         
 
 class DTTextfile(DoctestTextfile):
