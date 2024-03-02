@@ -4,8 +4,10 @@ import doctest
 
 import pytest
 
-from . import failure_cases as module, finder_cases as finder_module
-from .. import DTFinder, DTRunner, DebugDTRunner
+from . import (failure_cases as module,
+               finder_cases as finder_module,
+               module_cases)
+from .. import DTFinder, DTRunner, DebugDTRunner, DTConfig
 
 
 ### Smoke test DTRunner methods. Mainly to check that they are runnable.
@@ -78,4 +80,26 @@ class TestDebugDTRunner:
 
         # exception carries the original test
         assert orig_exception.test is tests[0]
+
+
+class VanillaOutputChecker(doctest.OutputChecker):
+    """doctest.OutputChecker to drop in for DTChecker.
+
+    LSP break: OutputChecker does not have __init__,
+    here we add it to agree with DTChecker.
+    """
+    def __init__(self, config):
+        pass
+
+class TestCheckerDropIn:
+    """Test DTChecker and vanilla doctest OutputChecker being drop-in replacements.
+    """
+    def test_vanilla_checker(self):
+        config = DTConfig(CheckerKlass=VanillaOutputChecker)
+        runner = DebugDTRunner(config=config)
+        tests = DTFinder().find(module_cases.func)
+
+        with pytest.raises(doctest.DocTestFailure) as exc:
+            for t in tests:
+                runner.run(t)
 
