@@ -42,3 +42,38 @@ def test_local_file_cases(pytester):
     python_file = PosixPath(path_str)
     result = pytester.inline_run(python_file, "--doctest-modules")
     assert result.ret == pytest.ExitCode.OK
+
+
+def test_alt_checker(pytester):
+    """Test an alternative Checker."""
+
+    # create a temporary conftest.py file
+    pytester.makeconftest(
+        """
+        import doctest
+        from scpdt.conftest import dt_config
+
+        class Vanilla(doctest.OutputChecker):
+            def __init__(self, config):
+                pass
+
+        dt_config.CheckerKlass = Vanilla
+    """
+    )
+
+    # create a temporary pytest test file
+    f = pytester.makepyfile(
+        """
+        def func():
+            '''
+            >>> 2 / 3     # fails with vanilla doctest.OutputChecker
+            0.667
+            '''
+            pass
+    """
+    )
+
+    # run all tests with pytest
+    result = pytester.inline_run(f, '--doctest-modules')
+    assert result.ret == pytest.ExitCode.TESTS_FAILED
+

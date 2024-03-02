@@ -213,7 +213,6 @@ class DTModule(DoctestModule):
         runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
-            checker=DTChecker(config=self.config.dt_config)
         )
 
         # strategy='api': discover doctests in public, non-deprecated objects in module
@@ -228,7 +227,7 @@ class DTModule(DoctestModule):
                 yield pydoctest.DoctestItem.from_parent(
                     self, name=test.name, runner=runner, dtest=test
                 )
-        
+
 
 class DTTextfile(DoctestTextfile):
     """
@@ -253,7 +252,6 @@ class DTTextfile(DoctestTextfile):
         runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
-            checker=DTChecker(config=self.config.dt_config)
         )
 
         # Plug in an instance of `DTParser` which parses the doctest examples from the text file and
@@ -268,7 +266,7 @@ class DTTextfile(DoctestTextfile):
             )
 
 
-def _get_runner(config, checker, verbose, optionflags):
+def _get_runner(config, verbose, optionflags):
     """
     Override function to return an instance of PytestDTRunner.
     
@@ -321,5 +319,5 @@ def _get_runner(config, checker, verbose, optionflags):
                 out.append(failure)
             else:
                 raise failure
-            
-    return PytestDTRunner(checker=checker, verbose=verbose, optionflags=optionflags, config=config.dt_config)
+
+    return PytestDTRunner(verbose=verbose, optionflags=optionflags, config=config.dt_config)
