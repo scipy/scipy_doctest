@@ -182,24 +182,37 @@ class DTModule(DoctestModule):
     in the specified module or file.
     """
     def collect(self):
-        # Part of this code is copy-pasted from the `_pytest.doctest` module(pytest 7.4.0):
-        # https://github.com/pytest-dev/pytest/blob/448563caaac559b8a3195edc58e8806aca8d2c71/src/_pytest/doctest.py#L497
-        if self.path.name == "setup.py":
-            return
-        if self.path.name == "conftest.py":
-            module = self.config.pluginmanager._importconftest(
-                self.path,
-                self.config.getoption("importmode"),
-                rootpath=self.config.rootpath
-            )
-        else:
-            try:
-                module = import_path(
+        if pytest.__version__ < '8':
+            # Part of this code is copy-pasted from the `_pytest.doctest` module(pytest 7.4.0):
+            # https://github.com/pytest-dev/pytest/blob/448563caaac559b8a3195edc58e8806aca8d2c71/src/_pytest/doctest.py#L497
+            if self.path.name == "setup.py":
+                return
+            if self.path.name == "conftest.py":
+                module = self.config.pluginmanager._importconftest(
                     self.path,
-                    root=self.config.rootpath,
-                    mode=self.config.getoption("importmode"),
+                    self.config.getoption("importmode"),
+                    rootpath=self.config.rootpath
                 )
-            except ImportError:
+            else:
+                try:
+                    module = import_path(
+                        self.path,
+                        root=self.config.rootpath,
+                        mode=self.config.getoption("importmode"),
+                    )
+                except ImportError:
+                    if self.config.getvalue("doctest_ignore_import_errors"):
+                        outcomes.skip("unable to import module %r" % self.path)
+                    else:
+                        raise
+
+            # XXX: `assert module == self.obj` seems to work (so is it all automatic?)
+            # but what are failure modes
+        else:
+            # https://github.com/pytest-dev/pytest/blob/8.1.0/src/_pytest/doctest.py#L561
+            try:
+                module = self.obj
+            except _pytest.nodes.Collector.CollectError:
                 if self.config.getvalue("doctest_ignore_import_errors"):
                     outcomes.skip("unable to import module %r" % self.path)
                 else:
