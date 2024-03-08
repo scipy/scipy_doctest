@@ -1,5 +1,6 @@
 import io
 import doctest
+
 from contextlib import redirect_stderr
 
 import numpy as np
@@ -10,12 +11,6 @@ try:
     HAVE_SCIPY = True
 except Exception:
     HAVE_SCIPY = False
-
-try:
-    import matplotlib    # noqa
-    HAVE_MATPLOTLIB = True
-except Exception:
-    HAVE_MATPLOTLIB  = False
 
 from . import (module_cases as module,
                stopwords_cases as stopwords,
@@ -46,8 +41,11 @@ def test_module_vanilla_dtfinder():
     assert res.attempted != 0
 
 
-@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
 def test_stopwords():
+    try:
+        import matplotlib
+    except ImportError:
+        pytest.skip("need matplotlib")
     res, _ = _testmod(stopwords, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0

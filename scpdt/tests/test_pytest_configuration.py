@@ -1,13 +1,4 @@
 import pytest
-from pathlib import Path
-
-from . import module_cases, failure_cases, failure_cases_2, stopwords_cases, local_file_cases
-
-# XXX: this is a bit hacky and repetetive. Can rework?
-
-
-pytest_plugins = ['pytester']
-
 
 try:
     import scipy    # noqa
@@ -15,11 +6,14 @@ try:
 except Exception:
     HAVE_SCIPY = False
 
-try:
-    import matplotlib    # noqa
-    HAVE_MATPLOTLIB = True
-except Exception:
-    HAVE_MATPLOTLIB  = False
+from pathlib import PosixPath, Path
+
+from . import module_cases, failure_cases, failure_cases_2, stopwords_cases, local_file_cases
+
+# XXX: this is a bit hacky and repetetive. Can rework?
+
+
+pytest_plugins = ['pytester']
 
 
 @pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
@@ -43,6 +37,10 @@ def test_failure_cases(pytester):
 @pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_stopword_cases(pytester):
     """Test that pytest uses the DTParser for doctests."""
+    try:
+        import matplotlib
+    except ImportError:
+        pytest.skip("need matplotlib")
     path_str = stopwords_cases.__file__
     python_file = Path(path_str)
     result = pytester.inline_run(python_file, "--doctest-modules")
