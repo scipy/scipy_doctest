@@ -34,15 +34,14 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install ${{matrix.pytest}}
         python -m pip install -e .
-        pip freeze
 
     # Run self-tests without Scipy and MPL
     # Tests that require Scipy and MPL will be skipped
-    - name: Self-test
+    - name: Self-test without SciPy and MPL
       run: |
-        pytest --pyargs scpdt -v -s
+        pytest --pyargs scpdt -v
 
-    - name: Self-test CLI
+    - name: Self-test CLI without SciPy and MPL
       run: |
         python -m scpdt scpdt/tests/finder_cases.py -vv
 
@@ -50,14 +49,13 @@ jobs:
     - name: Install optional dependencies
       run: |
         python -m pip install -e '.[test]'
-        pip freeze
 
     # Tests that require Scipy and MPL can now run
-    - name: Self-test
+    - name: Self-test with SciPy and MPL
       run: |
-        pytest --pyargs scpdt -v -s
+        pytest --pyargs scpdt -v
 
-    - name: Self-test CLI
+    - name: Self-test CLI with SciPy and MPL
       run: |
         python -m scpdt scpdt/tests/finder_cases.py -vv
 
