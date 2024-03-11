@@ -1,6 +1,12 @@
 import pytest
 
 try:
+    import matplotlib.pyplot as plt    # noqa
+    HAVE_MATPLOTLIB = True
+except Exception:
+    HAVE_MATPLOTLIB = False
+
+try:
     import scipy    # noqa
     HAVE_SCIPY = True
 except Exception:
@@ -34,13 +40,9 @@ def test_failure_cases(pytester):
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     
 
-@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
+@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
 def test_stopword_cases(pytester):
     """Test that pytest uses the DTParser for doctests."""
-    try:
-        import matplotlib
-    except ImportError:
-        pytest.skip("need matplotlib")
     path_str = stopwords_cases.__file__
     python_file = Path(path_str)
     result = pytester.inline_run(python_file, "--doctest-modules")

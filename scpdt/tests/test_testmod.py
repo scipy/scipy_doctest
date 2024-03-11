@@ -4,6 +4,13 @@ import doctest
 from contextlib import redirect_stderr
 
 import numpy as np
+
+try:
+    import matplotlib.pyplot as plt
+    HAVE_MATPLOTLIB = True
+except Exception:
+    HAVE_MATPLOTLIB = False
+
 import pytest
 
 try:
@@ -41,11 +48,8 @@ def test_module_vanilla_dtfinder():
     assert res.attempted != 0
 
 
+@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
 def test_stopwords():
-    try:
-        import matplotlib
-    except ImportError:
-        pytest.skip("need matplotlib")
     res, _ = _testmod(stopwords, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0

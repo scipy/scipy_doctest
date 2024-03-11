@@ -1,4 +1,11 @@
 import doctest
+
+try:
+    import matplotlib.pyplot as plt    # noqa
+    HAVE_MATPLOTLIB = True
+except Exception:
+    HAVE_MATPLOTLIB = False
+
 import pytest
 
 from ..impl import DTConfig, DTParser, DebugDTRunner
@@ -9,11 +16,8 @@ class TestSyntaxErrors:
 
     Either mark it with +SKIP or as pseudocode.
     """
+    @pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
     def test_invalid_python(self):
-        try:
-            import matplotlib
-        except ImportError:
-            pytest.skip("need matplotlib")
         # This string raises
         # TypeError("unsupported operand type(s) for +: 'int' and 'tuple'")
         string = ">>> import matplotlib.pyplot as plt; 1 + plt.xlim([1, 2])\n"
@@ -104,11 +108,8 @@ class TestStopwords:
     """If an example contains a stopword, the example still needs to be a valid
     python code, but the output is not checked.
     """
+    @pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
     def test_bogus_output(self):
-        try:
-            import matplotlib
-        except ImportError:
-            pytest.skip("need matplotlib")
         # 'plt.xlim(' is a stopword by default in the DTParser. This is because
         # it returns a tuple, which we don't want to litter our docstrings with.
         string = ">>> import matplotlib.pyplot as plt; plt.xlim([1, 2])\n"
