@@ -18,37 +18,44 @@ jobs:
         python-version: ['3.10', '3.11']
         os:  [ubuntu-latest]
         pytest: ['"pytest<8.0"', pytest]
-        # pip cache paths
-        include:
-        - os: ubuntu-latest
-          path: ~/.cache/pip
 
     steps:
-    - uses: actions/checkout@v2
+    # actions/setup-python@v5 has built-in functionality for caching and restoring dependencies. 
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip' # caching pip dependencies
 
-    # use pip caching
-    - uses: actions/cache@v2
-      with:
-        path: ${{ matrix.path }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-         ${{ runner.os }}-pip-
-
-    # Install dependencies 
-    - name: Install
+    # Install numpy and pytest
+    - name: Install core dependencies
       run: |
-        python -m pip install numpy scipy matplotlib ${{matrix.pytest}}
+        python -m pip install --upgrade pip
+        python -m pip install ${{matrix.pytest}}
         python -m pip install -e .
 
-    - name: Self-test
+    # Run self-tests without Scipy and MPL
+    # Tests that require Scipy and MPL will be skipped
+    - name: Self-test without SciPy and MPL
       run: |
-        pytest --pyargs scpdt -v -s
+        pytest --pyargs scpdt -v
 
-    - name: Self-test CLI
+    - name: Self-test CLI without SciPy and MPL
+      run: |
+        python -m scpdt scpdt/tests/finder_cases.py -vv
+
+    # Install Scipy and MPL
+    - name: Install optional dependencies
+      run: |
+        python -m pip install -e '.[test]'
+
+    # Tests that require Scipy and MPL can now run
+    - name: Self-test with SciPy and MPL
+      run: |
+        pytest --pyargs scpdt -v
+
+    - name: Self-test CLI with SciPy and MPL
       run: |
         python -m scpdt scpdt/tests/finder_cases.py -vv
 
@@ -62,7 +69,7 @@ jobs:
 
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
-        python -mpip install pooch
+        python -m pip install pooch
         python -c'from scipy import ndimage; from scpdt import testmod; testmod(ndimage, verbose=True, strategy="api")'
 
     - name: Test pytest plugin

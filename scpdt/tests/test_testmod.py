@@ -1,8 +1,16 @@
 import io
 import doctest
+
 from contextlib import redirect_stderr
 
 import numpy as np
+
+try:
+    import matplotlib.pyplot as plt
+    HAVE_MATPLOTLIB = True
+except Exception:
+    HAVE_MATPLOTLIB = False
+
 import pytest
 
 try:
@@ -24,12 +32,14 @@ from ..impl import DTConfig
 _VERBOSE = 2
 
 
+@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_module():
     res, _ = _testmod(module, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0
 
 
+@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_module_vanilla_dtfinder():
     config = DTConfig()
     config.stopwords = []
@@ -38,12 +48,14 @@ def test_module_vanilla_dtfinder():
     assert res.attempted != 0
 
 
+@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
 def test_stopwords():
     res, _ = _testmod(stopwords, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0
+    
 
-
+@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_public_obj_discovery():
     res, _ = _testmod(module, verbose=_VERBOSE, strategy='api')
     assert res.failed == 0

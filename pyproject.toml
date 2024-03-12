@@ -24,8 +24,7 @@ dependencies  = [
 [project.optional-dependencies]
 test = [
     "scipy",
-    "matplotlib",
-    "pytest"
+    "matplotlib"
 ]
 
 [project.urls]
