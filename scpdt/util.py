@@ -17,7 +17,9 @@ def matplotlib_make_nongui():
     """
     try:
         import matplotlib
+        import matplotlib.pyplot as plt
         backend = matplotlib.get_backend()
+        plt.close('all')
         matplotlib.use('Agg')
     except ImportError:
         backend = None
