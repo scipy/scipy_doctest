@@ -85,6 +85,7 @@ class DTConfig:
         a string. If not empty, the string value is used as the skip reason.
     """
     def __init__(self, *, # DTChecker configuration
+                          CheckerKlass=None,
                           default_namespace=None,
                           check_namespace=None,
                           rndm_markers=None,
@@ -108,6 +109,8 @@ class DTConfig:
                           pytest_extra_xfail=None,
     ):
         ### DTChecker configuration ###
+        self.CheckerKlass = CheckerKlass or DTChecker
+
         # The namespace to run examples in
         self.default_namespace = default_namespace or {}
 
@@ -340,7 +343,7 @@ class DTRunner(doctest.DocTestRunner):
         if config is None:
             config = DTConfig()
         if checker is None:
-            checker = DTChecker(config)
+            checker = config.CheckerKlass(config)
         self.nameerror_after_exception = config.nameerror_after_exception
         if optionflags is None:
             optionflags = config.optionflags
