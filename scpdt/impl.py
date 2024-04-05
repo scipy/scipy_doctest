@@ -217,6 +217,10 @@ def try_convert_namedtuple(got):
     return got_again
 
 
+def has_masked(got):
+    return 'masked_array' in got and '--' in got
+
+
 class DTChecker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
@@ -289,7 +293,7 @@ class DTChecker(doctest.OutputChecker):
             # maybe we are dealing with masked arrays?
             # their repr uses '--' for masked values and this is invalid syntax
             # If so, replace '--' by nans (they are masked anyway) and retry
-            if 'masked_array' in want or 'masked_array' in got:
+            if has_masked(want) or has_masked(got):
                 s_want = want.replace('--', 'nan')
                 s_got = got.replace('--', 'nan')
                 return self.check_output(s_want, s_got, optionflags)
