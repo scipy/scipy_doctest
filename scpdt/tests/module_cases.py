@@ -163,3 +163,24 @@ def array_abbreviation():
            [0,    0,    0, ...,    0,  999,    0],
            [0,    0,    0, ...,    0,    0, 1000]])
     """
+
+def nan_equal():
+    """
+    Test that nans are treated as equal.
+
+    >>> import numpy as np
+    >>> np.nan
+    np.float64(nan)
+
+    Complex nans
+    >>> np.nan - 1j*np.nan
+    nan + nanj
+
+    >>> np.nan + 1j*np.nan
+    np.complex128(nan+nanj)
+
+    Throw in infs, for a good measure
+    >>> np.inf + 1j*np.inf
+    inf + infj
+
+    """
