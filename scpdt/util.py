@@ -27,8 +27,9 @@ def matplotlib_make_nongui():
     try:
         # Matplotlib issues UserWarnings on plt.show() with a non-GUI backend,
         # Filter them out.
+        # UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", "Matplotlib", UserWarning)
+            warnings.filterwarnings("ignore", "FigureCanvasAgg", UserWarning)
             yield backend
     finally:
         if backend:
