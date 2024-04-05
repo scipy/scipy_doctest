@@ -139,6 +139,8 @@ class DTConfig:
                   'float64': np.float64,
                   'dtype': np.dtype,
                   'nan': np.nan,
+                  'nanj': np.complex128(1j*np.nan),
+                  'infj': complex(0, np.inf),
                   'NaN': np.nan,
                   'inf': np.inf,
                   'Inf': np.inf, }
@@ -343,7 +345,7 @@ class DTChecker(doctest.OutputChecker):
             warnings.simplefilter('ignore', VisibleDeprecationWarning)
 
             # This line is the crux of the whole thing. The rest is mostly scaffolding.
-            result = np.allclose(want, got, atol=self.atol, rtol=self.rtol)
+            result = np.allclose(want, got, atol=self.atol, rtol=self.rtol, equal_nan=True)
         return result
 
 
