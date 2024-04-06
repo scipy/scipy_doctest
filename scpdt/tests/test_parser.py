@@ -1,4 +1,4 @@
-from ..impl import DTConfig, DTParser, DebugDTRunner
+from ..impl import DTConfig, DTParser
 
 
 def test_parser_default_config():

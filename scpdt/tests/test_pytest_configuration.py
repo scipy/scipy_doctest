@@ -12,7 +12,7 @@ try:
 except Exception:
     HAVE_SCIPY = False
 
-from pathlib import PosixPath, Path
+from pathlib import Path
 
 from . import module_cases, failure_cases, failure_cases_2, stopwords_cases, local_file_cases
 

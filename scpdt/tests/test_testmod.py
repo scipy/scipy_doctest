@@ -6,7 +6,7 @@ from contextlib import redirect_stderr
 import numpy as np
 
 try:
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt    # noqa
     HAVE_MATPLOTLIB = True
 except Exception:
     HAVE_MATPLOTLIB = False
