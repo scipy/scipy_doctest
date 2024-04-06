@@ -1,4 +1,4 @@
-from scpdt.impl import DTConfig
+from .impl import DTConfig
 
 
 dt_config = DTConfig()

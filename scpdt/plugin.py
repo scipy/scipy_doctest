@@ -5,17 +5,16 @@ import bdb
 import warnings
 import doctest
 
-
 import pytest
 import _pytest
 from _pytest import doctest as pydoctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 
-from scpdt.impl import DTParser, DebugDTRunner
-from scpdt.conftest import dt_config
-from scpdt.util import np_errstate, matplotlib_make_nongui, temp_cwd
-from scpdt.frontend import find_doctests
+from .impl import DTParser, DebugDTRunner
+from .conftest import dt_config
+from .util import np_errstate, matplotlib_make_nongui, temp_cwd
+from .frontend import find_doctests
 
 
 def pytest_addoption(parser):
