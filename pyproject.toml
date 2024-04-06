@@ -4,17 +4,19 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "scpdt"
-authors = [
-    {name = "Evgeni Burovski et al", email = "evgeny.burovskiy@gmail.com"}
+maintainers = [
+    {name = "SciPy developers", email = "scipy-dev@python.org"}
     ]
 readme = "README.md"
 requires-python = ">=3.8"
 license={file = "LICENSE"}
 dynamic = ["version", "description"]
 classifiers = [
-    "Private :: Do Not Upload",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: BSD License",
+    "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Framework :: Pytest"
+    "Framework :: Pytest",
 ]
 dependencies  = [
     "numpy>=1.19.5",
