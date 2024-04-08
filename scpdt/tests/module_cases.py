@@ -3,6 +3,9 @@ __all__ = [
     'func7', 'manip_printoptions', 'array_abbreviation'
 ]
 
+import numpy as np
+import pytest
+
 def func():
     """
     >>> 2 / 3
@@ -171,16 +174,19 @@ def nan_equal():
     >>> import numpy as np
     >>> np.nan
     np.float64(nan)
+    """
 
+
+def test_cmplx_nan():
+    """
     Complex nans
+    >>> import numpy as np
     >>> np.nan - 1j*np.nan
     nan + nanj
 
     >>> np.nan + 1j*np.nan
     np.complex128(nan+nanj)
 
-    Throw in infs, for a good measure
-    >>> np.inf + 1j*np.inf
-    inf + infj
-
+    >>> 1j*np.complex128(np.nan)
+    np.complex128(nan+nanj)
     """
