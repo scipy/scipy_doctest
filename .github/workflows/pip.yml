@@ -62,7 +62,7 @@ jobs:
 
     - name: Test testfile CLI
       run: |
-        python -m scpdt ./scpdt/tests/scipy_linalg_tutorial_clone.rst -v
+        python -m scpdt ./scpdt/tests/scipy_ndimage_tutorial_clone.rst -v
 
     - name: Run testmod a scipy submodule
       run: |
