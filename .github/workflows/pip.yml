@@ -36,6 +36,11 @@ jobs:
         python -m pip install ${{matrix.pytest}} ${{matrix.pre}}
         python -m pip install -e . ${{matrix.pre}}
 
+    - name: Echo versions
+      run: |
+        python -m pytest --version
+        python -c"import numpy; print(f'{numpy.__version__ = }')"
+
     # Run self-tests without Scipy and MPL
     # Tests that require Scipy and MPL will be skipped
     - name: Self-test without SciPy and MPL
