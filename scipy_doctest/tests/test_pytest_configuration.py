@@ -66,7 +66,7 @@ def test_alt_checker(pytester):
     pytester.makeconftest(
         """
         import doctest
-        from scpdt.conftest import dt_config
+        from scipy_doctest.conftest import dt_config
 
         class Vanilla(doctest.OutputChecker):
             def __init__(self, config):

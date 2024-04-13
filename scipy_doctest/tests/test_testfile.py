@@ -20,4 +20,5 @@ def test_one_scipy_tutorial():
 def test_linalg_clone():
     # run on a clone of the scipy linalg tutorial
     path = 'scipy_ndimage_tutorial_clone.rst'
-    doctestfile(path, package='scpdt.tests', verbose=2, raise_on_error=False)
+    doctestfile(path, package='scipy_doctest.tests', verbose=2,
+                raise_on_error=False)

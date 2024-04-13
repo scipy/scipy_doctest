@@ -1,9 +1,9 @@
-from scpdt.conftest import dt_config
+from ..conftest import dt_config
 
 # Specify local files required by doctests
 dt_config.local_resources = {
-    'scpdt.tests.local_file_cases.local_files': ['local_file.txt'],
-    'scpdt.tests.local_file_cases.sio': ['octave_a.mat']
+    'scipy_doctest.tests.local_file_cases.local_files': ['local_file.txt'],
+    'scipy_doctest..local_file_cases.sio': ['octave_a.mat']
 }
 
 
