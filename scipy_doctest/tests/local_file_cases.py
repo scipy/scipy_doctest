@@ -3,7 +3,7 @@ from ..conftest import dt_config
 # Specify local files required by doctests
 dt_config.local_resources = {
     'scipy_doctest.tests.local_file_cases.local_files': ['local_file.txt'],
-    'scipy_doctest..local_file_cases.sio': ['octave_a.mat']
+    'scipy_doctest.local_file_cases.sio': ['octave_a.mat']
 }
 
 
