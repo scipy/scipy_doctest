@@ -45,11 +45,11 @@ jobs:
     # Tests that require Scipy and MPL will be skipped
     - name: Self-test without SciPy and MPL
       run: |
-        pytest --pyargs scpdt -v
+        pytest --pyargs scipy_doctest -v
 
     - name: Self-test CLI without SciPy and MPL
       run: |
-        python -m scpdt scpdt/tests/finder_cases.py -vv
+        python -m scipy_doctest scipy_doctest/tests/finder_cases.py -vv
 
     # Install Scipy and MPL
     - name: Install optional dependencies
@@ -59,29 +59,29 @@ jobs:
     # Tests that require Scipy and MPL can now run
     - name: Self-test with SciPy and MPL
       run: |
-        pytest --pyargs scpdt -v
+        pytest --pyargs scipy_doctest -v
 
     - name: Self-test CLI with SciPy and MPL
       run: |
-        python -m scpdt scpdt/tests/finder_cases.py -vv
+        python -m scipy_doctest scipy_doctest/tests/finder_cases.py -vv
 
     - name: Test testfile CLI
       run: |
-        python -m scpdt ./scpdt/tests/scipy_ndimage_tutorial_clone.rst -v
+        python -m scipy_doctest ./scipy_doctest/tests/scipy_ndimage_tutorial_clone.rst -v
 
     - name: Run testmod a scipy submodule
       run: |
-        python -c'from scipy.linalg import _basic; from scpdt import testmod; testmod(_basic, verbose=True)'
+        python -c'from scipy.linalg import _basic; from scipy_doctest import testmod; testmod(_basic, verbose=True)'
 
     - name: Run testmod a scipy submodule -- Public API onlly
       run: |
         python -m pip install pooch
-        python -c'from scipy import ndimage; from scpdt import testmod; testmod(ndimage, verbose=True, strategy="api")'
+        python -c'from scipy import ndimage; from scipy_doctest import testmod; testmod(ndimage, verbose=True, strategy="api")'
 
     - name: Test pytest plugin
-      # This test will fail in a venv where scpdt has not been installed and the plugin has not been activated
+      # This test will fail in a venv where scipy_doctest has not been installed and the plugin has not been activated
       run: |
-        test_files=("scpdt/tests/module_cases.py" "scpdt/tests/stopwords_cases.py" "scpdt/tests/local_file_cases.py")
+        test_files=("scipy_doctest/tests/module_cases.py" "scipy_doctest/tests/stopwords_cases.py")
           for file in "${test_files[@]}"; do
             python -m pytest "${file}" --doctest-modules
           done

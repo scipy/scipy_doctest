@@ -99,7 +99,7 @@ class TestCheckerDropIn:
         runner = DebugDTRunner(config=config)
         tests = DTFinder().find(module_cases.func)
 
-        with pytest.raises(doctest.DocTestFailure) as exc:
+        with pytest.raises(doctest.DocTestFailure):
             for t in tests:
                 runner.run(t)
 

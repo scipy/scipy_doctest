@@ -2,21 +2,19 @@
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
 import bdb
-import os
-import shutil
 import warnings
 import doctest
 
-
 import pytest
-from _pytest import doctest as pydoctest, mark, outcomes
+import _pytest
+from _pytest import doctest as pydoctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 
-from scpdt.impl import DTChecker, DTParser, DebugDTRunner
-from scpdt.conftest import dt_config
-from scpdt.util import np_errstate, matplotlib_make_nongui, temp_cwd
-from scpdt.frontend import find_doctests
+from .impl import DTParser, DebugDTRunner
+from .conftest import dt_config
+from .util import np_errstate, matplotlib_make_nongui, temp_cwd
+from .frontend import find_doctests
 
 
 def pytest_addoption(parser):
@@ -85,7 +83,7 @@ def _maybe_add_markers(item, config):
 
     extra_skip = dt_config.pytest_extra_skip
     skip_it = item.name in extra_skip
-    if item.name in extra_skip:
+    if skip_it:
         reason = extra_skip[item.name] or ''
         item.add_marker(
             pytest.mark.skip(reason=reason)
@@ -163,7 +161,7 @@ def _is_deprecated(module):
 
     res = False
     try:
-        with warnings.catch_warnings() as w:
+        with warnings.catch_warnings():
             warnings.simplefilter('error', DeprecationWarning)
             getattr(module, names[0])
             res = False
