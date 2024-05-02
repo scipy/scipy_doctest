@@ -367,4 +367,4 @@ leads to
 This package is work in progress. Contributions are most welcome!
 Please don't hesitate to open an issue in the tracker or send a pull request.
 
-The current location of the issue tracker is https://github.com/ev-br/scpdt.
+The current location of the issue tracker is https://github.com/scipy/scipy_doctest.
