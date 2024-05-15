@@ -1,5 +1,14 @@
 # Floating-point aware, human readable, numpy-compatible doctesting.
 
+# TL;DR
+
+This project extends the standard library `doctest` module to allow flexibility
+and easy customization of finding, parsing and checking code examples in
+documentation. 
+
+Can be used either as drop-in `doctest` replacement or through the `pytest`
+integration. Uses a floating-point aware doctest checker by default.
+
 ## Motivation and scope
 
 Having examples in the documentation is great. Having wrong examples in the
