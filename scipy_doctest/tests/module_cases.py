@@ -44,6 +44,32 @@ def func3():
     """
 
 
+def func_printed_arrays():
+    """
+    Check various ways handling of printed arrays can go wrong.
+
+    >>> import numpy as np
+    >>> a = np.arange(8).reshape(2, 4) / 3
+    >>> print(a)  # numpy 1.26.4
+    [[0.         0.33333333 0.66666667 1.        ]
+     [1.33333333 1.66666667 2.         2.33333333]]
+
+    >>> print(a)   # add spaces (older repr?)
+    [[ 0.         0.33333333 0.66666667 1.         ]
+     [ 1.33333333 1.66666667 2.         2.33333333 ]]
+
+    Also check 1D arrays
+    >>> a1 = np.arange(3)
+    >>> print(a1)
+    [0 1 2]
+    >>> print(a1)
+    [ 0 1 2]
+    >>> print(a1)
+    [ 0 1 2 ]
+
+    """
+
+
 def func4():
     """
     Test `# may vary` markers : these should not break doctests (but the code

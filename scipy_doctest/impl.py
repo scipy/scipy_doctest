@@ -219,6 +219,30 @@ def try_convert_namedtuple(got):
     return got_again
 
 
+def try_convert_printed_array(got):
+    """Printed arrays: reinsert commas.
+    """
+    # a minimal version is `s_got = ", ".join(got[1:-1].split())`
+    # but it fails if there's a space after the opening bracket: "[ 0 1 2 ]"
+    # For 2D arrays, split into rows, drop spurious entries, then reassemble.
+    if not got.startswith('['):
+        return got
+
+    g1 = got[1:-1]  # strip outer "[...]"-s
+    rows = [x for x in g1.split("[") if x]
+    rows2 = [", ".join(row.split()) for row in rows]
+
+    if got.startswith("[["):
+        # was a 2D array, restore the opening brackets in rows; XXX clean up
+        rows3 = ["[" + row for row in rows2]
+    else:
+        rows3 = rows2
+
+    # add back the outer brackets
+    s_got = "[" + ", ".join(rows3) + "]"
+    return s_got
+
+
 def has_masked(got):
     return 'masked_array' in got and '--' in got
 
@@ -280,8 +304,9 @@ class DTChecker(doctest.OutputChecker):
             cond = (s_want.startswith("[") and s_want.endswith("]") and
                     s_got.startswith("[") and s_got.endswith("]"))
             if cond:
-                s_want = ", ".join(s_want[1:-1].split())
-                s_got = ", ".join(s_got[1:-1].split())
+                s_want = try_convert_printed_array(s_want)
+                s_got = try_convert_printed_array(s_got)
+
                 return self.check_output(s_want, s_got, optionflags)
             
             #handle array abbreviation for n-dimensional arrays, n >= 1
