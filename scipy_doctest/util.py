@@ -98,7 +98,7 @@ def numpy_rndm_state():
 
 
 @contextmanager
-def noop_context_mgr(test):
+def noop_context_mgr(test=None):
     """Do nothing.
 
     This is a stub context manager to serve as a default for
@@ -117,7 +117,7 @@ def np_errstate():
 
 
 @contextmanager
-def warnings_errors(test):
+def warnings_errors(test=None):
     """Temporarily turn all warnings to errors."""
     with warnings.catch_warnings():
         warnings.simplefilter('error', Warning)

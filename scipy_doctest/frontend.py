@@ -70,8 +70,11 @@ def find_doctests(module, strategy=None,
         return tests
 
     if strategy == "api":
-        (items, names), failures = get_public_objects(module,
-                                                      skiplist=config.skiplist)
+
+        with config.user_context_mgr():
+            # user_context_mgr may want to e.g. filter warnings on imports?
+            (items, names), failures = get_public_objects(module,
+                                                          skiplist=config.skiplist)
         if failures:
             mesg = "\n".join([_[2] for _ in failures])
             raise ValueError(mesg)
