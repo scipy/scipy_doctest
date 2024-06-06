@@ -2,6 +2,7 @@ import re
 import warnings
 import doctest
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
+from itertools import zip_longest
 
 import numpy as np
 
@@ -328,7 +329,7 @@ class DTChecker(doctest.OutputChecker):
         except Exception:
             # heterog tuple, eg (1, np.array([1., 2.]))
             try:
-                return all(self._do_check(w, g) for w, g in zip(a_want, a_got))
+                return all(self._do_check(w, g) for w, g in zip_longest(a_want, a_got))
             except (TypeError, ValueError):
                 return False
 
