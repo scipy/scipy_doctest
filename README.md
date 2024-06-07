@@ -154,14 +154,42 @@ The pytest plugin enables the use of `scipy_doctest` tools to perform doctests.
 
 Follow the given instructions to utilize the pytest plugin for doctesting.
 
-### Running Doctests on Packages/Projects
+### Running Doctests on SciPy
+
+1. **Install plugin**
+
+```bash
+pip install scipy-doctest
+```
+
+2. **Configure Your Doctesting Experience**
+
+To tailor your doctesting experience, you can utilize an instance of `DTConfig`.
+An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/scipy/scipy_doctest#tailoring-your-doctesting-experience) section.
+
+3. **Run Doctests**
+
+Doctesting is configured to execute on SciPy using the `dev.py` module.
+
+To run all doctests, use the following command:
+```bash
+python dev.py smoke-docs
+```
+
+To run doctests on specific SciPy modules, e.g: `cluster`, use the following command:
+
+```bash
+python dev.py smoke-docs -s cluster
+```
+
+### Running Doctests on Other Packages/Projects
 
 If you want to run doctests on packages or projects other than SciPy, follow these steps:
 
 1. **Install the plugin**
 
 ```bash
-pip install git+https://github.com/scipy/scipy_doctest.git@main
+pip install scipy-doctest
 ```
 
 2. **Register or Load the Plugin**
@@ -243,7 +271,7 @@ dt_config.skiplist = {
 
 If you don't set these attributes, the [default settings](https://github.com/scipy/scipy_doctest/blob/58ff06a837b7bff1dbac6560013fc6fd07952ae2/scipy_doctest/impl.py#L94) of the attributes are used.
 
-By following these steps, you will be able to effectively use the Scpdt pytest plugin for doctests in your Python projects.
+By following these steps, you will be able to effectively use the SciPy Doctest pytest plugin for doctests in your Python projects.
 
 Happy testing!
 
