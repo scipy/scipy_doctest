@@ -82,7 +82,7 @@ the output. Thus the example source needs to be valid python code still.
 
 ```
 $ pip install -e .
-$ pytest --pyargs scpdt
+$ pytest --pyargs scipy_doctest
 ```
 
 ## Usage
@@ -100,7 +100,7 @@ For example,
 
 ```
 >>> from scipy import linalg
->>> from scpdt import testmod
+>>> from scipy_doctest import testmod
 >>> res, hist = testmod(linalg, strategy='api')
 >>> res
 TestResults(failed=0, attempted=764)
@@ -116,7 +116,7 @@ the behavior of the eponymous functions of the `doctest` module).
 
 There is a basic CLI, which also mimics that of the `doctest` module:
 ```
-$ python -m scpdt foo.py
+$ python -m scipy_doctest foo.py
 ```
 
 Note that, just like `$ python -m doctest foo.py`, this may
@@ -124,7 +124,7 @@ fail if `foo.py` is a part of a package due to package imports.
 
 Text files can also be CLI-checked:
 ```
-$ python -m scpdt bar.rst
+$ python -m scipy_doctest bar.rst
 ```
 
 
@@ -148,25 +148,24 @@ passing the instance to `testmod` or constructors of `DT*` objects. Defaults
 are provided, based on a long-term usage in SciPy.
 
 
-### The Scpdt Pytest Plugin
+### The SciPy Doctest Pytest Plugin
 
-The pytest plugin enables the use of scpdt tools to perform doctests. 
+The pytest plugin enables the use of `scipy_doctest` tools to perform doctests.
 
 Follow the given instructions to utilize the pytest plugin for doctesting.
 
-### Running doctests on Scipy
+### Running Doctests on SciPy
+
 1. **Install plugin**
 
-Start by installing the pytest plugin via pip:
-
 ```bash
-pip install git+https://github.com/ev-br/scpdt.git@main
+pip install scipy-doctest
 ```
 
 2. **Configure Your Doctesting Experience**
 
 To tailor your doctesting experience, you can utilize an instance of `DTConfig`.
-An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/ev-br/scpdt#tailoring-your-doctesting-experience) section.
+An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/scipy/scipy_doctest#tailoring-your-doctesting-experience) section.
 
 3. **Run Doctests**
 
@@ -174,13 +173,13 @@ Doctesting is configured to execute on SciPy using the `dev.py` module.
 
 To run all doctests, use the following command:
 ```bash
-python dev.py test --doctests
+python dev.py smoke-docs
 ```
 
 To run doctests on specific SciPy modules, e.g: `cluster`, use the following command:
 
 ```bash
-python dev.py test --doctests -s cluster
+python dev.py smoke-docs -s cluster
 ```
 
 ### Running Doctests on Other Packages/Projects
@@ -190,7 +189,7 @@ If you want to run doctests on packages or projects other than SciPy, follow the
 1. **Install the plugin**
 
 ```bash
-pip install git+https://github.com/ev-br/scpdt.git@main
+pip install scipy-doctest
 ```
 
 2. **Register or Load the Plugin**
@@ -202,14 +201,14 @@ To do this, add the following line of code:
 ```python
 # In your conftest.py file or test module
 
-pytest_plugins = "scpdt"
+pytest_plugins = "scipy_doctest"
 ```
 
 Check out the [pytest documentation](https://docs.pytest.org/en/stable/how-to/writing_plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file) for more information on requiring/loading plugins in a test module or `conftest.py` file.
 
 3. **Configure your doctesting experience**
 
-An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/ev-br/scpdt#tailoring-your-doctesting-experience) section.
+An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/scipy/scipy_doctest#tailoring-your-doctesting-experience) section.
 
 4. **Run doctests** 
 
@@ -232,7 +231,7 @@ $ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
 
 ### Tailoring Your Doctesting Experience
 
-[DTConfig](https://github.com/ev-br/scpdt/blob/671083d65b54111770cee71c9bc790ac652d59ab/scpdt/impl.py#L16) offers a variety of attributes that allow you to fine-tune your doctesting experience. 
+[DTConfig](https://github.com/scipy/scipy_doctest/blob/main/scipy_doctest/impl.py#L23) offers a variety of attributes that allow you to fine-tune your doctesting experience.
 
 These attributes include:
 1. **default_namespace (dict):** Defines the namespace in which examples are executed.
@@ -252,7 +251,7 @@ Typically, it is entered for each DocTest (especially in API documentation), ens
 12. **nameerror_after_exception (bool):** Controls whether subsequent examples in the same test, after one has failed, may raise spurious NameErrors. Set to `True` if you want to observe these errors or if your test is expected to raise NameErrors. The default is `False`.
 
 To set any of these attributes, create an instance of `DTConfig` called `dt_config`. 
-This instance is already set as an [attribute of pytest's `Config` object](https://github.com/ev-br/scpdt/blob/671083d65b54111770cee71c9bc790ac652d59ab/scpdt/plugin.py#L27).
+This instance is already set as an [attribute of pytest's `Config` object](https://github.com/scipy/scipy_doctest/blob/58ff06a837b7bff1dbac6560013fc6fd07952ae2/scipy_doctest/plugin.py#L39).
 
 **Example:**
 
@@ -260,8 +259,8 @@ This instance is already set as an [attribute of pytest's `Config` object](https
 dt_config = DTConfig()
 dt_config.stopwords = {'plt.', '.hist', '.show'}
 dt_config.local_resources = {
-    'scpdt.tests.local_file_cases.local_files': ['scpdt/tests/local_file.txt'],
-    'scpdt.tests.local_file_cases.sio': ['scpdt/tests/octave_a.mat']
+    'scipy_doctest.tests.local_file_cases.local_files': ['scipy_doctest/tests/local_file.txt'],
+    'scipy_doctest.tests.local_file_cases.sio': ['scipy_doctest/tests/octave_a.mat']
 }
 dt_config.skiplist = {
     'scipy.special.sinc',
@@ -270,9 +269,9 @@ dt_config.skiplist = {
 }
 ```
 
-If you don't set these attributes, the [default settings](https://github.com/ev-br/scpdt/blob/671083d65b54111770cee71c9bc790ac652d59ab/scpdt/impl.py#L73) of the attributes are used.
+If you don't set these attributes, the [default settings](https://github.com/scipy/scipy_doctest/blob/58ff06a837b7bff1dbac6560013fc6fd07952ae2/scipy_doctest/impl.py#L94) of the attributes are used.
 
-By following these steps, you will be able to effectively use the Scpdt pytest plugin for doctests in your Python projects.
+By following these steps, you will be able to effectively use the SciPy Doctest pytest plugin for doctests in your Python projects.
 
 Happy testing!
 
@@ -299,7 +298,7 @@ instead of `$ pytest --pyargs scipy`.
 If push comes to shove, you may try using the magic env variable:
 ` PY_IGNORE_IMPORTMISMATCH=1 pytest ...`,
 however the need usually indicates an issue with the package itself.
-(see [gh-107](https://github.com/ev-br/scpdt/pull/107) for an example).
+(see [gh-107](https://github.com/scipy/scipy_doctest/pull/107) for an example).
 
 - *Optional dependencies are not that optional*
 
