@@ -108,11 +108,11 @@ def test_wrong_lengths():
     assert res.failed == 2
 
 
-def test_different_iterables():
+def test_tuple_and_list():
     config = DTConfig()
     res, _ = _testmod(failure_cases,
-                      strategy=[failure_cases.different_iteralbes_1,
-                                failure_cases.different_iteralbes_2],
+                      strategy=[failure_cases.tuple_and_list_1,
+                                failure_cases.tuple_and_list_2],
                       config=config)
     assert res.failed == 2
 

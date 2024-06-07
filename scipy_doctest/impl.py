@@ -324,7 +324,7 @@ class DTChecker(doctest.OutputChecker):
                 return self.check_output(want_again, got_again, optionflags)
 
         # Validate data type if list or tuple
-        is_list_or_tuple = (isinstance(a_want, (list, tuple)) or
+        is_list_or_tuple = (isinstance(a_want, (list, tuple)) and
                             isinstance(a_got, (list, tuple)))
         if is_list_or_tuple and type(a_want) is not type(a_got):
             return False

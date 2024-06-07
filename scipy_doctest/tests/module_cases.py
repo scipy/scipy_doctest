@@ -190,3 +190,19 @@ def test_cmplx_nan():
     >>> 1j*np.complex128(np.nan)
     np.complex128(nan+nanj)
     """
+
+
+def array_and_list_1():
+    """
+    >>> import numpy as np
+    >>> np.array([1, 2, 3])
+    [1, 2, 3]
+    """
+
+
+def array_and_list_2():
+    """
+    >>> import numpy as np
+    >>> [1, 2, 3]
+    array([1, 2, 3])
+    """
