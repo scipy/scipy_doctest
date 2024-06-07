@@ -108,6 +108,15 @@ def test_wrong_lengths():
     assert res.failed == 2
 
 
+def test_different_iterables():
+    config = DTConfig()
+    res, _ = _testmod(failure_cases,
+                      strategy=[failure_cases.different_iteralbes_1,
+                                failure_cases.different_iteralbes_2],
+                      config=config)
+    assert res.failed == 2
+
+
 class TestLocalFiles:
     def test_local_files(self):
         # A doctest tries to open a local file. Test that it works

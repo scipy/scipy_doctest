@@ -1,4 +1,5 @@
-__all__ = ['func9', 'func10', 'iterable_length_1', 'iterable_length_2']
+__all__ = ['func9', 'func10', 'iterable_length_1', 'iterable_length_2',
+           'different_iteralbes_1', 'different_iteralbes_2']
 
 
 def func9():
@@ -29,4 +30,19 @@ def iterable_length_2():
     """
     >>> [1, 2, 3]
     [1, 2]
+    """
+
+
+def different_iteralbes_1():
+    """
+    >>> [0, 1, 2]
+    (0, 1, 2)
+    """
+
+
+def different_iteralbes_2():
+    """
+    >>> import numpy as np
+    >>> np.array([0, 1, 2])
+    [0, 1, 2]
     """
