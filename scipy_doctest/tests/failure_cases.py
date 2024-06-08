@@ -1,4 +1,5 @@
-__all__ = ['func9', 'func10', 'iterable_length_1', 'iterable_length_2']
+__all__ = ['func9', 'func10', 'iterable_length_1', 'iterable_length_2',
+           'tuple_and_list_1', 'tuple_and_list_2']
 
 
 def func9():
@@ -29,4 +30,18 @@ def iterable_length_2():
     """
     >>> [1, 2, 3]
     [1, 2]
+    """
+
+
+def tuple_and_list_1():
+    """
+    >>> [0, 1, 2]
+    (0, 1, 2)
+    """
+
+
+def tuple_and_list_2():
+    """
+    >>> (0, 1, 2)
+    [0, 1, 2]
     """
