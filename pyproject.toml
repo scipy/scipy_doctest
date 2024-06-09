@@ -30,7 +30,7 @@ test = [
 ]
 
 [project.urls]
-Home = "https://github.com/ev-br/scpdt"
+Home = "https://github.com/scipy/scipy_doctest"
 
 [tool.pytest.ini_options]
 addopts = "--verbose --color=yes"

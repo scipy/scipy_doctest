@@ -1,7 +1,5 @@
 """
-Doctests on steroids.
-
-Whitespace-insensitive, numpy-aware, floating-point-aware doctest helpers.
+Configurable, whitespace-insensitive, floating-point-aware doctest helpers.
 """
 
 
