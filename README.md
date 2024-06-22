@@ -256,7 +256,8 @@ This instance is already set as an [attribute of pytest's `Config` object](https
 **Example:**
 
 ```python
-dt_config = DTConfig()
+from scipy_doctest import dt_config   # a DTCongig instance with default settings
+
 dt_config.stopwords = {'plt.', '.hist', '.show'}
 dt_config.local_resources = {
     'scipy_doctest.tests.local_file_cases.local_files': ['scipy_doctest/tests/local_file.txt'],
