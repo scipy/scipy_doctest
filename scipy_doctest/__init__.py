@@ -9,6 +9,7 @@ try:
     # register internal modules with pytest; obscure errors galore otherwise
     import pytest
     pytest.register_assert_rewrite(
+        "scipy_doctest",
         "scipy_doctest.conftest", "scipy_doctest.impl", "scipy_doctest.util",
         "scipy_doctest.frontend", "scipy_doctest.plugin"
     )
