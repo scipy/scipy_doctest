@@ -81,7 +81,7 @@ the output. Thus the example source needs to be valid python code still.
 ## Install and test
 
 ```
-$ pip install -e .
+$ pip install scipy-doctest
 $ pytest --pyargs scipy_doctest
 ```
 
@@ -93,9 +93,56 @@ or nearly so.
 
 The other layer is the `pytest` plugin.
 
+### Run doctests via pytest
+
+To run doctests on your package or project, follow these steps:
+
+1. **Install the plugin**
+
+```bash
+pip install scipy-doctest
+```
+
+2. **Register or load the plugin**
+
+Next, you need to register or load the pytest plugin within your test module or `conftest.py` file. 
+
+To do this, add the following line of code:
+
+```python
+# In your conftest.py file or test module
+
+pytest_plugins = "scipy_doctest"
+```
+
+Check out the [pytest documentation](https://docs.pytest.org/en/stable/how-to/writing_plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file) for more information on requiring/loading plugins in a test module or `conftest.py` file.
+
+3. **Run doctests** 
+
+Once the plugin is registered, run the doctests by executing the following command:
+
+```bash
+$ python -m pytest --doctest-modules
+```
+or
+```bash
+$ pytest --pyargs <your-package> --doctest-modules
+```
+
+By default, all doctests are collected. To only collect public objects, `strategy="api"`,
+use the command flag
+
+```bash
+$ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
+```
+
+See [More fine-grained control](https://github.com/scipy/scipy_doctest#More-fine-grained-control) section
+for details on how to customize the behavior.
+
 
 ### Basic usage
 
+The use of `pytest` is optional, and you can use the `doctest` layer API.
 For example,
 
 ```
@@ -112,7 +159,8 @@ For more details, see the `testmod` docstring. Other useful functions are
 `find_doctests`, `run_docstring_examples` and `testfile` (the latter two mimic
 the behavior of the eponymous functions of the `doctest` module).
 
-#### Command-line interface
+
+### Command-line interface
 
 There is a basic CLI, which also mimics that of the `doctest` module:
 ```
@@ -127,8 +175,10 @@ Text files can also be CLI-checked:
 $ python -m scipy_doctest bar.rst
 ```
 
+Notice that the command-line usage only uses the default `DTConfig` settings.
 
-#### More fine-grained control
+
+## More fine-grained control
 
 More fine-grained control of the functionality is available via the following
 classes
@@ -147,122 +197,41 @@ configuration is simply creating an instance, overriding an attribute and
 passing the instance to `testmod` or constructors of `DT*` objects. Defaults
 are provided, based on a long-term usage in SciPy.
 
+See the [DTConfig docstring](https://github.com/scipy/scipy_doctest/blob/main/scipy_doctest/impl.py#L24)
+for the full set of attributes that allow you to fine-tune your doctesting experience.
 
-### The SciPy Doctest Pytest Plugin
+To set any of these attributes, create an instance of `DTConfig` and assign the attributes
+in a usual way. 
 
-The pytest plugin enables the use of `scipy_doctest` tools to perform doctests.
+If using the pytest plugin, it is convenient to use the default instance, which
+is predefined in `scipy_doctest/conftest.py`. This instance will be automatically
+passed around via an
+[attribute of pytest's `Config` object](https://github.com/scipy/scipy_doctest/blob/58ff06a837b7bff1dbac6560013fc6fd07952ae2/scipy_doctest/plugin.py#L39).
 
-Follow the given instructions to utilize the pytest plugin for doctesting.
+### Examples
 
-### Running Doctests on SciPy
-
-1. **Install plugin**
-
-```bash
-pip install scipy-doctest
+```
+dt_config = DTConfig()
 ```
 
-2. **Configure Your Doctesting Experience**
-
-To tailor your doctesting experience, you can utilize an instance of `DTConfig`.
-An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/scipy/scipy_doctest#tailoring-your-doctesting-experience) section.
-
-3. **Run Doctests**
-
-Doctesting is configured to execute on SciPy using the `dev.py` module.
-
-To run all doctests, use the following command:
-```bash
-python dev.py smoke-docs
-```
-
-To run doctests on specific SciPy modules, e.g: `cluster`, use the following command:
-
-```bash
-python dev.py smoke-docs -s cluster
-```
-
-### Running Doctests on Other Packages/Projects
-
-If you want to run doctests on packages or projects other than SciPy, follow these steps:
-
-1. **Install the plugin**
-
-```bash
-pip install scipy-doctest
-```
-
-2. **Register or Load the Plugin**
-
-Next, you need to register or load the pytest plugin within your test module or `conftest.py` file. 
-
-To do this, add the following line of code:
+or, if using pytest,
 
 ```python
-# In your conftest.py file or test module
-
-pytest_plugins = "scipy_doctest"
+from scipy_doctest.conftest import dt_config   # a DTConfig instance with default settings
 ```
 
-Check out the [pytest documentation](https://docs.pytest.org/en/stable/how-to/writing_plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file) for more information on requiring/loading plugins in a test module or `conftest.py` file.
+and then
 
-3. **Configure your doctesting experience**
-
-An in-depth explanation is given in the [tailoring your doctesting experience](https://github.com/scipy/scipy_doctest#tailoring-your-doctesting-experience) section.
-
-4. **Run doctests** 
-
-Once the plugin is registered, you can run your doctests by executing the following command:
-
-```bash
-$ python -m pytest --doctest-modules
 ```
-or
-```bash
-$ pytest --pyargs <your-package> --doctest-modules
-```
+dt_config.rndm_markers = {'# unintialized'}
 
-By default, all doctests are collected. To only collect public objects, `strategy="api"`,
-use the command flag
+dt_config.stopwords = {'plt.', 'plt.hist', 'plt.show'}
 
-```bash
-$ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
-```
-
-### Tailoring Your Doctesting Experience
-
-[DTConfig](https://github.com/scipy/scipy_doctest/blob/main/scipy_doctest/impl.py#L23) offers a variety of attributes that allow you to fine-tune your doctesting experience.
-
-These attributes include:
-1. **default_namespace (dict):** Defines the namespace in which examples are executed.
-2. **check_namespace (dict):** Specifies the namespace for conducting checks.
-3. **rndm_markers (set):** Provides additional directives which act like `# doctest: + SKIP`.
-4. **atol (float) and rtol (float):** Sets absolute and relative tolerances for validating doctest examples. 
-Specifically, it governs the check using `np.allclose(want, got, atol=atol, rtol=rtol)`.
-5. **optionflags (int):** These are doctest option flags.
-The default setting includes `NORMALIZE_WHITESPACE` | `ELLIPSIS` | `IGNORE_EXCEPTION_DETAIL`.
-6. **stopwords (set):** If an example contains any of these stopwords, the output is not checked (though the source's validity is still assessed).
-7. **pseudocode (list):** Lists strings that, when found in an example, result in no doctesting. This resembles the `# doctest +SKIP` directive and is useful for pseudocode blocks or similar cases.
-8. **skiplist (set):** A list of names of objects with docstrings known to fail doctesting and are intentionally excluded from testing.
-9. **user_context_mgr:** A context manager for running tests. 
-Typically, it is entered for each DocTest (especially in API documentation), ensuring proper testing isolation.
-10. **local_resources (dict):** Specifies local files needed for specific tests. The format is `{test.name: list-of-files}`. File paths are relative to the path of `test.filename`.
-11. **parse_namedtuples (bool):** Determines whether to perform a literal comparison (e.g., `TTestResult(pvalue=0.9, statistic=42)`) or extract and compare the tuple values (e.g., `(0.9, 42)`). The default is `True`.
-12. **nameerror_after_exception (bool):** Controls whether subsequent examples in the same test, after one has failed, may raise spurious NameErrors. Set to `True` if you want to observe these errors or if your test is expected to raise NameErrors. The default is `False`.
-
-To set any of these attributes, create an instance of `DTConfig` called `dt_config`. 
-This instance is already set as an [attribute of pytest's `Config` object](https://github.com/scipy/scipy_doctest/blob/58ff06a837b7bff1dbac6560013fc6fd07952ae2/scipy_doctest/plugin.py#L39).
-
-**Example:**
-
-```python
-from scipy_doctest import dt_config   # a DTCongig instance with default settings
-
-dt_config.stopwords = {'plt.', '.hist', '.show'}
 dt_config.local_resources = {
     'scipy_doctest.tests.local_file_cases.local_files': ['scipy_doctest/tests/local_file.txt'],
     'scipy_doctest.tests.local_file_cases.sio': ['scipy_doctest/tests/octave_a.mat']
 }
+
 dt_config.skiplist = {
     'scipy.special.sinc',
     'scipy.misc.who',
@@ -272,9 +241,60 @@ dt_config.skiplist = {
 
 If you don't set these attributes, the [default settings](https://github.com/scipy/scipy_doctest/blob/58ff06a837b7bff1dbac6560013fc6fd07952ae2/scipy_doctest/impl.py#L94) of the attributes are used.
 
-By following these steps, you will be able to effectively use the SciPy Doctest pytest plugin for doctests in your Python projects.
 
-Happy testing!
+#### Alternative Checkers
+
+By default, we use the floating-point aware `DTChecker`. If you want to use an
+alternative checker, all you need to do is to define the corresponding class,
+and add an attribute to the `DTConfig` instance. For example,
+
+
+```
+class VanillaOutputChecker(doctest.OutputChecker):
+    """doctest.OutputChecker to drop in for DTChecker.
+
+    LSP break: OutputChecker does not have __init__,
+    here we add it to agree with DTChecker.
+    """
+    def __init__(self, config):
+        pass
+```
+
+and
+
+```
+dt_config = DTConfig()
+dt_config.CheckerKlass = VanillaOutputChecker
+```
+
+See [a pytest example](https://github.com/scipy/scipy_doctest/blob/main/scipy_doctest/tests/test_pytest_configuration.py#L63)
+and [a doctest example](https://github.com/scipy/scipy_doctest/blob/main/scipy_doctest/tests/test_runner.py#L94)
+for more details.
+
+
+### The SciPy Doctest Pytest Plugin
+
+The pytest plugin enables the use of `scipy_doctest` tools to perform doctests.
+
+Follow the given instructions to utilize the pytest plugin for doctesting.
+
+### NumPy and SciPy wrappers
+
+
+NumPy wraps `scipy-doctest` with the `spin` command
+
+```
+$ spin check-docs
+```
+
+SciPy wraps `scipy-doctest` with custom `dev.py` commands:
+
+```
+$ python dev.py smoke-docs    # check docstrings
+$ python dev.py smoke-tutorials   # ReST user guide tutorials
+```
+
+
 
 ## Rough edges and sharp bits
 
@@ -308,7 +328,7 @@ being optional. So you either guard the imports in doctests (yikes!), or
 the collections fails if dependencies are not available.
 
 The solution is to explicitly `--ignore` the paths to modules with optionals.
-(or use `DTConfig.pytest_extra_ignore` list):
+(or, equivalently, use `DTConfig.pytest_extra_ignore` list):
 
 ```
 $ pytest --ignore=/build-install/lib/scipy/python3.10/site-packages/scipy/_lib ...
@@ -352,20 +372,17 @@ leads to
   differences are: (i) `pytest-doctestplus` is more sensitive to formatting,
   including whitespace---thus if numpy tweaks its output formatting, doctests
   may start failing; (ii) there is still a need for `# doctest: +FLOAT_CMP`
-  directives; (iii) being a pytest plugin, `pytest-doctestplus` is tightly
-  coupled to `pytest`. It thus needs to follow `pytest` releases, and
-  some maintenance work may be required to adapt when `pytest` publishes a new
-  release.
+  directives.
 
   This project takes a different approach: in addition to plugging into `pytest`,
   we closely follow the `doctest` API and implementation, which are naturally
   way more stable then `pytest`.
 
-- `NumPy` and `SciPy` use modified doctesting in their `refguide-check` utilities.
+- `NumPy` and `SciPy` were using modified doctesting in their `refguide-check` utilities.
   These utilities are tightly coupled to their libraries, and have been reported
   to be not easy to reason about, work with, and extend to other projects.
 
-  This project is nothing but the core functionality of the modified
+  This project is mainly the core functionality of the modified
   `refguide-check` doctesting, extracted to a separate package. 
   We believe having it separate simplifies both addressing the needs of these
   two packages, and potential adoption by other projects.

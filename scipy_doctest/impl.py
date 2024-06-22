@@ -91,6 +91,14 @@ class DTConfig:
         adding `# may vary` to the outputs of all examples.
         Each key is a doctest name to skip, and the corresponding value is
         a string. If not empty, the string value is used as the skip reason.
+    CheckerKlass : object, optional
+        The class for the Checker object. Must mimic the ``DTChecker`` API:
+        subclass the `doctest.OutputChecker` and make the constructor signature
+        read ``__init__(self, config=None)``, where `config` is a ``DTConfig``
+        instance.
+        This class will be instantiated by ``DTRunner``.
+        Defaults to `DTChecker`.
+
     """
     def __init__(self, *, # DTChecker configuration
                           CheckerKlass=None,
