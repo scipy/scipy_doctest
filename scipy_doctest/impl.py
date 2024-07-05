@@ -514,6 +514,7 @@ class DTParser(doctest.DocTestParser):
         """
         stopwords = self.config.stopwords
         pseudocode = self.config.pseudocode
+        rndm_markers = self.config.rndm_markers
 
         SKIP = doctest.OPTIONFLAGS_BY_NAME['SKIP']
         keep_skipping_this_block = False
@@ -536,6 +537,11 @@ class DTParser(doctest.DocTestParser):
                 # Found pseudocode. Add a `#doctest: +SKIP` directive.
                 # NB: Could have just skipped it via `continue`.
                 example.options[SKIP] = True
+
+            if any(word in example.source for word in rndm_markers):
+                # Found a `# may vary`. Do not check the output (but do check
+                # that the source is valid python).
+                example.want += "  # _ignore\n"
 
             if any(word in example.source for word in stopwords):
                 # Found a stopword. Do not check the output (but do check

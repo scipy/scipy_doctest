@@ -48,8 +48,8 @@ Its main features are
   >>> np.random.randint(100)
   42     # may vary
   ```
-Note that the markers (by default, `"# may vary"` and `"# random"`) are applied
-to an example's output, not its source.
+Note that the markers (by default, `"# may vary"` and `"# random"`) can be applied
+to either an example's output, or its source.
 
 Also note a difference with respect to the standard `# doctest: +SKIP`: the latter
 skips the example entirely, while these additional markers only skip checking
