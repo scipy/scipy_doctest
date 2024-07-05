@@ -161,8 +161,25 @@ class TestMayVary:
                                   filename='none', lineno=0)
 
         runner = DebugDTRunner()
-        with pytest.raises(doctest.DocTestFailure):
+        runner.run(test)
+
+        # one example tried, of which zero failed
+        assert runner.get_history() == {'may_vary_source': (0, 1)}
+
+    def test_may_vary_syntax_error(self):
+        # `# may vary` markers do not mask syntax errors, unlike `# doctest: +SKIP`
+        string = ">>> 1 += 2    # may vary\n"
+        string += "42\n"
+
+        parser = DTParser()
+        test = parser.get_doctest(string, globs={},
+                                  name='may_vary_err',
+                                  filename='none', lineno=0)
+
+        runner = DebugDTRunner()
+        with pytest.raises(Exception) as exc_info:
             runner.run(test)
+        assert exc_info.type == doctest.UnexpectedException
 
 
 string='''\
