@@ -49,11 +49,9 @@ def test_stopword_cases(pytester):
     assert result.ret == pytest.ExitCode.OK
 
 
-@pytest.mark.xfail(reason="XXX: passes locally, fails on CI")
 @pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_local_file_cases(pytester):
-    """Test that local files are found for use in doctests.
-    """
+    """Test that local files are found for use in doctests."""
     path_str = local_file_cases.__file__
     python_file = Path(path_str)
     result = pytester.inline_run(python_file, "--doctest-modules")
