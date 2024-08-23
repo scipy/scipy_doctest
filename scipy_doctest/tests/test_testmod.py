@@ -117,6 +117,16 @@ def test_tuple_and_list():
     assert res.failed == 2
 
 
+@pytest.mark.parametrize('strict, num_fails', [(True, 1), (False, 0)])
+class TestStrictDType:
+    def test_np_fix(self, strict, num_fails):
+        config = DTConfig(strict_check=strict)
+        res, _ = _testmod(failure_cases,
+                          strategy=[failure_cases.dtype_mismatch],
+                          config=config)
+        assert res.failed == num_fails
+
+
 class TestLocalFiles:
     def test_local_files(self):
         # A doctest tries to open a local file. Test that it works
