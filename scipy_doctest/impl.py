@@ -391,12 +391,12 @@ class DTChecker(doctest.OutputChecker):
             got_dtype = np.asarray(got).dtype
             if want_dtype != got_dtype:
                 return False
-        else:
-            try:
-                if want == got:
-                    return True
-            except Exception:
-                pass
+
+        try:
+            if want == got:
+                return True
+        except Exception:
+            pass
 
         with warnings.catch_warnings():
             # NumPy's ragged array deprecation of np.array([1, (2, 3)])
