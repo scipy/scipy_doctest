@@ -45,3 +45,11 @@ def tuple_and_list_2():
     >>> (0, 1, 2)
     [0, 1, 2]
     """
+
+
+def dtype_mismatch():
+    """
+    >>> import numpy as np
+    >>> 3.0
+    3
+    """

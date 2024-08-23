@@ -40,6 +40,11 @@ class DTConfig:
     rtol : float
         Absolute and relative tolerances to check doctest examples with.
         Specifically, the check is ``np.allclose(want, got, atol=atol, rtol=rtol)``
+    strict_check : bool
+       Whether to check that dtypes match or rely on the lax definition of
+       equality of numpy objects. For instance, `3 == np.float64(3)`, but
+       dtypes do not match.
+       Default is False.
     optionflags : int
         doctest optionflags
         Default is ``NORMALIZE_WHITESPACE | ELLIPSIS | IGNORE_EXCEPTION_DETAIL``
@@ -107,6 +112,7 @@ class DTConfig:
                           rndm_markers=None,
                           atol=1e-8,
                           rtol=1e-2,
+                          strict_check=False,
                           # DTRunner configuration
                           optionflags=None,
                           # DTFinder/DTParser configuration
@@ -161,8 +167,8 @@ class DTConfig:
                             '#random', '#Random',
                             "# may vary"}
         self.rndm_markers = rndm_markers
-
         self.atol, self.rtol = atol, rtol
+        self.strict_check = strict_check
 
         ### DTRunner configuration ###
 
@@ -363,23 +369,35 @@ class DTChecker(doctest.OutputChecker):
             return False
 
         # ... and defer to numpy
+        strict = self.config.strict_check
         try:
-            return self._do_check(a_want, a_got)
+            return self._do_check(a_want, a_got, strict)
         except Exception:
             # heterog tuple, eg (1, np.array([1., 2.]))
             try:
-                return all(self._do_check(w, g) for w, g in zip_longest(a_want, a_got))
+                return all(
+                    self._do_check(w, g, strict) for w, g in zip_longest(a_want, a_got)
+                )
             except (TypeError, ValueError):
                 return False
 
-    def _do_check(self, want, got):
+    def _do_check(self, want, got, strict_check):
         # This should be done exactly as written to correctly handle all of
         # numpy-comparable objects, strings, and heterogeneous tuples
+
+        # NB: 3 == np.float64(3.0) but dtypes differ
+        if strict_check:
+            want_dtype = np.asarray(want).dtype
+            got_dtype = np.asarray(got).dtype
+            if want_dtype != got_dtype:
+                return False
+
         try:
             if want == got:
                 return True
         except Exception:
             pass
+
         with warnings.catch_warnings():
             # NumPy's ragged array deprecation of np.array([1, (2, 3)])
             warnings.simplefilter('ignore', VisibleDeprecationWarning)
