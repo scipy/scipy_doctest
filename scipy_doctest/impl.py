@@ -368,6 +368,10 @@ class DTChecker(doctest.OutputChecker):
         if is_list_or_tuple and type(a_want) is not type(a_got):
             return False
 
+        # XXX
+        if isinstance(a_got, np.generic) and not want.startswith('np'):
+            return False
+
         # ... and defer to numpy
         strict = self.config.strict_check
         try:
