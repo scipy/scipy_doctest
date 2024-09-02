@@ -103,10 +103,16 @@ class DTConfig:
         instance.
         This class will be instantiated by ``DTRunner``.
         Defaults to `DTChecker`.
+    ParserKlass : object, optional
+        The class for the Parser object. Must mimic the ``DTParser`` API:
+        subclass the `doctest.DocTestParser` and make the constructor signature
+        be ``__init__(self, config=None)``, where ``config`` is a ``DTConfig``
+        instance.
+        This class will be instantiated by ``DTRunner`` via ``DTFinder``.
+        Defaults to ``DTParser``.
 
     """
     def __init__(self, *, # DTChecker configuration
-                          CheckerKlass=None,
                           default_namespace=None,
                           check_namespace=None,
                           rndm_markers=None,
@@ -129,9 +135,11 @@ class DTConfig:
                           pytest_extra_ignore=None,
                           pytest_extra_skip=None,
                           pytest_extra_xfail=None,
+                          # plug-and-play configuration
+                          CheckerKlass=None,
+                          ParserKlass=None,
     ):
         ### DTChecker configuration ###
-        self.CheckerKlass = CheckerKlass or DTChecker
 
         # The namespace to run examples in
         self.default_namespace = default_namespace or {}
@@ -216,6 +224,10 @@ class DTConfig:
         self.pytest_extra_ignore = pytest_extra_ignore or []
         self.pytest_extra_skip = pytest_extra_skip or {}
         self.pytest_extra_xfail = pytest_extra_xfail or {}
+
+        ### Plug-and-play: Checker/Parser classes
+        self.CheckerKlass = CheckerKlass or DTChecker
+        self.ParserKlass = ParserKlass or DTParser
 
 
 def try_convert_namedtuple(got):
@@ -495,7 +507,7 @@ class DTFinder(doctest.DocTestFinder):
             config = DTConfig()
         self.config = config
         if parser is None:
-            parser = DTParser(config)
+            parser = config.ParserKlass(config)
         verbose, dtverbose = util._map_verbosity(verbose)
         super().__init__(dtverbose, parser, recurse, exclude_empty)
 

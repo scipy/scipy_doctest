@@ -1,8 +1,12 @@
 import io
-
 import doctest
-
 import pytest
+
+try:
+    import xdoctest
+    HAVE_XDOCTEST = True
+except ModuleNotFoundError:
+    HAVE_XDOCTEST = False
 
 from . import (failure_cases as module,
                finder_cases as finder_module,
@@ -91,15 +95,53 @@ class VanillaOutputChecker(doctest.OutputChecker):
     def __init__(self, config):
         pass
 
+
 class TestCheckerDropIn:
     """Test DTChecker and vanilla doctest OutputChecker being drop-in replacements.
     """
     def test_vanilla_checker(self):
         config = DTConfig(CheckerKlass=VanillaOutputChecker)
         runner = DebugDTRunner(config=config)
-        tests = DTFinder().find(module_cases.func)
+        tests = DTFinder(config=config).find(module_cases.func)
 
         with pytest.raises(doctest.DocTestFailure):
             for t in tests:
                 runner.run(t)
 
+
+class VanillaParser(doctest.DocTestParser):
+    def __init__(self, config):
+        self.config = config
+        pass
+
+
+class XDParser(doctest.DocTestParser):
+    """ Wrap `xdoctest` parser.
+    """
+    def __init__(self, config):
+        self.config = config
+        self.xd = xdoctest.parser.DoctestParser()
+
+    def parse(self, string, name='<string>'):
+        return self.xd.parse(string)
+
+
+class TestParserDropIn:
+    """ Test an alternative DoctestParser
+    """
+    def test_vanilla_parser(self):
+        config = DTConfig(ParserKlass=VanillaParser)
+        runner = DebugDTRunner(config=config)
+        tests = DTFinder(config=config).find(module_cases.func3)
+
+        assert len(tests) == 1
+        assert len(tests[0].examples) == 3
+
+    @pytest.mark.skipif(not HAVE_XDOCTEST, reason="needs xdoctest")
+    def test_xdoctest_parser(self):
+        config = DTConfig(ParserKlass=XDParser)
+        runner = DebugDTRunner(config=config)
+        tests = DTFinder(config=config).find(module_cases.func3)
+
+        assert len(tests) == 1
+        assert len(tests[0].examples) == 3
