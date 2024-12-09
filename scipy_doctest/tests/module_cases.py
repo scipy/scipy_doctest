@@ -164,14 +164,25 @@ def array_abbreviation():
     """
     Numpy abbreviates arrays, check that it works.
 
-    NB: the implementation might need to change when
-    numpy finally disallows default-creating ragged arrays.
-    Currently, `...` gets interpreted as an Ellipsis,
-    thus the `a_want/a_got` variables in DTChecker are in fact
-    object arrays.
+    XXX: check if ... creates ragged arrays, avoid if so.
+
+    NumPy 2.2 abbreviations
+    =======================
+
+    NumPy 2.2 adds shape=(...) to abbreviated arrays.
+
+    This is not a valid argument to `array(...), so it cannot be eval-ed,
+    and need to be removed for doctesting.
+
+    The implementation handles both formats, and checks the shapes if present
+    in the actual output. If not present in the output, they are ignored.
+
     >>> import numpy as np
     >>> np.arange(10000)
-    array([0, 1, 2, ..., 9997, 9998, 9999])
+    array([0, 1, 2, ..., 9997, 9998, 9999], shape=(10000,))
+
+    >>> np.arange(10000, dtype=np.uint16)
+    array([   0,    1,    2, ..., 9997, 9998, 9999], shape=(10000,), dtype=uint16)
 
     >>> np.diag(np.arange(33)) / 30
     array([[0., 0., 0., ..., 0., 0.,0.],
@@ -180,53 +191,17 @@ def array_abbreviation():
            ...,
            [0., 0., 0., ..., 1., 0., 0.],
            [0., 0., 0., ..., 0., 1.03333333, 0.],
-           [0., 0., 0., ..., 0., 0., 1.06666667]])
+           [0., 0., 0., ..., 0., 0., 1.06666667]], shape=(33, 33))
 
 
-    >>> np.diag(np.arange(1, 1001, dtype=float))
+    >>> np.diag(np.arange(1, 1001, dtype=np.uint16))
     array([[1,    0,    0, ...,    0,    0,    0],
            [0,    2,    0, ...,    0,    0,    0],
            [0,    0,    3, ...,    0,    0,    0],
             ...,
            [0,    0,    0, ...,  998,    0,    0],
            [0,    0,    0, ...,    0,  999,    0],
-           [0,    0,    0, ...,    0,    0, 1000]])
-    """
-
-
-def array_abbreviation_2():
-    """ NumPy 2.2 adds shape=(...) to abbreviated arrays.
-
-    So the actual numpy==2.2.0 output below is
-    # array([   0,    1,    2, ..., 9997, 9998, 9999], shape=(10000,))
-
-    This is not a valid argument to `array(...), so it cannot be eval-ed,
-    and need to be removed for doctesting.
-
-    >>> import numpy as np
-    >>> np.arange(10000)
-    array([   0,    1,    2, ..., 9997, 9998, 9999])
-
-    >>> np.arange(10000, dtype=np.uint16)
-    array([   0,    1,    2, ..., 9997, 9998, 9999], dtype=np.uint16)
-
-    >>> np.arange(5000).reshape(50, 100)
-    array([[   0,    1,    2, ...,   97,   98,   99],
-           [ 100,  101,  102, ...,  197,  198,  199],
-           [ 200,  201,  202, ...,  297,  298,  299],
-           ...,
-           [4700, 4701, 4702, ..., 4797, 4798, 4799],
-           [4800, 4801, 4802, ..., 4897, 4898, 4899],
-           [4900, 4901, 4902, ..., 4997, 4998, 4999]])
-
-    >>> np.arange(5000, dtype=np.uint16).reshape(50, 100)
-    array([[   0,    1,    2, ...,   97,   98,   99],
-           [ 100,  101,  102, ...,  197,  198,  199],
-           [ 200,  201,  202, ...,  297,  298,  299],
-           ...,
-           [4700, 4701, 4702, ..., 4797, 4798, 4799],
-           [4800, 4801, 4802, ..., 4897, 4898, 4899],
-           [4900, 4901, 4902, ..., 4997, 4998, 4999]], dtype=uint16)
+           [0,    0,    0, ...,    0,    0, 1000]], shape=(1000, 1000), dtype=uint16)
     """
 
 

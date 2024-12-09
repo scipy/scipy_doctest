@@ -148,8 +148,12 @@ class DTConfig:
                   'masked_array': np.ma.masked_array,
                   'int64': np.int64,
                   'uint64': np.uint64,
-                  'int8': np.int8,
                   'int32': np.int32,
+                  'uint32': np.uint32,
+                  'int16': np.int16,
+                  'uint16': np.uint16,
+                  'int8': np.int8,
+                  'uint8': np.uint8,
                   'float32': np.float32,
                   'float64': np.float64,
                   'dtype': np.dtype,
@@ -262,20 +266,27 @@ def has_masked(got):
     return 'masked_array' in got and '--' in got
 
 
-def remove_shape_from_abbrv(s_got):
-    """NumPy 2.2 added shape=(123,) to abbreviated array repr. Remove it.
+def try_split_shape_from_abbrv(s_got):
+    """NumPy 2.2 added shape=(123,) to abbreviated array repr.
+
+    If present, split it off, and return a tuple. `(array, shape)`
     """
     if "shape=" in s_got:
         # handle
         # array(..., shape=(1000,))
         # array(..., shape=(100, 100))
         # array(..., shape=(100, 100), dtype=uint16)
-        grp = re.match(r'(.+) shape=\(([\d\s,]+\))(.+)', s_got, flags=re.DOTALL).groups()
+        match = re.match(r'(.+),\s+shape=\(([\d\s,]+)\)(.+)', s_got, flags=re.DOTALL)
+        if match:
+            grp = match.groups()
 
-        s_got = grp[0] + grp[-1]
-        s_got = s_got.replace(',,', ',')
+            s_got = grp[0] + grp[-1]
+            s_got = s_got.replace(',,', ',')
+            shape_str = f'({grp[1]})'
 
-    return ''.join(s_got.split('...,'))
+            return ''.join(s_got.split('...,')), shape_str
+
+    return ''.join(s_got.split('...,')), ''
 
 
 class DTChecker(doctest.OutputChecker):
@@ -344,8 +355,14 @@ class DTChecker(doctest.OutputChecker):
             ndim_array = (s_want.startswith("array([") and "..." in s_want and 
                           s_got.startswith("array([") and "..." in s_got)
             if ndim_array:
-                s_want = remove_shape_from_abbrv(s_want)
-                s_got = remove_shape_from_abbrv(s_got)
+                s_want, want_shape = try_split_shape_from_abbrv(s_want)
+                s_got, got_shape = try_split_shape_from_abbrv(s_got)
+
+                if got_shape:
+                    # NumPy 2.2 output, `with shape=`, check the shapes, too
+                    s_want = f"{s_want}, {want_shape}"
+                    s_got = f"{s_got}, {got_shape}"
+
                 return self.check_output(s_want, s_got, optionflags)
 
             # maybe we are dealing with masked arrays?
