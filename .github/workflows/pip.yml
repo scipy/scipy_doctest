@@ -15,7 +15,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.10', '3.11']
+        python-version: ['3.11', '3.12']
+        numpy: ['"numpy<2.2"', 'numpy']
         os:  [ubuntu-latest]
         pytest: ['"pytest<8.0"', pytest]
         pre: ['', '--pre']
@@ -35,6 +36,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install ${{matrix.pytest}} ${{matrix.pre}}
         python -m pip install -e . ${{matrix.pre}}
+        python -m pip install ${{matrix.numpy}}
 
     - name: Echo versions
       run: |
