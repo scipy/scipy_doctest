@@ -262,6 +262,22 @@ def has_masked(got):
     return 'masked_array' in got and '--' in got
 
 
+def remove_shape_from_abbrv(s_got):
+    """NumPy 2.2 added shape=(123,) to abbreviated array repr. Remove it.
+    """
+    if "shape=" in s_got:
+        # handle
+        # array(..., shape=(1000,))
+        # array(..., shape=(100, 100))
+        # array(..., shape=(100, 100), dtype=uint16)
+        grp = re.match(r'(.+) shape=\(([\d\s,]+\))(.+)', s_got, flags=re.DOTALL).groups()
+
+        s_got = grp[0] + grp[-1]
+        s_got = s_got.replace(',,', ',')
+
+    return ''.join(s_got.split('...,'))
+
+
 class DTChecker(doctest.OutputChecker):
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
@@ -325,11 +341,11 @@ class DTChecker(doctest.OutputChecker):
                 return self.check_output(s_want, s_got, optionflags)
             
             #handle array abbreviation for n-dimensional arrays, n >= 1
-            ndim_array = (s_want.startswith("array([") and s_want.endswith("])") and 
-                          s_got.startswith("array([") and s_got.endswith("])"))
+            ndim_array = (s_want.startswith("array([") and "..." in s_want and 
+                          s_got.startswith("array([") and "..." in s_got)
             if ndim_array:
-                s_want = ''.join(s_want.split('...,'))
-                s_got = ''.join(s_got.split('...,'))
+                s_want = remove_shape_from_abbrv(s_want)
+                s_got = remove_shape_from_abbrv(s_got)
                 return self.check_output(s_want, s_got, optionflags)
 
             # maybe we are dealing with masked arrays?

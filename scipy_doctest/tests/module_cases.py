@@ -193,6 +193,43 @@ def array_abbreviation():
            [0,    0,    0, ...,    0,    0, 1000]])
     """
 
+
+def array_abbreviation_2():
+    """ NumPy 2.2 adds shape=(...) to abbreviated arrays.
+
+    So the actual numpy==2.2.0 output below is
+    # array([   0,    1,    2, ..., 9997, 9998, 9999], shape=(10000,))
+
+    This is not a valid argument to `array(...), so it cannot be eval-ed,
+    and need to be removed for doctesting.
+
+    >>> import numpy as np
+    >>> np.arange(10000)
+    array([   0,    1,    2, ..., 9997, 9998, 9999])
+
+    >>> np.arange(10000, dtype=np.uint16)
+    array([   0,    1,    2, ..., 9997, 9998, 9999], dtype=np.uint16)
+
+    >>> np.arange(5000).reshape(50, 100)
+    array([[   0,    1,    2, ...,   97,   98,   99],
+           [ 100,  101,  102, ...,  197,  198,  199],
+           [ 200,  201,  202, ...,  297,  298,  299],
+           ...,
+           [4700, 4701, 4702, ..., 4797, 4798, 4799],
+           [4800, 4801, 4802, ..., 4897, 4898, 4899],
+           [4900, 4901, 4902, ..., 4997, 4998, 4999]])
+
+    >>> np.arange(5000, dtype=np.uint16).reshape(50, 100)
+    array([[   0,    1,    2, ...,   97,   98,   99],
+           [ 100,  101,  102, ...,  197,  198,  199],
+           [ 200,  201,  202, ...,  297,  298,  299],
+           ...,
+           [4700, 4701, 4702, ..., 4797, 4798, 4799],
+           [4800, 4801, 4802, ..., 4897, 4898, 4899],
+           [4900, 4901, 4902, ..., 4997, 4998, 4999]], dtype=uint16)
+    """
+
+
 def nan_equal():
     """
     Test that nans are treated as equal.
