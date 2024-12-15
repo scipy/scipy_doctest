@@ -90,14 +90,24 @@ def find_doctests(module, strategy=None,
     # Having collected the list of objects, extract doctests
     tests = []
     for item, name in zip(items, names):
-        full_name = module.__name__ + '.' + name
         if inspect.ismodule(item):
             # do not recurse, only inspect the module docstring
             _finder = DTFinder(recurse=False, config=config)
             t = _finder.find(item, name, globs=globs, extraglobs=extraglobs)
+            unique_t = set(t)
         else:
+            full_name = module.__name__ + '.' + name
             t = finder.find(item, full_name, globs=globs, extraglobs=extraglobs)
-        tests += t
+
+            unique_t = set(t)
+            if hasattr(item, '__mro__'):
+                # is a class, inspect superclasses
+                # cf https://github.com/scipy/scipy_doctest/issues/177
+                # item.__mro__ starts with itself, ends with `object`
+                for item_ in item.__mro__[1:-1]:
+                    t_ = finder.find(item_, full_name, globs=globs, extraglobs=extraglobs)
+                    unique_t.update(set(t_))
+        tests += list(unique_t)
 
     # If the skiplist contains methods of objects, their doctests may have been
     # left in the `tests` list. Remove them.
