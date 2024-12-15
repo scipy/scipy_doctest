@@ -1,9 +1,12 @@
 import pytest
 
+import numpy as np
+
 from . import finder_cases
 from ..util import get_all_list, get_public_objects
 from ..impl import DTFinder, DTConfig
 from ..frontend import find_doctests
+
 
 def test_get_all_list():
     items, depr, other = get_all_list(finder_cases)
@@ -111,6 +114,7 @@ class TestSkiplist:
         #   - *private* stuff, which is not in `__all__`
         wanted_names = ['Klass', 'Klass.meth']
         wanted_names = [base] + [base + '.' + n for n in wanted_names]
+        wanted_names += [f'{base}.Klass.__weakref__']
 
         assert sorted(names) == sorted(wanted_names)
 
@@ -129,6 +133,7 @@ class TestSkiplist:
         #   - the 'base' module (via the strategy=<list>)
         wanted_names = ['Klass', 'Klass.meth']
         wanted_names = [base + '.' + n for n in wanted_names]
+        wanted_names += [f'{base}.Klass.__weakref__']
 
         assert sorted(names) == sorted(wanted_names)
 
@@ -139,7 +144,8 @@ def test_explicit_object_list():
 
     base = 'scipy_doctest.tests.finder_cases'
     assert ([test.name for test in tests] ==
-            [base + '.Klass', base + '.Klass.meth', base + '.Klass.meth_2'])
+            [f'{base}.Klass', f'{base}.Klass.meth', f'{base}.Klass.meth_2',
+             f'{base}.Klass.__weakref__'])
 
 
 def test_explicit_object_list_with_module():
@@ -151,7 +157,8 @@ def test_explicit_object_list_with_module():
 
     base = 'scipy_doctest.tests.finder_cases'
     assert ([test.name for test in tests] ==
-            [base, base + '.Klass', base + '.Klass.meth', base + '.Klass.meth_2'])
+            [base, f'{base}.Klass', f'{base}.Klass.meth', f'{base}.Klass.meth_2',
+             f'{base}.Klass.__weakref__'])
 
 
 def test_find_doctests_api():
@@ -161,10 +168,18 @@ def test_find_doctests_api():
     base = 'scipy_doctest.tests.finder_cases'
     assert ([test.name for test in tests] ==
             [base + '.func', base + '.Klass', base + '.Klass.meth',
-             base + '.Klass.meth_2', base])
+             base + '.Klass.meth_2', base + '.Klass.__weakref__', base])
 
 
 def test_dtfinder_config():
     config = DTConfig()
     finder = DTFinder(config=config)
     assert finder.config is config
+
+
+@pytest.mark.skipif(np.__version__ < '2', reason="XXX check if works on numpy 1.x")
+def test_descriptors_get_collected():
+    tests = find_doctests(np, strategy=[np.dtype])
+    names = [test.name for test in tests]
+    assert 'numpy.dtype.kind' in names   # was previously missing
+
