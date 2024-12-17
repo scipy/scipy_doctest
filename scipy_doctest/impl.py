@@ -541,17 +541,11 @@ class DTFinder(doctest.DocTestFinder):
             tests = super().find(obj, name, module, globs, extraglobs)
 
             if inspect.isclass(obj):
-                descriptors = [
-                    (name_, method)
-                    for name_, method in inspect.getmembers(obj)
-                    if inspect.isdatadescriptor(method)
-                ]
-
-                for name_, method in descriptors:
-                    tests += super().find(
-                        method, f'{name}.{name_}', module, globs, extraglobs
-                    )
-
+                for name_, method in inspect.getmembers(obj):
+                    if inspect.isdatadescriptor(method):
+                        tests += super().find(
+                            method, f'{name}.{name_}', module, globs, extraglobs
+                        )
             return tests
 
 
