@@ -310,7 +310,10 @@ $ pytest build-install/lib/python3.10/site-packages/scipy/ --doctest-modules
 
 instead of `$ pytest --pyargs scipy`.
 
-If push comes to shove, you may try using the magic env variable:
+If you use actual editable installs, of the `pip install --no-build-isolation -e .` variety, you may
+need to add `--import-mode=importlib` to the `pytest` invocation.
+
+If push really comes to shove, you may try using the magic env variable:
 ` PY_IGNORE_IMPORTMISMATCH=1 pytest ...`,
 however the need usually indicates an issue with the package itself.
 (see [gh-107](https://github.com/scipy/scipy_doctest/pull/107) for an example).
