@@ -3,7 +3,7 @@ Configurable, whitespace-insensitive, floating-point-aware doctest helpers.
 """
 
 
-__version__ = "1.6"
+__version__ = "1.7dev0"
 
 try:
     # register internal modules with pytest; obscure errors galore otherwise
