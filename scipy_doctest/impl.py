@@ -1,5 +1,6 @@
 import re
 import warnings
+import inspect
 import doctest
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 from itertools import zip_longest
@@ -538,6 +539,13 @@ class DTFinder(doctest.DocTestFinder):
         # XXX: does this make similar checks in testmod/testfile duplicate?
         if module not in self.config.skiplist:   
             tests = super().find(obj, name, module, globs, extraglobs)
+
+            if inspect.isclass(obj):
+                for name_, method in inspect.getmembers(obj):
+                    if inspect.isdatadescriptor(method):
+                        tests += super().find(
+                            method, f'{name}.{name_}', module, globs, extraglobs
+                        )
             return tests
 
 
