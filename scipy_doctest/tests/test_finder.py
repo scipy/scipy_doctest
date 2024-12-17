@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from . import finder_cases
+from . import finder_cases_2
 from ..util import get_all_list, get_public_objects
 from ..impl import DTFinder, DTConfig
 from ..frontend import find_doctests
@@ -142,10 +143,13 @@ def test_explicit_object_list():
     objs = [finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy=objs)
 
+    names = sorted([test.name for test in tests])
+
     base = 'scipy_doctest.tests.finder_cases'
-    assert ([test.name for test in tests] ==
-            [f'{base}.Klass', f'{base}.Klass.meth', f'{base}.Klass.meth_2',
-             f'{base}.Klass.__weakref__'])
+    expected = sorted([f'{base}.Klass', f'{base}.Klass.__weakref__',
+                       f'{base}.Klass.meth', f'{base}.Klass.meth_2',])
+
+    assert names == expected
 
 
 def test_explicit_object_list_with_module():
@@ -155,20 +159,26 @@ def test_explicit_object_list_with_module():
     objs = [finder_cases, finder_cases.Klass]
     tests = find_doctests(finder_cases, strategy=objs)
 
+    names = sorted([test.name for test in tests])
+
     base = 'scipy_doctest.tests.finder_cases'
-    assert ([test.name for test in tests] ==
-            [base, f'{base}.Klass', f'{base}.Klass.meth', f'{base}.Klass.meth_2',
-             f'{base}.Klass.__weakref__'])
+    expected = sorted([base, f'{base}.Klass', f'{base}.Klass.__weakref__',
+                       f'{base}.Klass.meth', f'{base}.Klass.meth_2'])
+
+    assert names == expected
 
 
 def test_find_doctests_api():
     # Test that the module itself is included with strategy='api'
     tests = find_doctests(finder_cases, strategy='api')
 
+    names = sorted([test.name for test in tests])
+
     base = 'scipy_doctest.tests.finder_cases'
-    assert ([test.name for test in tests] ==
-            [base + '.func', base + '.Klass', base + '.Klass.meth',
+    expected = sorted([base + '.func', base + '.Klass', base + '.Klass.meth',
              base + '.Klass.meth_2', base + '.Klass.__weakref__', base])
+
+    assert names == expected
 
 
 def test_dtfinder_config():
@@ -182,4 +192,31 @@ def test_descriptors_get_collected():
     tests = find_doctests(np, strategy=[np.dtype])
     names = [test.name for test in tests]
     assert 'numpy.dtype.kind' in names   # was previously missing
+
+
+@pytest.mark.parametrize('strategy', [None, 'api'])
+def test_private_superclasses(strategy):
+    # Test that methods from inherited private superclasses get collected
+    tests = find_doctests(finder_cases_2, strategy=strategy)
+
+    names = set(test.name.split('.')[-1] for test in tests)
+    expected_names = ['finder_cases_2', 'public_method', 'private_method']
+    if strategy == 'api':
+        expected_names += ['__weakref__']
+
+    assert len(tests) == len(expected_names)
+    assert names == set(expected_names)
+
+
+def test_private_superclasses_2():
+    # similar to test_private_superclass, only with an explicit strategy=list
+    tests = find_doctests(finder_cases_2, strategy=[finder_cases_2.Klass])
+
+    names = set(test.name.split('.')[-1] for test in tests)
+    expected_names = ['public_method', 'private_method', '__weakref__']
+
+    assert len(tests) == len(expected_names)
+    assert names == set(expected_names)
+
+
 
