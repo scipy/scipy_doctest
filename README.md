@@ -1,5 +1,18 @@
 # Floating-point aware, human readable, numpy-compatible doctesting.
 
+
+[![PyPI version][pypi-version]][pypi-link]
+[![Conda-Forge][conda-badge]][conda-link]
+
+
+<!-- prettier-ignore-start -->
+[conda-badge]:              https://img.shields.io/conda/vn/conda-forge/scipy-doctest
+[conda-link]:               https://anaconda.org/conda-forge/scipy-doctest
+[pypi-link]:                https://pypi.org/project/scipy-doctest/
+[pypi-version]:             https://img.shields.io/pypi/v/scipy-doctest
+<!-- prettier-ignore-end -->
+
+
 ## TL;DR
 
 This project extends the standard library `doctest` module to allow flexibility
