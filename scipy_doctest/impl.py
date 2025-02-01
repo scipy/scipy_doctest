@@ -190,7 +190,8 @@ class DTConfig:
                  '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
                  '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
                  '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim(',
-                 'ax.set('}
+                 'ax.set(', '.text(',
+            }
         self.stopwords = stopwords
 
         if pseudocode is None:
