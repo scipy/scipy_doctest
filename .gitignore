@@ -5,3 +5,6 @@ bin/
 venv/
 .pytest_cache
 dist/
+build/
+.vscode
+**/.DS_Store
