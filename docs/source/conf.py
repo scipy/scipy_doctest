@@ -13,9 +13,6 @@ author = 'SciPy Contributors'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-# Set the default role so we can use `text` instead of ``text``
-default_role = "literal"
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_copybutton',
@@ -30,7 +27,6 @@ source_suffix = [".rst"]
 # The main toctree document.
 master_doc = 'index'
 
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
@@ -44,6 +40,3 @@ html_theme_options = {
         "text": "SciPy Doctest",
     }
 }
-
-autosummary_generate = True
-
