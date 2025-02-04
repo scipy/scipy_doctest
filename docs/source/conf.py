@@ -17,7 +17,8 @@ author = 'SciPy Contributors'
 default_role = "literal"
 
 extensions = [
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinx_copybutton',
 ]
 
 templates_path = ['_templates']
