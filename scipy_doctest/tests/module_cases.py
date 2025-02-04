@@ -3,8 +3,6 @@ __all__ = [
     'func7', 'manip_printoptions', 'array_abbreviation'
 ]
 
-import numpy as np
-import pytest
 
 def func():
     """
