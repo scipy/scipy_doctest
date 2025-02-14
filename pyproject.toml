@@ -7,7 +7,7 @@ name = "scipy_doctest"
 maintainers = [
     {name = "SciPy developers", email = "scipy-dev@python.org"}
     ]
-readme = "README.rst"
+readme = "README.md"
 requires-python = ">=3.8"
 license={file = "LICENSE"}
 dynamic = ["version", "description"]

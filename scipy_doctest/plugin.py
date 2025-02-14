@@ -47,7 +47,7 @@ def pytest_ignore_collect(collection_path, config):
     """
     Determine whether to ignore the specified collection path.
     This function is used to exclude the 'tests' directory and test modules when
-    the '--doctest-modules' option is used.
+    the `--doctest-modules` option is used.
     """
     if config.getoption("--doctest-modules"):
         path_str = str(collection_path)
@@ -62,7 +62,7 @@ def pytest_ignore_collect(collection_path, config):
 def is_private(item):
     """Decide if an DocTestItem `item` is private.
 
-    Private items are ignored in pytest_collect_modifyitem`.
+    Private items are ignored in `pytest_collect_modifyitem`.
     """
     # Here we look at the name of a test module/object. A seemingly less
     # hacky alternative is to populate a set of seen `item.dtest` attributes

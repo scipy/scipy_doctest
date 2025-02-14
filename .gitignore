@@ -8,3 +8,7 @@ dist/
 build/
 .vscode
 **/.DS_Store
+
+# Sphinx documentation
+docs/_build/
+docs/generated/

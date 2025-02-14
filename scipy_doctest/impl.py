@@ -68,6 +68,7 @@ class DTConfig:
         >>> for test in tests:
         ...     with user_context(test):
         ...         runner.run(test)
+        
         Default is a noop.
     local_resources: dict
         If a test needs some local files, list them here. The format is
@@ -225,8 +226,13 @@ class DTConfig:
 
 
 def try_convert_namedtuple(got):
-    # suppose that "got" is smth like MoodResult(statistic=10, pvalue=0.1).
-    # Then convert it to the tuple (10, 0.1), so that can later compare tuples.
+    """
+    Converts a string representation of a named tuple into a plain tuple.
+
+    Suppose that "got" is smth like MoodResult(statistic=10, pvalue=0.1).
+    Then convert it to the tuple (10, 0.1), so that can later compare tuples.
+    """
+
     num = got.count('=')
     if num == 0:
         # not a nameduple, bail out
@@ -265,6 +271,8 @@ def try_convert_printed_array(got):
 
 
 def has_masked(got):
+    """Check if a given string represents a NumPy masked array.
+    """
     return 'masked_array' in got and '--' in got
 
 
@@ -292,6 +300,20 @@ def try_split_shape_from_abbrv(s_got):
 
 
 class DTChecker(doctest.OutputChecker):
+    """
+    A drop-in replacement for `doctest.OutputChecker`.
+
+    Allows robust output comparison for numerical values and special
+    cases involving NumPy arrays, masked arrays, namedtuples, and object
+    memory addresses. It is configurable via a `DTConfig` object.
+    
+    Parameters:
+    -----------
+    config : DTConfig, optional
+        Configuration object that controls various aspects of output checking.
+        If not provided, a default `DTConfig` instance is used.
+
+    """
     obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
 
@@ -443,6 +465,25 @@ class DTChecker(doctest.OutputChecker):
 
 
 class DTRunner(doctest.DocTestRunner):
+    """
+    A drop-in replacement for `doctest.DocTestRunner`.
+
+    Improves how test names are reported and allows better control over exception handling. 
+    It integrates with `DTConfig` to apply customized settings for doctest execution.
+
+    Parameters:
+    -----------
+    checker : doctest.OutputChecker, optional
+        A custom output checker, defaults to `DTConfig.CheckerKlass(config)`.
+    verbose : bool, optional
+        If `True`, enables verbose output.
+    optionflags : int, optional
+        Bitwise OR of `doctest` option flags; defaults to `DTConfig.optionflags`.
+    config : DTConfig, optional
+        A configuration object controlling doctest behavior; a default instance is used if not provided.
+
+    """
+
     DIVIDER = "\n"
 
     def __init__(self, checker=None, verbose=None, optionflags=None, config=None):
@@ -498,7 +539,8 @@ class DTRunner(doctest.DocTestRunner):
 
 
 class DebugDTRunner(DTRunner):
-    """Doctest runner which raises on a first error.
+    """
+    Doctest runner which raises an exception on the first error.
 
     Almost verbatim copy of `doctest.DebugRunner`.
     """
@@ -522,8 +564,24 @@ class DebugDTRunner(DTRunner):
 
 
 class DTFinder(doctest.DocTestFinder):
-    """A Finder with helpful defaults.
     """
+    A drop-in replacement for `doctest.DocTestFinder` with helpful defaults.
+
+    Parameters:
+    -----------
+    verbose : bool, optional
+        If `True`, enables verbose output during doctest discovery.
+    parser : doctest.DocTestParser, optional
+        A custom parser for extracting doctests; defaults to `DTParser(config)`.
+    recurse : bool, default=True
+        Whether to recursively search for doctests in nested objects.
+    exclude_empty : bool, default=True
+        Whether to exclude objects that have no doctests.
+    config : DTConfig, optional
+        A configuration object controlling doctest behavior; a default instance is used if not provided.
+
+    """
+    
     def __init__(self, verbose=None, parser=None, recurse=True,
                  exclude_empty=True, config=None):
         if config is None:
@@ -551,8 +609,21 @@ class DTFinder(doctest.DocTestFinder):
 
 
 class DTParser(doctest.DocTestParser):
-    """A Parser with a stopword list.
     """
+    A drop-in replacement for `doctest.DocTestParser` with a stopword list.
+
+    It filters out stopwords, pseudocode, and random markers from doctests.
+
+    Parameters:
+    -----------
+    config : DTConfig, optional
+        A configuration object containing:
+        - `stopwords`: A list of words that signal a doctest should be ignored.
+        - `pseudocode`: A list of markers indicating non-executable code.
+        - `rndm_markers`: A list of markers indicating results may vary.
+
+    """
+
     def __init__(self, config=None):
         if config is None:
             config = DTConfig()
