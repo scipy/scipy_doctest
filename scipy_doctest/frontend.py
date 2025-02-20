@@ -46,7 +46,7 @@ def find_doctests(module, strategy=None,
     Returns
     -------
     tests : list
-        A list of `doctest.DocTest`s that are defined by the module docstring,
+        A list of `doctest.DocTest` s that are defined by the module docstring,
         and by its contained objects’ docstrings. The selection is controlled
         by the `strategy` argument.
 
@@ -141,7 +141,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
         In verbose mode, the summary is detailed, else very brief (in fact,
         empty if all tests passed)
         Default is True.
-   verbose : int
+    verbose : int
         Control the run verbosity:
         0 means only report failures,
         1 means emit object names,
@@ -175,7 +175,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     (result, history)
         `result` is a namedtuple ``TestResult(failed, attempted)``
         `history` is a dict with details of which objects were examined (the
-        keys are object names and values are individual objects' ``TestResult``s)
+        keys are object names and values are individual objects' ``TestResult`` s)
 
     Examples
     --------
@@ -204,7 +204,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     For complex packages, prefer `strategy='api'`, which works as follows:
     - take the names of public objects from the `__all__` attribute of the package.
     - if `__all__` is not defined, take `dir(module)` and filter out names
-      which start with a leading underscore and dunders.
+    which start with a leading underscore and dunders.
     - filter out deprecated items, i.e. those which raise `DeprecationWarning`.
 
     """
@@ -306,7 +306,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
         In verbose mode, the summary is detailed, else very brief (in fact,
         empty if all tests passed)
         Default is True.
-   verbose : int
+    verbose : int
         Control the run verbosity:
         0 means only report failures,
         1 means emit object names,
@@ -335,7 +335,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
     (result, history)
         `result` is a namedtuple ``TestResult(failed, attempted)``
         `history` is a dict with details of which objects were examined (the
-        keys are object names and values are individual objects' ``TestResult``s)
+        keys are object names and values are individual objects' ``TestResult`` s)
     """
     # initial configuration
     if config is None:

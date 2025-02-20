@@ -28,6 +28,12 @@ test = [
     "scipy <= 1.14.1",   # black-list 1.5.1 ? 
     "matplotlib"
 ]
+doc = [
+    "furo==2024.8.6",
+    "myst-parser==4.0.0",
+    "sphinx==8.1.3",
+    "sphinx-copybutton==0.5.2"
+]
 
 [project.urls]
 Home = "https://github.com/scipy/scipy_doctest"
