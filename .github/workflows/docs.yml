@@ -1,12 +1,14 @@
-name: Docs Build
+name: Build & Deploy Docs
 
 on: 
     push:
         branches: [ main ]
     pull_request:
         branches: [ main ]
+    workflow_dispatch:
 
 jobs:
+    # Build the docs
     docs-build:
         runs-on: ubuntu-latest
         steps:
@@ -30,3 +32,25 @@ jobs:
           with:
             name: docs-build
             path: docs/build/
+
+    # Deploy the docs to GitHub Pages
+    docs-deploy:
+      if: ${{ github.event_name == 'push' }}
+      runs-on: ubuntu-latest
+      needs: docs-build
+
+      # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+      permissions:
+        pages: write
+
+      steps:
+        - name: Download Artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: docs-build
+            path: docs/build/
+
+        - name: Deploy to GitHub pages
+          uses: JamesIves/github-pages-deploy-action@v4
+          with:
+            folder: docs/build/
