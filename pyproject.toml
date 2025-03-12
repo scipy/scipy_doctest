@@ -25,7 +25,7 @@ dependencies  = [
 
 [project.optional-dependencies]
 test = [
-    "scipy <= 1.14.1",   # black-list 1.5.1 ? 
+    "scipy",
     "matplotlib"
 ]
 
