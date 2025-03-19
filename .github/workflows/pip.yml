@@ -16,9 +16,9 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.11', '3.12']
-        numpy: ['"numpy<2.2"', 'numpy']
+        numpy: ['"numpy<2.0"', 'numpy']
         os:  [ubuntu-latest]
-        pytest: ['"pytest<8.0"', pytest]
+        pytest: [pytest]
         pre: ['', '--pre']
 
     steps:
@@ -36,7 +36,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install ${{matrix.pytest}} ${{matrix.pre}}
         python -m pip install -e . ${{matrix.pre}}
-        python -m pip install ${{matrix.numpy}}
+        python -m pip install ${{matrix.numpy}} ${{matrix.pre}}
 
     - name: Echo versions
       run: |
