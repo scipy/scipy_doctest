@@ -52,7 +52,6 @@ always_document_param_types = True
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'furo'
-html_static_path = ['_static']
 
 autosummary_generate = True
 numpydoc_show_class_members = False 
