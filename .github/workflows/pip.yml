@@ -87,3 +87,8 @@ jobs:
           for file in "${test_files[@]}"; do
             python -m pytest "${file}" --doctest-modules
           done
+
+    - name: Demo interoperability with doctestplus
+      run: |
+        python -m pip install pytest-doctestplus
+        python -m pytest scipy_doctest/tests/ -v -k'alt_checker'
