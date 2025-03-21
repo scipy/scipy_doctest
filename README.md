@@ -149,7 +149,7 @@ use the command flag
 $ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
 ```
 
-See [More fine-grained control](https://github.com/scipy/scipy_doctest#More-fine-grained-control) section
+See [More fine-grained control](#more-fine-grained-control) section
 for details on how to customize the behavior.
 
 
@@ -190,7 +190,7 @@ $ python -m scipy_doctest bar.rst
 
 Notice that the command-line usage only uses the default `DTConfig` settings.
 
-
+(more-fine-grained-control)=
 ## More fine-grained control
 
 More fine-grained control of the functionality is available via the following
@@ -416,4 +416,4 @@ adding `--assert=plain` is reasonable.
 This package is work in progress. Contributions are most welcome!
 Please don't hesitate to open an issue in the tracker or send a pull request.
 
-The current location of the issue tracker is https://github.com/scipy/scipy_doctest.
+The current location of the issue tracker is <https://github.com/scipy/scipy_doctest>.
