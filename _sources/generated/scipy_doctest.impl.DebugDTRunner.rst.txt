@@ -1,0 +1,36 @@
+﻿scipy\_doctest.impl.DebugDTRunner
+=================================
+
+.. currentmodule:: scipy_doctest.impl
+
+.. autoclass:: DebugDTRunner
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DebugDTRunner.__init__
+      ~DebugDTRunner.get_history
+      ~DebugDTRunner.merge
+      ~DebugDTRunner.report_failure
+      ~DebugDTRunner.report_start
+      ~DebugDTRunner.report_success
+      ~DebugDTRunner.report_unexpected_exception
+      ~DebugDTRunner.run
+      ~DebugDTRunner.summarize
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DebugDTRunner.DIVIDER
+   
+   

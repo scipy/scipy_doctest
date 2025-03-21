@@ -1,0 +1,66 @@
+﻿scipy\_doctest.plugin.DTModule
+==============================
+
+.. currentmodule:: scipy_doctest.plugin
+
+.. autoclass:: DTModule
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DTModule.__init__
+      ~DTModule.add_marker
+      ~DTModule.addfinalizer
+      ~DTModule.classnamefilter
+      ~DTModule.collect
+      ~DTModule.from_parent
+      ~DTModule.funcnamefilter
+      ~DTModule.get_closest_marker
+      ~DTModule.getmodpath
+      ~DTModule.getparent
+      ~DTModule.isnosetest
+      ~DTModule.istestclass
+      ~DTModule.istestfunction
+      ~DTModule.iter_markers
+      ~DTModule.iter_markers_with_node
+      ~DTModule.iter_parents
+      ~DTModule.listchain
+      ~DTModule.listextrakeywords
+      ~DTModule.listnames
+      ~DTModule.reportinfo
+      ~DTModule.repr_failure
+      ~DTModule.setup
+      ~DTModule.teardown
+      ~DTModule.warn
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DTModule.name
+      ~DTModule.parent
+      ~DTModule.config
+      ~DTModule.session
+      ~DTModule.path
+      ~DTModule.cls
+      ~DTModule.ihook
+      ~DTModule.instance
+      ~DTModule.module
+      ~DTModule.nodeid
+      ~DTModule.obj
+      ~DTModule.fspath
+      ~DTModule.keywords
+      ~DTModule.own_markers
+      ~DTModule.extra_keyword_matches
+      ~DTModule.stash
+   
+   

@@ -1,0 +1,25 @@
+﻿scipy\_doctest.impl.DTParser
+============================
+
+.. currentmodule:: scipy_doctest.impl
+
+.. autoclass:: DTParser
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DTParser.__init__
+      ~DTParser.get_doctest
+      ~DTParser.get_examples
+      ~DTParser.parse
+   
+   
+
+   
+   
+   

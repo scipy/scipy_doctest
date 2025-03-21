@@ -1,0 +1,22 @@
+﻿scipy\_doctest.impl.DTConfig
+============================
+
+.. currentmodule:: scipy_doctest.impl
+
+.. autoclass:: DTConfig
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DTConfig.__init__
+   
+   
+
+   
+   
+   

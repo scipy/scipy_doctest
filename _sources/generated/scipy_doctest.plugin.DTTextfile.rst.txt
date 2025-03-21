@@ -1,0 +1,66 @@
+﻿scipy\_doctest.plugin.DTTextfile
+================================
+
+.. currentmodule:: scipy_doctest.plugin
+
+.. autoclass:: DTTextfile
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DTTextfile.__init__
+      ~DTTextfile.add_marker
+      ~DTTextfile.addfinalizer
+      ~DTTextfile.classnamefilter
+      ~DTTextfile.collect
+      ~DTTextfile.from_parent
+      ~DTTextfile.funcnamefilter
+      ~DTTextfile.get_closest_marker
+      ~DTTextfile.getmodpath
+      ~DTTextfile.getparent
+      ~DTTextfile.isnosetest
+      ~DTTextfile.istestclass
+      ~DTTextfile.istestfunction
+      ~DTTextfile.iter_markers
+      ~DTTextfile.iter_markers_with_node
+      ~DTTextfile.iter_parents
+      ~DTTextfile.listchain
+      ~DTTextfile.listextrakeywords
+      ~DTTextfile.listnames
+      ~DTTextfile.reportinfo
+      ~DTTextfile.repr_failure
+      ~DTTextfile.setup
+      ~DTTextfile.teardown
+      ~DTTextfile.warn
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DTTextfile.name
+      ~DTTextfile.parent
+      ~DTTextfile.config
+      ~DTTextfile.session
+      ~DTTextfile.path
+      ~DTTextfile.cls
+      ~DTTextfile.ihook
+      ~DTTextfile.instance
+      ~DTTextfile.module
+      ~DTTextfile.nodeid
+      ~DTTextfile.obj
+      ~DTTextfile.fspath
+      ~DTTextfile.keywords
+      ~DTTextfile.own_markers
+      ~DTTextfile.extra_keyword_matches
+      ~DTTextfile.stash
+   
+   

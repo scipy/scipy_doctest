@@ -1,0 +1,31 @@
+﻿scipy\_doctest.impl.DTChecker
+=============================
+
+.. currentmodule:: scipy_doctest.impl
+
+.. autoclass:: DTChecker
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DTChecker.__init__
+      ~DTChecker.check_output
+      ~DTChecker.output_difference
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DTChecker.obj_pattern
+      ~DTChecker.vanilla
+   
+   

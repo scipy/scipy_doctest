@@ -1,0 +1,23 @@
+﻿scipy\_doctest.impl.DTFinder
+============================
+
+.. currentmodule:: scipy_doctest.impl
+
+.. autoclass:: DTFinder
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DTFinder.__init__
+      ~DTFinder.find
+   
+   
+
+   
+   
+   
