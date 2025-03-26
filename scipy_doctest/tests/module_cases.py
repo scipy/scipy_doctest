@@ -20,17 +20,18 @@ def func():
     pass
 
 
+# fmt: off
 def func2():
     """
     Check that `np.` is imported and the array repr is recognized. Also check
     that whitespace is irrelevant for the checker.
     >>> import numpy as np
-    >>> np.array([1, 2, 3.0])
+    >>> np.array([1,         2,          3.0])
     array([1, 2, 3])
 
     Check that the comparison is with atol and rtol: give less digits than
     what numpy by default prints
-    >>> np.sin([1.0, 2, 3])
+    >>> np.sin([1., 2, 3])
     array([0.8414, 0.9092, 0.1411])
 
     Also check that numpy repr for e.g. dtypes is recognized
@@ -38,6 +39,7 @@ def func2():
     array([1., 2., 3.], dtype=float32)
 
     """
+# fmt: on
 
 
 def func3():
