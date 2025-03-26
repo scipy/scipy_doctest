@@ -1,21 +1,26 @@
-""" Copy-pasting my way through python/cpython/Lib/doctest.py. """
+"""Copy-pasting my way through python/cpython/Lib/doctest.py."""
 
-import sys
-import os
-import inspect
 import doctest
+import inspect
+import os
+import sys
 
-from .impl import DTFinder, DTRunner, DebugDTRunner, DTParser, DTConfig
-from .util import (matplotlib_make_nongui as mpl,
-                    temp_cwd, np_errstate,
-                    get_public_objects, _map_verbosity)
+from .impl import DebugDTRunner, DTConfig, DTFinder, DTParser, DTRunner
+from .util import _map_verbosity, get_public_objects, np_errstate, temp_cwd
+from .util import matplotlib_make_nongui as mpl
 
 
-def find_doctests(module, strategy=None,
-                  # doctest parameters. These fall through to the DocTestFinder
-                  name=None, exclude_empty=True, globs=None, extraglobs=None,
-                  # our configuration
-                  config=None):
+def find_doctests(
+    module,
+    strategy=None,
+    # doctest parameters. These fall through to the DocTestFinder
+    name=None,
+    exclude_empty=True,
+    globs=None,
+    extraglobs=None,
+    # our configuration
+    config=None,
+):
     """Find doctests in a module.
 
     Parameters
@@ -70,11 +75,11 @@ def find_doctests(module, strategy=None,
         return tests
 
     if strategy == "api":
-
         with config.user_context_mgr():
             # user_context_mgr may want to e.g. filter warnings on imports?
-            (items, names), failures = get_public_objects(module,
-                                                          skiplist=config.skiplist)
+            (items, names), failures = get_public_objects(
+                module, skiplist=config.skiplist
+            )
         if failures:
             mesg = "\n".join([_[2] for _ in failures])
             raise ValueError(mesg)
@@ -96,16 +101,18 @@ def find_doctests(module, strategy=None,
             t = _finder.find(item, name, globs=globs, extraglobs=extraglobs)
             unique_t = set(t)
         else:
-            full_name = module.__name__ + '.' + name
+            full_name = module.__name__ + "." + name
             t = finder.find(item, full_name, globs=globs, extraglobs=extraglobs)
 
             unique_t = set(t)
-            if hasattr(item, '__mro__'):
+            if hasattr(item, "__mro__"):
                 # is a class, inspect superclasses
                 # cf https://github.com/scipy/scipy_doctest/issues/177
                 # item.__mro__ starts with itself, ends with `object`
                 for item_ in item.__mro__[1:-1]:
-                    t_ = finder.find(item_, full_name, globs=globs, extraglobs=extraglobs)
+                    t_ = finder.find(
+                        item_, full_name, globs=globs, extraglobs=extraglobs
+                    )
                     unique_t.update(set(t_))
         tests += list(unique_t)
 
@@ -115,10 +122,19 @@ def find_doctests(module, strategy=None,
     return tests
 
 
-def testmod(m=None, name=None, globs=None, verbose=None,
-            report=True, optionflags=None, extraglobs=None,
-            raise_on_error=False, exclude_empty=True,
-            strategy=None, config=None):
+def testmod(
+    m=None,
+    name=None,
+    globs=None,
+    verbose=None,
+    report=True,
+    optionflags=None,
+    extraglobs=None,
+    raise_on_error=False,
+    exclude_empty=True,
+    strategy=None,
+    config=None,
+):
     """Run modified doctesting on a module or on docstrings of a list of objects.
 
     This function is an analog of the `testmod` driver from the standard library.
@@ -181,7 +197,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     --------
     >>> from scipy import constants
     >>> from scpdt import testmod
-    >>> result, history = testmod(constants, strategy='api')
+    >>> result, history = testmod(constants, strategy="api")
     >>> result
     TestResults(failed=0, attempted=25)
     >>> len(history)
@@ -211,11 +227,11 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     ### mimic `doctest.testmod` initial set-ups
     # If no module was given, then use __main__.
     if m is None:
-        m = sys.modules.get('__main__')
+        m = sys.modules.get("__main__")
 
     # Check that we were actually given a module.
     if not inspect.ismodule(m):
-        raise TypeError("testmod: module required; %r" % (m,))
+        raise TypeError(f"testmod: module required; {m!r}")
 
     # If no name was given, then use the module's name.
     if name is None:
@@ -248,7 +264,7 @@ def testmod(m=None, name=None, globs=None, verbose=None,
 
     for test in tests:
         if verbose == 1:
-            output.write(test.name + '\n')
+            output.write(test.name + "\n")
         # restore the errstate/print state after each docstring.
         # Also make MPL backend non-GUI and close the figures.
         # The order of context managers is actually relevant. Consider
@@ -266,10 +282,21 @@ def testmod(m=None, name=None, globs=None, verbose=None,
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
 
 
-def testfile(filename, module_relative=True, name=None, package=None,
-             globs=None, verbose=None, report=True, optionflags=None,
-             extraglobs=None, raise_on_error=False, parser=None,
-             encoding='utf-8', config=None):
+def testfile(
+    filename,
+    module_relative=True,
+    name=None,
+    package=None,
+    globs=None,
+    verbose=None,
+    report=True,
+    optionflags=None,
+    extraglobs=None,
+    raise_on_error=False,
+    parser=None,
+    encoding="utf-8",
+    config=None,
+):
     """Test examples in the given file.
 
     This function is an analog of the `doctest.testfile` driver from the
@@ -350,12 +377,12 @@ def testfile(filename, module_relative=True, name=None, package=None,
     ######### mimic `doctest.tesfile` initial set-ups
     # c.f. https://github.com/python/cpython/blob/3.10/Lib/doctest.py#L2064
     if package and not module_relative:
-        raise ValueError("Package may only be specified for module-"
-                         "relative paths.")
+        raise ValueError("Package may only be specified for module-relative paths.")
 
     # Relativize the path
-    text, filename = doctest._load_testfile(filename, package, module_relative,
-                                            encoding or "utf-8")
+    text, filename = doctest._load_testfile(
+        filename, package, module_relative, encoding or "utf-8"
+    )
 
     # If no name was given, then use the file's name.
     if name is None:
@@ -364,8 +391,8 @@ def testfile(filename, module_relative=True, name=None, package=None,
     # Assemble the globals.
     if extraglobs is not None:
         globs.update(extraglobs)
-    if '__name__' not in globs:
-        globs['__name__'] = '__main__'
+    if "__name__" not in globs:
+        globs["__name__"] = "__main__"
     ##### done copy-pasting from doctest.testfile
 
     # Fail fast or run all tests
@@ -375,9 +402,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
             verbose=dtverbose, optionflags=optionflags, config=config
         )
     else:
-        runner = DTRunner(
-            verbose=dtverbose, optionflags=optionflags, config=config
-        )
+        runner = DTRunner(verbose=dtverbose, optionflags=optionflags, config=config)
 
     ### Parse doctest examples out of the input file and run them.
     if parser is None:
@@ -390,7 +415,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
 
     output = sys.stderr
     if verbose == 1:
-        output.write(test.name + '\n')
+        output.write(test.name + "\n")
 
     # see testmod for discussion of these context managers
     with np_errstate():
@@ -402,8 +427,9 @@ def testfile(filename, module_relative=True, name=None, package=None,
     return doctest.TestResults(runner.failures, runner.tries), runner.get_history()
 
 
-def run_docstring_examples(f, globs=None, verbose=False, name='NoName',
-                           optionflags=None, config=None):
+def run_docstring_examples(
+    f, globs=None, verbose=False, name="NoName", optionflags=None, config=None
+):
     """Run examples in the docstring of the object `f`.
 
     Parameters
@@ -437,25 +463,39 @@ def run_docstring_examples(f, globs=None, verbose=False, name='NoName',
 
     m = f.__module__
     import importlib
+
     module = importlib.import_module(m)
 
-    return testmod(module, name=name, globs=globs, verbose=verbose,
-                   optionflags=optionflags, strategy=[f], config=config)
+    return testmod(
+        module,
+        name=name,
+        globs=globs,
+        verbose=verbose,
+        optionflags=optionflags,
+        strategy=[f],
+        config=config,
+    )
 
 
 def _main():
-    """CLI for `$ python -m scpdt pythonfile.py`, cf `__main__.py`
-    """
+    """CLI for `$ python -m scpdt pythonfile.py`, cf `__main__.py`"""
     import argparse
 
     parser = argparse.ArgumentParser(description="doctest runner")
-    parser.add_argument('-v', '--verbose', action='count', default=0,
-                        help='print verbose (`-v`) or very verbose (`-vv`) '
-                              'output for all tests')
-    parser.add_argument('-x', '--fail-fast', action='store_true',
-                        help=('stop running tests after first failure'))
-    parser.add_argument('file', nargs='+',
-                        help='file containing the tests to run')
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="print verbose (`-v`) or very verbose (`-vv`) output for all tests",
+    )
+    parser.add_argument(
+        "-x",
+        "--fail-fast",
+        action="store_true",
+        help=("stop running tests after first failure"),
+    )
+    parser.add_argument("file", nargs="+", help="file containing the tests to run")
     args = parser.parse_args()
     testfiles = args.file
     verbose = args.verbose
@@ -469,13 +509,15 @@ def _main():
             sys.path.insert(0, dirname)
             m = __import__(filename[:-3])
             del sys.path[0]
-            result, _ = testmod(m, verbose=verbose,
-                                raise_on_error=args.fail_fast)
+            result, _ = testmod(m, verbose=verbose, raise_on_error=args.fail_fast)
         else:
-            result, _ = testfile(filename, module_relative=False,
-                                 verbose=verbose, raise_on_error=args.fail_fast)
+            result, _ = testfile(
+                filename,
+                module_relative=False,
+                verbose=verbose,
+                raise_on_error=args.fail_fast,
+            )
 
         if result.failed:
             return 1
     return 0
-

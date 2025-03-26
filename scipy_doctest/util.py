@@ -1,26 +1,27 @@
 """
 Assorted utilities.
 """
-import os
-import warnings
-import operator
-import shutil
+
 import copy
-import tempfile
 import inspect
+import operator
+import os
+import shutil
+import tempfile
+import warnings
 from contextlib import contextmanager
 
 
 @contextmanager
 def matplotlib_make_nongui():
-    """ Temporarily make the matplotlib backend non-GUI; close all figures on exit.
-    """
+    """Temporarily make the matplotlib backend non-GUI; close all figures on exit."""
     try:
         import matplotlib
         import matplotlib.pyplot as plt
+
         backend = matplotlib.get_backend()
-        plt.close('all')
-        matplotlib.use('Agg')
+        plt.close("all")
+        matplotlib.use("Agg")
     except ImportError:
         backend = None
 
@@ -29,13 +30,16 @@ def matplotlib_make_nongui():
         # Filter them out.
         # UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", "FigureCanvasAgg", UserWarning)  # MPL >= 3.8.x
-            warnings.filterwarnings("ignore", "Matplotlib", UserWarning)     # MPL <= 3.7.x
+            warnings.filterwarnings(
+                "ignore", "FigureCanvasAgg", UserWarning
+            )  # MPL >= 3.8.x
+            warnings.filterwarnings("ignore", "Matplotlib", UserWarning)  # MPL <= 3.7.x
             yield backend
     finally:
         if backend:
             import matplotlib.pyplot as plt
-            plt.close('all')
+
+            plt.close("all")
             matplotlib.use(backend)
 
 
@@ -43,17 +47,17 @@ def matplotlib_make_nongui():
 def temp_cwd(test, local_resources=None):
     """Switch to a temp directory, clean up when done.
 
-        Copy local files, if requested.
+    Copy local files, if requested.
 
-        Parameters
-        ----------
-        test : doctest.DocTest instance
-            The current test instance
-        local_resources : dict, optional
-            If provided, maps the name of the test (`test.name` attribute) to
-            a list of filenames to copy to the tempdir. File names are relative
-            to the `test.filename`, which is, in most cases, the name of the
-            file the doctest has been extracted from.
+    Parameters
+    ----------
+    test : doctest.DocTest instance
+        The current test instance
+    local_resources : dict, optional
+        If provided, maps the name of the test (`test.name` attribute) to
+        a list of filenames to copy to the tempdir. File names are relative
+        to the `test.filename`, which is, in most cases, the name of the
+        file the doctest has been extracted from.
     """
     cwd = os.getcwd()
     tmpdir = tempfile.mkdtemp()
@@ -74,15 +78,17 @@ def temp_cwd(test, local_resources=None):
 # Options for the usr_context_mgr : do nothing (default), and control the random
 # state, in two flavors.
 
+
 @contextmanager
 def scipy_rndm_state():
     """Restore the `np.random` state when done."""
     # FIXME: this matches the refguide-check behavior, but is a tad strange:
-    # makes sure that the seed the old-fashioned np.random* methods is *NOT* reproducible
-    # but the new-style `default_rng()` *IS*.
+    # makes sure that the seed the old-fashioned np.random* methods is *NOT*
+    # reproducible but the new-style `default_rng()` *IS*.
     # Should these two be either both repro or both not repro?
-    from scipy._lib._util import _fixed_default_rng
     import numpy as np
+    from scipy._lib._util import _fixed_default_rng
+
     with _fixed_default_rng():
         np.random.seed(None)
         yield
@@ -93,6 +99,7 @@ def numpy_rndm_state():
     """Restore the `np.random` state when done."""
     # Make sure that the seed the old-fashioned np.random* methods is *NOT* reproducible
     import numpy as np
+
     np.random.seed(None)
     yield
 
@@ -111,6 +118,7 @@ def noop_context_mgr(test=None):
 def np_errstate():
     """A context manager to restore the numpy errstate and printoptions when done."""
     import numpy as np
+
     with np.errstate():
         with np.printoptions():
             yield
@@ -120,7 +128,7 @@ def np_errstate():
 def warnings_errors(test=None):
     """Temporarily turn all warnings to errors."""
     with warnings.catch_warnings():
-        warnings.simplefilter('error', Warning)
+        warnings.simplefilter("error", Warning)
         yield
 
 
@@ -148,7 +156,7 @@ def _map_verbosity(level):
         level = 0
     level = operator.index(level)
     if level not in [0, 1, 2]:
-        raise ValueError("Unknown verbosity setting : level = %s " % level)
+        raise ValueError(f"Unknown verbosity setting : level = {level} ")
     dtverbose = True if level == 2 else False
     return level, dtverbose
 
@@ -157,8 +165,7 @@ def _map_verbosity(level):
 
 
 def is_deprecated(f):
-    """ Check if an item is deprecated.
-    """
+    """Check if an item is deprecated."""
     with warnings.catch_warnings(record=True):
         warnings.simplefilter("error")
         try:
@@ -181,7 +188,7 @@ def get_all_list(module):
         all_list = copy.deepcopy(module.__all__)
     else:
         all_list = []
-    for name in ['absolute_import', 'division', 'print_function']:
+    for name in ["absolute_import", "division", "print_function"]:
         try:
             all_list.remove(name)
         except ValueError:
@@ -189,8 +196,9 @@ def get_all_list(module):
 
     # Modules are almost always private; real submodules need a separate
     # run of refguide_check.
-    all_list = [name for name in all_list
-                if not inspect.ismodule(getattr(module, name, None))]
+    all_list = [
+        name for name in all_list if not inspect.ismodule(getattr(module, name, None))
+    ]
 
     deprecated = []
     not_deprecated = []
@@ -201,7 +209,9 @@ def get_all_list(module):
         else:
             not_deprecated.append(name)
 
-    others = set(dir(module)).difference(set(deprecated)).difference(set(not_deprecated))
+    others = (
+        set(dir(module)).difference(set(deprecated)).difference(set(not_deprecated))
+    )
 
     return not_deprecated, deprecated, others
 
@@ -236,7 +246,7 @@ def get_public_objects(module, skiplist=None):
     items, names, failures = [], [], []
 
     for name in all_list:
-        full_name = module.__name__ + '.' + name
+        full_name = module.__name__ + "." + name
 
         if full_name in skiplist:
             continue
@@ -247,9 +257,10 @@ def get_public_objects(module, skiplist=None):
             names.append(name)
         except AttributeError:
             import traceback
-            failures.append((full_name, False,
-                            "Missing item!\n" +
-                            traceback.format_exc()))
+
+            failures.append(
+                (full_name, False, "Missing item!\n" + traceback.format_exc())
+            )
             continue
 
     return (items, names), failures
@@ -257,23 +268,24 @@ def get_public_objects(module, skiplist=None):
 
 # XXX: not used ATM
 modules = []
+
+
 def generate_log(module, test):
     """
     Generate a log of the doctested items.
-    
+
     This function logs the items being doctested to a file named 'doctest.log'.
-    
+
     Args:
         module (module): The module being doctested.
         test (str): The name of the doctest item.
     """
-    with open('doctest.log', 'a') as LOGFILE:
+    with open("doctest.log", "a") as LOGFILE:
         try:
             if module.__name__ not in modules:
                 LOGFILE.write("\n" + module.__name__ + "\n")
-                LOGFILE.write("="*len(module.__name__) + "\n")
+                LOGFILE.write("=" * len(module.__name__) + "\n")
                 modules.append(module.__name__)
             LOGFILE.write(f"{test}\n")
         except AttributeError:
             LOGFILE.write(f"{test}\n")
-

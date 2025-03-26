@@ -1,28 +1,36 @@
 import pytest
 
 try:
-    import matplotlib.pyplot as plt    # noqa
+    import matplotlib.pyplot as plt  # noqa
+
     HAVE_MATPLOTLIB = True
 except Exception:
     HAVE_MATPLOTLIB = False
 
 try:
-    import scipy    # noqa
+    import scipy  # noqa
+
     HAVE_SCIPY = True
 except Exception:
     HAVE_SCIPY = False
 
 from pathlib import Path
 
-from . import module_cases, failure_cases, failure_cases_2, stopwords_cases, local_file_cases
+from . import (
+    failure_cases,
+    failure_cases_2,
+    local_file_cases,
+    module_cases,
+    stopwords_cases,
+)
 
 # XXX: this is a bit hacky and repetetive. Can rework?
 
 
-pytest_plugins = ['pytester']
+pytest_plugins = ["pytester"]
 
 
-@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
+@pytest.mark.skipif(not HAVE_SCIPY, reason="need scipy")
 def test_module_cases(pytester):
     """Test that pytest uses the DTChecker for doctests."""
     path_str = module_cases.__file__
@@ -39,8 +47,8 @@ def test_failure_cases(pytester):
         result = pytester.inline_run(python_file, "--doctest-modules")
     assert result.ret == pytest.ExitCode.TESTS_FAILED
 
-    
-@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
+
+@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason="need matplotlib")
 def test_stopword_cases(pytester):
     """Test that pytest uses the DTParser for doctests."""
     path_str = stopwords_cases.__file__
@@ -49,7 +57,7 @@ def test_stopword_cases(pytester):
     assert result.ret == pytest.ExitCode.OK
 
 
-@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
+@pytest.mark.skipif(not HAVE_SCIPY, reason="need scipy")
 def test_local_file_cases(pytester):
     """Test that local files are found for use in doctests."""
     path_str = local_file_cases.__file__
@@ -88,6 +96,5 @@ def test_alt_checker(pytester):
     )
 
     # run all tests with pytest
-    result = pytester.inline_run(f, '--doctest-modules')
+    result = pytester.inline_run(f, "--doctest-modules")
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-
