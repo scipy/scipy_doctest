@@ -1,16 +1,15 @@
-import io
-
 import doctest
+import io
 
 import pytest
 
-from . import (failure_cases as module,
-               finder_cases as finder_module,
-               module_cases)
-from .. import DTFinder, DTRunner, DebugDTRunner, DTConfig
-
+from .. import DebugDTRunner, DTConfig, DTFinder, DTRunner
+from . import failure_cases as module
+from . import finder_cases as finder_module
+from . import module_cases
 
 ### Smoke test DTRunner methods. Mainly to check that they are runnable.
+
 
 def test_single_failure():
     finder = DTFinder()
@@ -22,7 +21,7 @@ def test_single_failure():
 
     stream.seek(0)
     output = stream.read()
-    assert output.startswith('\n func9\n -----\n')
+    assert output.startswith("\n func9\n -----\n")
 
 
 def test_exception():
@@ -35,7 +34,7 @@ def test_exception():
 
     stream.seek(0)
     output = stream.read()
-    assert output.startswith('\n func10\n ------\n')
+    assert output.startswith("\n func10\n ------\n")
 
 
 def test_get_history():
@@ -64,9 +63,9 @@ class TestDebugDTRunner:
 
         # DocTestFailure carries the doctest and the run result
         assert orig_exception.test is tests[0]
-        assert orig_exception.test.name == 'func9'
-        assert orig_exception.got == 'array([1, 2, 3])\n'
-        assert orig_exception.example.want == 'array([2, 3, 4])\n'
+        assert orig_exception.test.name == "func9"
+        assert orig_exception.got == "array([1, 2, 3])\n"
+        assert orig_exception.example.want == "array([2, 3, 4])\n"
 
     def test_debug_runner_exception(self):
         finder = DTFinder()
@@ -88,12 +87,14 @@ class VanillaOutputChecker(doctest.OutputChecker):
     LSP break: OutputChecker does not have __init__,
     here we add it to agree with DTChecker.
     """
+
     def __init__(self, config):
         pass
 
+
 class TestCheckerDropIn:
-    """Test DTChecker and vanilla doctest OutputChecker being drop-in replacements.
-    """
+    """Test DTChecker and vanilla doctest OutputChecker being drop-in replacements."""
+
     def test_vanilla_checker(self):
         config = DTConfig(CheckerKlass=VanillaOutputChecker)
         runner = DebugDTRunner(config=config)
@@ -102,4 +103,3 @@ class TestCheckerDropIn:
         with pytest.raises(doctest.DocTestFailure):
             for t in tests:
                 runner.run(t)
-

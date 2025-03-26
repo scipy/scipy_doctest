@@ -1,6 +1,14 @@
 __all__ = [
-    'func', 'func2', 'func3', 'func4', 'func5', 'func6', 'func8',
-    'func7', 'manip_printoptions', 'array_abbreviation'
+    "func",
+    "func2",
+    "func3",
+    "func4",
+    "func5",
+    "func6",
+    "func8",
+    "func7",
+    "manip_printoptions",
+    "array_abbreviation",
 ]
 
 
@@ -17,12 +25,12 @@ def func2():
     Check that `np.` is imported and the array repr is recognized. Also check
     that whitespace is irrelevant for the checker.
     >>> import numpy as np
-    >>> np.array([1,         2,          3.0])
+    >>> np.array([1, 2, 3.0])
     array([1, 2, 3])
 
     Check that the comparison is with atol and rtol: give less digits than
     what numpy by default prints
-    >>> np.sin([1., 2, 3])
+    >>> np.sin([1.0, 2, 3])
     array([0.8414, 0.9092, 0.1411])
 
     Also check that numpy repr for e.g. dtypes is recognized
@@ -52,7 +60,7 @@ def func_printed_arrays():
     [[0.         0.33333333 0.66666667 1.        ]
      [1.33333333 1.66666667 2.         2.33333333]]
 
-    >>> print(a)   # add spaces (older repr?)
+    >>> print(a)  # add spaces (older repr?)
     [[ 0.         0.33333333 0.66666667 1.         ]
      [ 1.33333333 1.66666667 2.         2.33333333 ]]
 
@@ -98,7 +106,7 @@ def func6():
     Masked arrays
 
     >>> import numpy.ma as ma
-    >>> y = ma.array([1, 2, 3], mask = [0, 1, 0])
+    >>> y = ma.array([1, 2, 3], mask=[0, 1, 0])
     >>> y
     masked_array(data=[1, --, 3],
                  mask=[False,  True, False],
@@ -217,13 +225,13 @@ def test_cmplx_nan():
     """
     Complex nans
     >>> import numpy as np
-    >>> np.nan - 1j*np.nan
+    >>> np.nan - 1j * np.nan
     nan + nanj
 
-    >>> np.nan + 1j*np.nan
+    >>> np.nan + 1j * np.nan
     np.complex128(nan+nanj)
 
-    >>> 1j*np.complex128(np.nan)
+    >>> 1j * np.complex128(np.nan)
     np.complex128(nan+nanj)
     """
 
