@@ -12,7 +12,6 @@ def func():
     pass
 
 
-# fmt: off
 def func2():
     """
     Check that `np.` is imported and the array repr is recognized. Also check
@@ -31,7 +30,6 @@ def func2():
     array([1., 2., 3.], dtype=float32)
 
     """
-# fmt: on
 
 
 def func3():
