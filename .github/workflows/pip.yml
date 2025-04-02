@@ -5,84 +5,85 @@ name: pip
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
-        numpy: ['"numpy<2.0"', "numpy"]
-        os: [ubuntu-latest]
+        python-version: ['3.11', '3.12']
+        numpy: ['"numpy<2.0"', 'numpy']
+        os:  [ubuntu-latest]
         pytest: [pytest]
-        pre: ["", "--pre"]
+        pre: ['', '--pre']
 
     steps:
-      # actions/setup-python@v5 has built-in functionality for caching and restoring dependencies.
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip" # caching pip dependencies
+    # actions/setup-python@v5 has built-in functionality for caching and restoring dependencies. 
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip' # caching pip dependencies
 
-      # Install numpy and pytest
-      - name: Install core dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install ${{matrix.pytest}} ${{matrix.pre}}
-          python -m pip install -e . ${{matrix.pre}}
-          python -m pip install ${{matrix.numpy}} ${{matrix.pre}}
+    # Install numpy and pytest
+    - name: Install core dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install ${{matrix.pytest}} ${{matrix.pre}}
+        python -m pip install -e . ${{matrix.pre}}
+        python -m pip install ${{matrix.numpy}} ${{matrix.pre}}
 
-      - name: Echo versions
-        run: |
-          python -m pytest --version
-          python -c"import numpy; print(f'{numpy.__version__ = }')"
+    - name: Echo versions
+      run: |
+        python -m pytest --version
+        python -c"import numpy; print(f'{numpy.__version__ = }')"
 
-      # Run self-tests without Scipy and MPL
-      # Tests that require Scipy and MPL will be skipped
-      - name: Self-test without SciPy and MPL
-        run: |
-          pytest --pyargs scipy_doctest -v
+    # Run self-tests without Scipy and MPL
+    # Tests that require Scipy and MPL will be skipped
+    - name: Self-test without SciPy and MPL
+      run: |
+        pytest --pyargs scipy_doctest -v
 
-      - name: Self-test CLI without SciPy and MPL
-        run: |
-          python -m scipy_doctest scipy_doctest/tests/finder_cases.py -vv
+    - name: Self-test CLI without SciPy and MPL
+      run: |
+        python -m scipy_doctest scipy_doctest/tests/finder_cases.py -vv
 
-      # Install Scipy and MPL
-      - name: Install optional dependencies
-        run: |
-          python -m pip install -e '.[test]'
+    # Install Scipy and MPL
+    - name: Install optional dependencies
+      run: |
+        python -m pip install -e '.[test]'
 
-      # Tests that require Scipy and MPL can now run
-      - name: Self-test with SciPy and MPL
-        run: |
-          pytest --pyargs scipy_doctest -v
+    # Tests that require Scipy and MPL can now run
+    - name: Self-test with SciPy and MPL
+      run: |
+        pytest --pyargs scipy_doctest -v
 
-      - name: Self-test CLI with SciPy and MPL
-        run: |
-          python -m scipy_doctest scipy_doctest/tests/finder_cases.py -vv
+    - name: Self-test CLI with SciPy and MPL
+      run: |
+        python -m scipy_doctest scipy_doctest/tests/finder_cases.py -vv
 
-      - name: Test testfile CLI
-        run: |
-          python -m scipy_doctest ./scipy_doctest/tests/scipy_ndimage_tutorial_clone.rst -v
+    - name: Test testfile CLI
+      run: |
+        python -m scipy_doctest ./scipy_doctest/tests/scipy_ndimage_tutorial_clone.rst -v
 
-      - name: Run testmod a scipy submodule
-        run: |
-          python -c'from scipy.linalg import _basic; from scipy_doctest import testmod; testmod(_basic, verbose=True)'
+    - name: Run testmod a scipy submodule
+      run: |
+        python -c'from scipy.linalg import _basic; from scipy_doctest import testmod; testmod(_basic, verbose=True)'
 
-      - name: Run testmod a scipy submodule -- Public API onlly
-        run: |
-          python -m pip install pooch
-          python -c'from scipy import ndimage; from scipy_doctest import testmod; testmod(ndimage, verbose=True, strategy="api")'
+    - name: Run testmod a scipy submodule -- Public API onlly
+      run: |
+        python -m pip install pooch
+        python -c'from scipy import ndimage; from scipy_doctest import testmod; testmod(ndimage, verbose=True, strategy="api")'
 
-      - name: Test pytest plugin
-        # This test will fail in a venv where scipy_doctest has not been installed and the plugin has not been activated
-        run: |
-          test_files=("scipy_doctest/tests/module_cases.py" "scipy_doctest/tests/stopwords_cases.py" "scipy_doctest/tests/local_file_cases.py")
-            for file in "${test_files[@]}"; do
-              python -m pytest "${file}" --doctest-modules
-            done
+    - name: Test pytest plugin
+      # This test will fail in a venv where scipy_doctest has not been installed and the plugin has not been activated
+      run: |
+        test_files=("scipy_doctest/tests/module_cases.py" "scipy_doctest/tests/stopwords_cases.py" "scipy_doctest/tests/local_file_cases.py")
+          for file in "${test_files[@]}"; do
+            python -m pytest "${file}" --doctest-modules
+          done

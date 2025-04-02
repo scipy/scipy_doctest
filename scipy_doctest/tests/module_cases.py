@@ -1,14 +1,6 @@
 __all__ = [
-    "func",
-    "func2",
-    "func3",
-    "func4",
-    "func5",
-    "func6",
-    "func8",
-    "func7",
-    "manip_printoptions",
-    "array_abbreviation",
+    'func', 'func2', 'func3', 'func4', 'func5', 'func6', 'func8',
+    'func7', 'manip_printoptions', 'array_abbreviation'
 ]
 
 
@@ -62,7 +54,7 @@ def func_printed_arrays():
     [[0.         0.33333333 0.66666667 1.        ]
      [1.33333333 1.66666667 2.         2.33333333]]
 
-    >>> print(a)  # add spaces (older repr?)
+    >>> print(a)   # add spaces (older repr?)
     [[ 0.         0.33333333 0.66666667 1.         ]
      [ 1.33333333 1.66666667 2.         2.33333333 ]]
 
@@ -108,7 +100,7 @@ def func6():
     Masked arrays
 
     >>> import numpy.ma as ma
-    >>> y = ma.array([1, 2, 3], mask=[0, 1, 0])
+    >>> y = ma.array([1, 2, 3], mask = [0, 1, 0])
     >>> y
     masked_array(data=[1, --, 3],
                  mask=[False,  True, False],
@@ -227,13 +219,13 @@ def test_cmplx_nan():
     """
     Complex nans
     >>> import numpy as np
-    >>> np.nan - 1j * np.nan
+    >>> np.nan - 1j*np.nan
     nan + nanj
 
-    >>> np.nan + 1j * np.nan
+    >>> np.nan + 1j*np.nan
     np.complex128(nan+nanj)
 
-    >>> 1j * np.complex128(np.nan)
+    >>> 1j*np.complex128(np.nan)
     np.complex128(nan+nanj)
     """
 

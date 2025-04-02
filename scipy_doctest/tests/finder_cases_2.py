@@ -4,7 +4,6 @@ Private method in subclasses
 
 __all__ = ["Klass"]
 
-
 class _PrivateKlass:
     def private_method(self):
         """

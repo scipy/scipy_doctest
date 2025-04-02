@@ -1,7 +1,8 @@
-import doctest
-import inspect
 import re
-from doctest import ELLIPSIS, IGNORE_EXCEPTION_DETAIL, NORMALIZE_WHITESPACE
+import warnings
+import inspect
+import doctest
+from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 from itertools import zip_longest
 
 import numpy as np
@@ -10,7 +11,7 @@ from . import util
 
 # Register the optionflag to skip whole blocks, i.e.
 # sequences of Examples without an intervening text.
-SKIPBLOCK = doctest.register_optionflag("SKIPBLOCK")
+SKIPBLOCK = doctest.register_optionflag('SKIPBLOCK')
 
 
 class DTConfig:
@@ -59,7 +60,7 @@ class DTConfig:
         >>> for test in tests:
         ...     with user_context(test):
         ...         runner.run(test)
-
+        
         Default is a noop.
     local_resources: dict
         If a test needs some local files, list them here. The format is
@@ -98,33 +99,30 @@ class DTConfig:
         Defaults to `DTChecker`.
 
     """
-
-    def __init__(
-        self,
-        *,  # DTChecker configuration
-        CheckerKlass=None,
-        default_namespace=None,
-        check_namespace=None,
-        rndm_markers=None,
-        atol=1e-8,
-        rtol=1e-2,
-        strict_check=False,
-        # DTRunner configuration
-        optionflags=None,
-        # DTFinder/DTParser configuration
-        stopwords=None,
-        pseudocode=None,
-        skiplist=None,
-        # Additional user configuration
-        user_context_mgr=None,
-        local_resources=None,
-        # Obscure switches
-        parse_namedtuples=True,  # Checker
-        nameerror_after_exception=False,  # Runner
-        # plugin
-        pytest_extra_ignore=None,
-        pytest_extra_skip=None,
-        pytest_extra_xfail=None,
+    def __init__(self, *, # DTChecker configuration
+                          CheckerKlass=None,
+                          default_namespace=None,
+                          check_namespace=None,
+                          rndm_markers=None,
+                          atol=1e-8,
+                          rtol=1e-2,
+                          strict_check=False,
+                          # DTRunner configuration
+                          optionflags=None,
+                          # DTFinder/DTParser configuration
+                          stopwords=None,
+                          pseudocode=None,
+                          skiplist=None,
+                          # Additional user configuration
+                          user_context_mgr=None,
+                          local_resources=None,
+                          # Obscure switches
+                          parse_namedtuples=True,  # Checker
+                          nameerror_after_exception=False,  # Runner
+                          # plugin
+                          pytest_extra_ignore=None,
+                          pytest_extra_skip=None,
+                          pytest_extra_xfail=None,
     ):
         ### DTChecker configuration ###
         self.CheckerKlass = CheckerKlass or DTChecker
@@ -135,36 +133,37 @@ class DTConfig:
         # The namespace to do checks in
         if check_namespace is None:
             check_namespace = {
-                "np": np,
-                "assert_allclose": np.testing.assert_allclose,
-                "assert_equal": np.testing.assert_equal,
-                # recognize numpy repr's
-                "array": np.array,
-                "matrix": np.matrix,
-                "masked_array": np.ma.masked_array,
-                "int64": np.int64,
-                "uint64": np.uint64,
-                "int32": np.int32,
-                "uint32": np.uint32,
-                "int16": np.int16,
-                "uint16": np.uint16,
-                "int8": np.int8,
-                "uint8": np.uint8,
-                "float32": np.float32,
-                "float64": np.float64,
-                "dtype": np.dtype,
-                "nan": np.nan,
-                "nanj": np.complex128(1j * np.nan),
-                "infj": complex(0, np.inf),
-                "NaN": np.nan,
-                "inf": np.inf,
-                "Inf": np.inf,
-            }
+                  'np': np,
+                  'assert_allclose': np.testing.assert_allclose,
+                  'assert_equal': np.testing.assert_equal,
+                  # recognize numpy repr's
+                  'array': np.array,
+                  'matrix': np.matrix,
+                  'masked_array': np.ma.masked_array,
+                  'int64': np.int64,
+                  'uint64': np.uint64,
+                  'int32': np.int32,
+                  'uint32': np.uint32,
+                  'int16': np.int16,
+                  'uint16': np.uint16,
+                  'int8': np.int8,
+                  'uint8': np.uint8,
+                  'float32': np.float32,
+                  'float64': np.float64,
+                  'dtype': np.dtype,
+                  'nan': np.nan,
+                  'nanj': np.complex128(1j*np.nan),
+                  'infj': complex(0, np.inf),
+                  'NaN': np.nan,
+                  'inf': np.inf,
+                  'Inf': np.inf, }
             self.check_namespace = check_namespace
 
         # Additional directives which act like `# doctest: + SKIP`
         if rndm_markers is None:
-            rndm_markers = {"# random", "# Random", "#random", "#Random", "# may vary"}
+            rndm_markers = {'# random', '# Random',
+                            '#random', '#Random',
+                            "# may vary"}
         self.rndm_markers = rndm_markers
         self.atol, self.rtol = atol, rtol
         self.strict_check = strict_check
@@ -179,34 +178,12 @@ class DTConfig:
         ### DTFinder/DTParser configuration ###
         # ignore examples which contain any of these stopwords
         if stopwords is None:
-            stopwords = {
-                "plt.",
-                ".hist",
-                ".show",
-                ".ylim",
-                ".subplot(",
-                "set_title",
-                "imshow",
-                "plt.show",
-                ".axis(",
-                ".plot(",
-                ".bar(",
-                ".title",
-                ".ylabel",
-                ".xlabel",
-                "set_ylim",
-                "set_xlim",
-                "# reformatted",
-                ".set_xlabel(",
-                ".set_ylabel(",
-                ".set_zlabel(",
-                ".set(xlim=",
-                ".set(ylim=",
-                ".set(xlabel=",
-                ".set(ylabel=",
-                ".xlim(",
-                "ax.set(",
-                ".text(",
+            stopwords = {'plt.', '.hist', '.show', '.ylim', '.subplot(',
+                 'set_title', 'imshow', 'plt.show', '.axis(', '.plot(',
+                 '.bar(', '.title', '.ylabel', '.xlabel', 'set_ylim', 'set_xlim',
+                 '# reformatted', '.set_xlabel(', '.set_ylabel(', '.set_zlabel(',
+                 '.set(xlim=', '.set(ylim=', '.set(xlabel=', '.set(ylabel=', '.xlim(',
+                 'ax.set(', '.text(',
             }
         self.stopwords = stopwords
 
@@ -217,13 +194,9 @@ class DTConfig:
         # these names are known to fail doctesting and we like to keep it that way
         # e.g. sometimes pseudocode is acceptable etc
         if skiplist is None:
-            skiplist = set(
-                [
-                    "scipy.special.sinc",  # comes from numpy
-                    "scipy.misc.who",  # comes from numpy
-                    "scipy.optimize.show_options",
-                ]
-            )
+            skiplist = set(['scipy.special.sinc',  # comes from numpy
+                            'scipy.misc.who',  # comes from numpy
+                            'scipy.optimize.show_options', ])
         self.skiplist = skiplist
 
         #### User configuration
@@ -232,7 +205,7 @@ class DTConfig:
         self.user_context_mgr = user_context_mgr
 
         #### Local resources: None or dict {test: list-of-files-to-copy}
-        self.local_resources = local_resources or dict()
+        self.local_resources=local_resources or dict()
 
         #### Obscure switches, best leave intact
         self.parse_namedtuples = parse_namedtuples
@@ -252,23 +225,26 @@ def try_convert_namedtuple(got):
     Then convert it to the tuple (10, 0.1), so that can later compare tuples.
     """
 
-    num = got.count("=")
+    num = got.count('=')
     if num == 0:
         # not a nameduple, bail out
         return got
-    regex = r"[\w\d_]+\(" + ", ".join([r"[\w\d_]+=(.+)"] * num) + r"\)"
+    regex = (r'[\w\d_]+\(' +
+             ', '.join([r'[\w\d_]+=(.+)']*num) +
+             r'\)')
     grp = re.findall(regex, " ".join(got.split()))
     # fold it back to a tuple
-    got_again = "(" + ", ".join(grp[0]) + ")"
+    got_again = '(' + ', '.join(grp[0]) + ')'
     return got_again
 
 
 def try_convert_printed_array(got):
-    """Printed arrays: reinsert commas."""
+    """Printed arrays: reinsert commas.
+    """
     # a minimal version is `s_got = ", ".join(got[1:-1].split())`
     # but it fails if there's a space after the opening bracket: "[ 0 1 2 ]"
     # For 2D arrays, split into rows, drop spurious entries, then reassemble.
-    if not got.startswith("["):
+    if not got.startswith('['):
         return got
 
     g1 = got[1:-1]  # strip outer "[...]"-s
@@ -287,8 +263,9 @@ def try_convert_printed_array(got):
 
 
 def has_masked(got):
-    """Check if a given string represents a NumPy masked array."""
-    return "masked_array" in got and "--" in got
+    """Check if a given string represents a NumPy masked array.
+    """
+    return 'masked_array' in got and '--' in got
 
 
 def try_split_shape_from_abbrv(s_got):
@@ -301,17 +278,17 @@ def try_split_shape_from_abbrv(s_got):
         # array(..., shape=(1000,))
         # array(..., shape=(100, 100))
         # array(..., shape=(100, 100), dtype=uint16)
-        match = re.match(r"(.+),\s+shape=\(([\d\s,]+)\)(.+)", s_got, flags=re.DOTALL)
+        match = re.match(r'(.+),\s+shape=\(([\d\s,]+)\)(.+)', s_got, flags=re.DOTALL)
         if match:
             grp = match.groups()
 
             s_got = grp[0] + grp[-1]
-            s_got = s_got.replace(",,", ",")
-            shape_str = f"({grp[1]})"
+            s_got = s_got.replace(',,', ',')
+            shape_str = f'({grp[1]})'
 
-            return "".join(s_got.split("...,")), shape_str
+            return ''.join(s_got.split('...,')), shape_str
 
-    return "".join(s_got.split("...,")), ""
+    return ''.join(s_got.split('...,')), ''
 
 
 class DTChecker(doctest.OutputChecker):
@@ -321,7 +298,7 @@ class DTChecker(doctest.OutputChecker):
     Allows robust output comparison for numerical values and special
     cases involving NumPy arrays, masked arrays, namedtuples, and object
     memory addresses. It is configurable via a `DTConfig` object.
-
+    
     Parameters:
     -----------
     config : DTConfig, optional
@@ -329,8 +306,7 @@ class DTChecker(doctest.OutputChecker):
         If not provided, a default `DTConfig` instance is used.
 
     """
-
-    obj_pattern = re.compile(r"at 0x[0-9a-fA-F]+>")
+    obj_pattern = re.compile(r'at 0x[0-9a-fA-F]+>')
     vanilla = doctest.OutputChecker()
 
     def __init__(self, config=None):
@@ -340,9 +316,10 @@ class DTChecker(doctest.OutputChecker):
 
         self.atol, self.rtol = self.config.atol, self.config.rtol
         self.rndm_markers = set(self.config.rndm_markers)
-        self.rndm_markers.add("# _ignore")  # technical, private. See DTParser
+        self.rndm_markers.add('# _ignore')  # technical, private. See DTParser
 
     def check_output(self, want, got, optionflags):
+
         # cut it short if they are equal
         if want == got:
             return True
@@ -377,25 +354,17 @@ class DTChecker(doctest.OutputChecker):
             # values. So, reinsert commas and retry.
             s_want = want.strip()
             s_got = got.strip()
-            cond = (
-                s_want.startswith("[")
-                and s_want.endswith("]")
-                and s_got.startswith("[")
-                and s_got.endswith("]")
-            )
+            cond = (s_want.startswith("[") and s_want.endswith("]") and
+                    s_got.startswith("[") and s_got.endswith("]"))
             if cond:
                 s_want = try_convert_printed_array(s_want)
                 s_got = try_convert_printed_array(s_got)
 
                 return self.check_output(s_want, s_got, optionflags)
-
-            # handle array abbreviation for n-dimensional arrays, n >= 1
-            ndim_array = (
-                s_want.startswith("array([")
-                and "..." in s_want
-                and s_got.startswith("array([")
-                and "..." in s_got
-            )
+            
+            #handle array abbreviation for n-dimensional arrays, n >= 1
+            ndim_array = (s_want.startswith("array([") and "..." in s_want and 
+                          s_got.startswith("array([") and "..." in s_got)
             if ndim_array:
                 s_want, want_shape = try_split_shape_from_abbrv(s_want)
                 s_got, got_shape = try_split_shape_from_abbrv(s_got)
@@ -411,8 +380,8 @@ class DTChecker(doctest.OutputChecker):
             # their repr uses '--' for masked values and this is invalid syntax
             # If so, replace '--' by nans (they are masked anyway) and retry
             if has_masked(want) or has_masked(got):
-                s_want = want.replace("--", "nan")
-                s_got = got.replace("--", "nan")
+                s_want = want.replace('--', 'nan')
+                s_got = got.replace('--', 'nan')
                 return self.check_output(s_want, s_got, optionflags)
 
             if "=" not in want and "=" not in got:
@@ -438,9 +407,8 @@ class DTChecker(doctest.OutputChecker):
                 return self.check_output(want_again, got_again, optionflags)
 
         # Validate data type if list or tuple
-        is_list_or_tuple = isinstance(a_want, (list, tuple)) and isinstance(
-            a_got, (list, tuple)
-        )
+        is_list_or_tuple = (isinstance(a_want, (list, tuple)) and
+                            isinstance(a_got, (list, tuple)))
         if is_list_or_tuple and type(a_want) is not type(a_got):
             return False
 
@@ -483,8 +451,7 @@ class DTRunner(doctest.DocTestRunner):
     """
     A drop-in replacement for `doctest.DocTestRunner`.
 
-    Improves how test names are reported and allows better control over exception
-    handling.
+    Improves how test names are reported and allows better control over exception handling. 
     It integrates with `DTConfig` to apply customized settings for doctest execution.
 
     Parameters:
@@ -496,8 +463,7 @@ class DTRunner(doctest.DocTestRunner):
     optionflags : int, optional
         Bitwise OR of `doctest` option flags; defaults to `DTConfig.optionflags`.
     config : DTConfig, optional
-        A configuration object controlling doctest behavior; a default instance
-        is used if not provided.
+        A configuration object controlling doctest behavior; a default instance is used if not provided.
 
     """
 
@@ -515,7 +481,7 @@ class DTRunner(doctest.DocTestRunner):
 
     def _report_item_name(self, out, item_name, new_line=False):
         if item_name is not None:
-            out("\n " + item_name + "\n " + "-" * len(item_name))
+            out("\n " + item_name + "\n " + "-"*len(item_name))
             if new_line:
                 out("\n")
 
@@ -532,7 +498,7 @@ class DTRunner(doctest.DocTestRunner):
             # Ignore name errors after failing due to an unexpected exception
             # NB: this came in in https://github.com/scipy/scipy/pull/13116
             # However, here we attach the flag to the test itself, not the runner
-            if not hasattr(test, "had_unexpected_error"):
+            if not hasattr(test, 'had_unexpected_error'):
                 test.had_unexpected_error = True
             else:
                 exception_type = exc_info[0]
@@ -561,7 +527,6 @@ class DebugDTRunner(DTRunner):
 
     Almost verbatim copy of `doctest.DebugRunner`.
     """
-
     def run(self, test, compileflags=None, out=None, clear_globs=True):
         r = super().run(
             test, compileflags=compileflags, out=out, clear_globs=clear_globs
@@ -572,12 +537,12 @@ class DebugDTRunner(DTRunner):
 
     def report_unexpected_exception(self, out, test, example, exc_info):
         super().report_unexpected_exception(out, test, example, exc_info)
-        out("\n")
+        out('\n')
         raise doctest.UnexpectedException(test, example, exc_info)
 
     def report_failure(self, out, test, example, got):
         super().report_failure(out, test, example, got)
-        out("\n")
+        out('\n')
         raise doctest.DocTestFailure(test, example, got)
 
 
@@ -596,14 +561,12 @@ class DTFinder(doctest.DocTestFinder):
     exclude_empty : bool, default=True
         Whether to exclude objects that have no doctests.
     config : DTConfig, optional
-        A configuration object controlling doctest behavior; a default instance is
-        used if not provided.
+        A configuration object controlling doctest behavior; a default instance is used if not provided.
 
     """
-
-    def __init__(
-        self, verbose=None, parser=None, recurse=True, exclude_empty=True, config=None
-    ):
+    
+    def __init__(self, verbose=None, parser=None, recurse=True,
+                 exclude_empty=True, config=None):
         if config is None:
             config = DTConfig()
         self.config = config
@@ -616,14 +579,14 @@ class DTFinder(doctest.DocTestFinder):
         if globs is None:
             globs = dict(self.config.default_namespace)
         # XXX: does this make similar checks in testmod/testfile duplicate?
-        if module not in self.config.skiplist:
+        if module not in self.config.skiplist:   
             tests = super().find(obj, name, module, globs, extraglobs)
 
             if inspect.isclass(obj):
                 for name_, method in inspect.getmembers(obj):
                     if inspect.isdatadescriptor(method):
                         tests += super().find(
-                            method, f"{name}.{name_}", module, globs, extraglobs
+                            method, f'{name}.{name_}', module, globs, extraglobs
                         )
             return tests
 
@@ -650,7 +613,7 @@ class DTParser(doctest.DocTestParser):
         self.config = config
         # DocTestParser has no __init__, do not try calling it
 
-    def get_examples(self, string, name="<string>"):
+    def get_examples(self, string, name='<string>'):
         """Get examples from intervening strings and examples.
 
         How this works
@@ -667,7 +630,7 @@ class DTParser(doctest.DocTestParser):
         pseudocode = self.config.pseudocode
         rndm_markers = self.config.rndm_markers
 
-        SKIP = doctest.OPTIONFLAGS_BY_NAME["SKIP"]
+        SKIP = doctest.OPTIONFLAGS_BY_NAME['SKIP']
         keep_skipping_this_block = False
 
         examples = []
@@ -700,3 +663,4 @@ class DTParser(doctest.DocTestParser):
                 example.want += "  # _ignore\n"
             examples.append(example)
         return examples
+

@@ -1,12 +1,12 @@
-import doctest
 import io
+import doctest
+
 from contextlib import redirect_stderr
 
 import numpy as np
 
 try:
-    import matplotlib.pyplot as plt  # noqa
-
+    import matplotlib.pyplot as plt    # noqa
     HAVE_MATPLOTLIB = True
 except Exception:
     HAVE_MATPLOTLIB = False
@@ -14,31 +14,32 @@ except Exception:
 import pytest
 
 try:
-    import scipy  # noqa
-
+    import scipy    # noqa
     HAVE_SCIPY = True
 except Exception:
     HAVE_SCIPY = False
 
-from ..frontend import run_docstring_examples
-from ..frontend import testmod as _testmod
-from ..impl import DTConfig
+from . import (module_cases as module,
+               stopwords_cases as stopwords,
+               finder_cases,
+               failure_cases,
+               failure_cases_2,
+               local_file_cases)
+from ..frontend import testmod as _testmod, run_docstring_examples
 from ..util import warnings_errors
-from . import failure_cases, failure_cases_2, finder_cases, local_file_cases
-from . import module_cases as module
-from . import stopwords_cases as stopwords
+from ..impl import DTConfig
 
 _VERBOSE = 2
 
 
-@pytest.mark.skipif(not HAVE_SCIPY, reason="need scipy")
+@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_module():
     res, _ = _testmod(module, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0
 
 
-@pytest.mark.skipif(not HAVE_SCIPY, reason="need scipy")
+@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_module_vanilla_dtfinder():
     config = DTConfig()
     config.stopwords = []
@@ -47,16 +48,16 @@ def test_module_vanilla_dtfinder():
     assert res.attempted != 0
 
 
-@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason="need matplotlib")
+@pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
 def test_stopwords():
     res, _ = _testmod(stopwords, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0
+    
 
-
-@pytest.mark.skipif(not HAVE_SCIPY, reason="need scipy")
+@pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_public_obj_discovery():
-    res, _ = _testmod(module, verbose=_VERBOSE, strategy="api")
+    res, _ = _testmod(module, verbose=_VERBOSE, strategy='api')
     assert res.failed == 0
     assert res.attempted != 0
 
@@ -93,41 +94,36 @@ def test_user_context():
     config = DTConfig()
     config.user_context_mgr = warnings_errors
     with pytest.raises(doctest.UnexpectedException):
-        _testmod(
-            failure_cases_2,
-            raise_on_error=True,
-            strategy=[failure_cases_2.func_depr],
-            config=config,
-        )
+        _testmod(failure_cases_2,
+                raise_on_error=True, strategy=[failure_cases_2.func_depr],
+                config=config)
 
 
 def test_wrong_lengths():
     config = DTConfig()
-    res, _ = _testmod(
-        failure_cases,
-        strategy=[failure_cases.iterable_length_1, failure_cases.iterable_length_2],
-        config=config,
-    )
+    res, _ = _testmod(failure_cases,
+                      strategy=[failure_cases.iterable_length_1,
+                                failure_cases.iterable_length_2],
+                      config=config)
     assert res.failed == 2
 
 
 def test_tuple_and_list():
     config = DTConfig()
-    res, _ = _testmod(
-        failure_cases,
-        strategy=[failure_cases.tuple_and_list_1, failure_cases.tuple_and_list_2],
-        config=config,
-    )
+    res, _ = _testmod(failure_cases,
+                      strategy=[failure_cases.tuple_and_list_1,
+                                failure_cases.tuple_and_list_2],
+                      config=config)
     assert res.failed == 2
 
 
-@pytest.mark.parametrize("strict, num_fails", [(True, 1), (False, 0)])
+@pytest.mark.parametrize('strict, num_fails', [(True, 1), (False, 0)])
 class TestStrictDType:
     def test_np_fix(self, strict, num_fails):
         config = DTConfig(strict_check=strict)
-        res, _ = _testmod(
-            failure_cases, strategy=[failure_cases.dtype_mismatch], config=config
-        )
+        res, _ = _testmod(failure_cases,
+                          strategy=[failure_cases.dtype_mismatch],
+                          config=config)
         assert res.failed == num_fails
 
 
@@ -136,32 +132,24 @@ class TestLocalFiles:
         # A doctest tries to open a local file. Test that it works
         # (internally, the file will need to be copied).
         config = DTConfig()
-        config.local_resources = {
-            "scipy_doctest.tests.local_file_cases.local_files": ["local_file.txt"]
-        }
-        res, _ = _testmod(
-            local_file_cases,
-            config=config,
-            strategy=[local_file_cases.local_files],
-            verbose=_VERBOSE,
-        )
+        config.local_resources = {'scipy_doctest.tests.local_file_cases.local_files':
+                                  ['local_file.txt']}
+        res, _ = _testmod(local_file_cases, config=config,
+                         strategy=[local_file_cases.local_files],
+                         verbose=_VERBOSE)
 
         assert res.failed == 0
         assert res.attempted != 0
 
-    @pytest.mark.skipif(not HAVE_SCIPY, reason="need scipy")
+    @pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
     def test_sio_octave(self):
         # scipy/tutorial/io.rst : octave_a.mat file
         config = DTConfig()
-        config.local_resources = {
-            "scipy_doctest.tests.local_file_cases.sio": ["octave_a.mat"]
-        }
-        res, _ = _testmod(
-            local_file_cases,
-            config=config,
-            strategy=[local_file_cases.sio],
-            verbose=_VERBOSE,
-        )
+        config.local_resources = {'scipy_doctest.tests.local_file_cases.sio':
+                                  ['octave_a.mat']}
+        res, _ = _testmod(local_file_cases, config=config,
+                          strategy=[local_file_cases.sio],
+                          verbose=_VERBOSE)
 
         assert res.failed == 0
         assert res.attempted != 0
@@ -174,12 +162,13 @@ class TestNameErrorAfterException:
         # This first came in in https://github.com/scipy/scipy/pull/13116
         stream = io.StringIO()
         with redirect_stderr(stream):
-            _testmod(failure_cases_2, strategy=[failure_cases_2.func_name_error])
+            _testmod(failure_cases_2,
+                     strategy=[failure_cases_2.func_name_error])
 
         stream.seek(0)
         output = stream.read()
 
-        assert "ValueError:" in output  # the original exception
+        assert "ValueError:" in output   # the original exception
         assert "NameError:" not in output  # the follow-up NameError
 
     def test_name_error_after_exception_off(self):
@@ -187,14 +176,11 @@ class TestNameErrorAfterException:
         config = DTConfig(nameerror_after_exception=True)
         stream = io.StringIO()
         with redirect_stderr(stream):
-            _testmod(
-                failure_cases_2,
-                strategy=[failure_cases_2.func_name_error],
-                config=config,
-            )
+            _testmod(failure_cases_2,
+                     strategy=[failure_cases_2.func_name_error], config=config)
 
         stream.seek(0)
         output = stream.read()
 
-        assert "ValueError:" in output  # the original exception
-        assert "NameError:" in output  # the follow-up NameError
+        assert "ValueError:" in output   # the original exception
+        assert "NameError:" in output    # the follow-up NameError

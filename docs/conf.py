@@ -1,9 +1,9 @@
 # Configuration file for the Sphinx documentation builder.
 from typing import Any
 
-project = "scipy_doctest"
-copyright = "2025, Scipy Contributors"
-author = "Scipy Contributors"
+project = 'scipy_doctest'
+copyright = '2025, Scipy Contributors'
+author = 'Scipy Contributors'
 
 extensions = [
     "myst_parser",
@@ -14,7 +14,10 @@ extensions = [
 ]
 
 source_suffix = [".rst", ".md"]
-exclude_patterns = ["_build", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    ".DS_Store"
+]
 
 default_role = "literal"
 
@@ -48,7 +51,7 @@ always_document_param_types = True
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "furo"
+html_theme = 'furo'
 
 autosummary_generate = True
-numpydoc_show_class_members = False
+numpydoc_show_class_members = False 

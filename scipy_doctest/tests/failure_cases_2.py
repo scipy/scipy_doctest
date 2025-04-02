@@ -1,13 +1,10 @@
-__all__ = ["func_depr", "func_name_error"]
-
+__all__ = ['func_depr', 'func_name_error']
 
 def func_depr():
     """
     A test case for the user context mgr to turn warnings to errors.
 
-    >>> import warnings
-    ...
-    ... warnings.warn("Sample deprecation warning", DeprecationWarning)
+    >>> import warnings; warnings.warn('Sample deprecation warning', DeprecationWarning)
     """
 
 
@@ -22,8 +19,9 @@ def func_name_error():
     ...     return 42
     >>> res = func()
     >>> res
-    >>> raise NameError("This is legitimate, but is suppressed")
+    >>> raise NameError('This is legitimate, but is suppressed')
 
     Further name errors are also suppressed (which is a bug, too):
-    >>> raise NameError("Also legit")
+    >>> raise NameError('Also legit')
     """
+

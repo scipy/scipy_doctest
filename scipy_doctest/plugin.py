@@ -1,22 +1,20 @@
 """
 A pytest plugin that provides enhanced doctesting for Pydata libraries
 """
-
 import bdb
-import doctest
 import warnings
+import doctest
 
-import _pytest
 import pytest
-from _pytest import doctest as pydoctest
-from _pytest import outcomes
+import _pytest
+from _pytest import doctest as pydoctest, outcomes
 from _pytest.doctest import DoctestModule, DoctestTextfile
 from _pytest.pathlib import import_path
 
+from .impl import DTParser, DebugDTRunner
 from .conftest import dt_config
+from .util import np_errstate, matplotlib_make_nongui, temp_cwd
 from .frontend import find_doctests
-from .impl import DebugDTRunner, DTParser
-from .util import matplotlib_make_nongui, np_errstate, temp_cwd
 
 
 def pytest_addoption(parser):
@@ -28,7 +26,7 @@ def pytest_addoption(parser):
         default="None",
         help="Doctest collection strategy: vanilla pytest ('None', default), or 'api'",
         choices=("None", "api"),
-        dest="collection_strategy",
+        dest="collection_strategy"
     )
 
 
@@ -86,29 +84,30 @@ def _maybe_add_markers(item, config):
     extra_skip = dt_config.pytest_extra_skip
     skip_it = item.name in extra_skip
     if skip_it:
-        reason = extra_skip[item.name] or ""
-        item.add_marker(pytest.mark.skip(reason=reason))
+        reason = extra_skip[item.name] or ''
+        item.add_marker(
+            pytest.mark.skip(reason=reason)
+        )
 
     extra_xfail = dt_config.pytest_extra_xfail
     fail_it = item.name in extra_xfail
     if fail_it:
-        reason = extra_xfail[item.name] or ""
-        item.add_marker(pytest.mark.xfail(reason=reason))
+        reason = extra_xfail[item.name] or ''
+        item.add_marker(
+            pytest.mark.xfail(reason=reason)
+        )
 
 
 def pytest_collection_modifyitems(config, items):
     """
-    This hook is executed after test collection and allows you to modify the list
-    of collected items.
+    This hook is executed after test collection and allows you to modify the list of collected items.
 
     The function removes
-        - duplicate Doctest items (e.g., scipy.stats.norm and
-        scipy.stats.distributions.norm)
-        - Doctest items from underscored or otherwise private modules
-        (e.g., scipy.special._precompute)
+        - duplicate Doctest items (e.g., scipy.stats.norm and scipy.stats.distributions.norm)
+        - Doctest items from underscored or otherwise private modules (e.g., scipy.special._precompute)
 
-    Note that this functions cooperates with and cleans up after `DTModule.collect`,
-    which does the bulk of the collection work.
+    Note that this functions cooperates with and cleans up after `DTModule.collect`, which does the
+    bulk of the collection work.
     """
     # XXX: The logic in this function can probably be folded into DTModule.collect.
     # I (E.B.) quickly tried it and it does not seem to just work. Apparently something
@@ -117,31 +116,28 @@ def pytest_collection_modifyitems(config, items):
     # Also note that DTTextfile needs _maybe_add_markers, too.
 
     need_filter_unique = (
-        config.getoption("--doctest-modules")
-        and config.getvalue("collection_strategy") == "api"
+        config.getoption("--doctest-modules") and
+        config.getvalue("collection_strategy") == 'api'
     )
 
     unique_items = []
 
     for item in items:
         if isinstance(item.parent, DTModule) and need_filter_unique:
-            # objects are collected twice: from their public module + from the impl
-            # module e.g. for `levy_stable` we have
+            # objects are collected twice: from their public module + from the impl module
+            # e.g. for `levy_stable` we have
             # (Pdb) p item.name, item.parent.name
-            # ('scipy.stats.levy_stable',
-            # 'build-install/lib/python3.10/site-packages/scipy/stats/__init__.py')
+            # ('scipy.stats.levy_stable', 'build-install/lib/python3.10/site-packages/scipy/stats/__init__.py')
             # and
             # ('scipy.stats.distributions.levy_stable', 'distributions.py')
             # so we filter out the second occurence
             #
             # There are two options:
-            #  - either the impl module has a leading underscore (scipy.linalg._basic),
-            # or
-            #  - it needs to be explicitly listed in the 'extra_ignore' config
-            # key (distributions.py)
+            #  - either the impl module has a leading underscore (scipy.linalg._basic), or
+            #  - it needs to be explicitly listed in the 'extra_ignore' config key (distributions.py)
             #
-            # Note that the last part cannot be automated: scipy.cluster.vq is public,
-            # but scipy.stats.distributions is not
+            # Note that the last part cannot be automated: scipy.cluster.vq is public, but
+            # scipy.stats.distributions is not
             extra_ignore = config.dt_config.pytest_extra_ignore
             parent_full_name = item.parent.module.__name__
             is_duplicate = parent_full_name in extra_ignore or item.name in extra_ignore
@@ -166,7 +162,7 @@ def _is_deprecated(module):
     res = False
     try:
         with warnings.catch_warnings():
-            warnings.simplefilter("error", DeprecationWarning)
+            warnings.simplefilter('error', DeprecationWarning)
             getattr(module, names[0])
             res = False
     except DeprecationWarning:
@@ -178,16 +174,14 @@ def _is_deprecated(module):
 class DTModule(DoctestModule):
     """
     This class extends the DoctestModule class provided by pytest.
-
+    
     DTModule is responsible for overriding the behavior of the collect method.
-    The collect method is called by pytest to collect and generate test items
-    for doctests in the specified module or file.
+    The collect method is called by pytest to collect and generate test items for doctests
+    in the specified module or file.
     """
-
     def collect(self):
-        if pytest.__version__ < "8":
-            # Part of this code is copy-pasted from the `_pytest.doctest`
-            # module(pytest 7.4.0):
+        if pytest.__version__ < '8':
+            # Part of this code is copy-pasted from the `_pytest.doctest` module(pytest 7.4.0):
             # https://github.com/pytest-dev/pytest/blob/448563caaac559b8a3195edc58e8806aca8d2c71/src/_pytest/doctest.py#L497
             if self.path.name == "setup.py":
                 return
@@ -195,7 +189,7 @@ class DTModule(DoctestModule):
                 module = self.config.pluginmanager._importconftest(
                     self.path,
                     self.config.getoption("importmode"),
-                    rootpath=self.config.rootpath,
+                    rootpath=self.config.rootpath
                 )
             else:
                 try:
@@ -206,7 +200,7 @@ class DTModule(DoctestModule):
                     )
                 except ImportError:
                     if self.config.getvalue("doctest_ignore_import_errors"):
-                        outcomes.skip(f"unable to import module {self.path!r}")
+                        outcomes.skip("unable to import module %r" % self.path)
                     else:
                         raise
 
@@ -218,7 +212,7 @@ class DTModule(DoctestModule):
                 module = self.obj
             except _pytest.nodes.Collector.CollectError:
                 if self.config.getvalue("doctest_ignore_import_errors"):
-                    outcomes.skip(f"unable to import module {self.path!r}")
+                    outcomes.skip("unable to import module %r" % self.path)
                 else:
                     raise
 
@@ -228,9 +222,8 @@ class DTModule(DoctestModule):
 
         optionflags = dt_config.optionflags
 
-        # Plug in the custom runner: `PytestDTRunner`
-        runner = _get_runner(
-            self.config,
+        # Plug in the custom runner: `PytestDTRunner` 
+        runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
         )
@@ -238,14 +231,12 @@ class DTModule(DoctestModule):
         # strategy='api': discover doctests in public, non-deprecated objects in module
         # strategy=None : use vanilla stdlib doctest discovery
         strategy = self.config.getvalue("collection_strategy")
-        if strategy == "None":
+        if strategy == 'None':
             strategy = None
 
         # NB: additional postprocessing in pytest_collection_modifyitems
-        for test in find_doctests(
-            module, strategy=strategy, name=module.__name__, config=dt_config
-        ):
-            if test.examples:  # skip empty doctests
+        for test in find_doctests(module, strategy=strategy, name=module.__name__, config=dt_config):
+            if test.examples: # skip empty doctests
                 yield pydoctest.DoctestItem.from_parent(
                     self, name=test.name, runner=runner, dtest=test
                 )
@@ -254,12 +245,11 @@ class DTModule(DoctestModule):
 class DTTextfile(DoctestTextfile):
     """
     This class extends the DoctestTextfile class provided by pytest.
-
+    
     DTTextfile is responsible for overriding the behavior of the collect method.
-    The collect method is called by pytest to collect and generate test items for
-    doctests in the specified text files.
+    The collect method is called by pytest to collect and generate test items for doctests
+    in the specified text files.
     """
-
     def collect(self):
         # Part of this code is copy-pasted from `_pytest.doctest` module(pytest 7.4.0):
         # https://github.com/pytest-dev/pytest/blob/448563caaac559b8a3195edc58e8806aca8d2c71/src/_pytest/doctest.py#L417
@@ -272,14 +262,13 @@ class DTTextfile(DoctestTextfile):
         optionflags = dt_config.optionflags
 
         # Plug in the custom runner: `PytestDTRunner`
-        runner = _get_runner(
-            self.config,
+        runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
         )
 
-        # Plug in an instance of `DTParser` which parses the doctest examples from the
-        # text file and filters out stopwords and pseudocode.
+        # Plug in an instance of `DTParser` which parses the doctest examples from the text file and
+        # filters out stopwords and pseudocode.
         parser = DTParser(config=self.config.dt_config)
 
         # This part of the code is unchanged
@@ -293,22 +282,21 @@ class DTTextfile(DoctestTextfile):
 def _get_runner(config, verbose, optionflags):
     """
     Override function to return an instance of PytestDTRunner.
-
-    This function creates and returns an instance of PytestDTRunner, a custom runner
-    class that extends the behavior of DebugDTRunner for running doctests in pytest.
+    
+    This function creates and returns an instance of PytestDTRunner, a custom runner class
+    that extends the behavior of DebugDTRunner for running doctests in pytest.
     """
-
     class PytestDTRunner(DebugDTRunner):
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
             Run tests in context managers.
-
+            
             Restore the errstate/print state after each docstring.
             Also, make MPL backend non-GUI and close the figures.
-
+            
             The order of context managers is actually relevant. Consider
             user_context_mgr that turns warnings into errors.
-
+            
             Additionally, suppose that MPL deprecates something and plt.something
             starts issuing warnings. Now all of those become errors
             *unless* the `mpl()` context mgr has a chance to filter them out
@@ -321,19 +309,12 @@ def _get_runner(config, verbose, optionflags):
                     with matplotlib_make_nongui():
                         # XXX: local_resourses needed? they seem to be, w/o pytest
                         with temp_cwd(test, dt_config.local_resources):
-                            super().run(
-                                test,
-                                compileflags=compileflags,
-                                out=out,
-                                clear_globs=clear_globs,
-                            )
+                            super().run(test, compileflags=compileflags, out=out, clear_globs=clear_globs)
 
         """
         Almost verbatim copy of `_pytest.doctest.PytestDoctestRunner` except we utilize
-        DTConfig's `nameerror_after_exception` attribute in place of doctest's
-        `continue_on_failure`.
+        DTConfig's `nameerror_after_exception` attribute in place of doctest's `continue_on_failure`.
         """
-
         def report_failure(self, out, test, example, got):
             failure = doctest.DocTestFailure(test, example, got)
             if config.dt_config.nameerror_after_exception:
@@ -352,6 +333,4 @@ def _get_runner(config, verbose, optionflags):
             else:
                 raise failure
 
-    return PytestDTRunner(
-        verbose=verbose, optionflags=optionflags, config=config.dt_config
-    )
+    return PytestDTRunner(verbose=verbose, optionflags=optionflags, config=config.dt_config)

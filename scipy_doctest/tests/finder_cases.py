@@ -9,7 +9,7 @@ A set of simple cases for DocTestFinder / DTFinder and its helpers.
 3
 """
 
-__all__ = ["func", "Klass"]
+__all__ = ['func', 'Klass']
 
 
 def func():
@@ -30,7 +30,6 @@ class Klass:
     >>> 1 + 8
     9
     """
-
     def meth(self):
         """And a method has its doctests.
 
@@ -62,3 +61,5 @@ def _underscored_private_func():
     >>> 9 + 12
     21
     """
+
+

@@ -1,11 +1,5 @@
-__all__ = [
-    "func9",
-    "func10",
-    "iterable_length_1",
-    "iterable_length_2",
-    "tuple_and_list_1",
-    "tuple_and_list_2",
-]
+__all__ = ['func9', 'func10', 'iterable_length_1', 'iterable_length_2',
+           'tuple_and_list_1', 'tuple_and_list_2']
 
 
 def func9():
