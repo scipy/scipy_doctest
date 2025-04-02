@@ -13,14 +13,15 @@ repos:
     hooks:
       # Run the linter.
       - id: ruff
-        args: [--fix]
 
       # Run the formatter.
       - id: ruff-format
+        args: [--diff] # Avoid writing any formatted files back; instead, exit with a non-zero status code and the difference between the current file and how the formatted file would look like
 
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.4.2
     hooks:
+      # Formats non-Python files
       - id: prettier
 
 # pre-commit.ci will periodically autoupdate your configuration ensuring that hook versions are kept up to date.
