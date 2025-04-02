@@ -174,7 +174,7 @@ def _is_deprecated(module):
 class DTModule(DoctestModule):
     """
     This class extends the DoctestModule class provided by pytest.
-    
+
     DTModule is responsible for overriding the behavior of the collect method.
     The collect method is called by pytest to collect and generate test items for doctests
     in the specified module or file.
@@ -222,7 +222,7 @@ class DTModule(DoctestModule):
 
         optionflags = dt_config.optionflags
 
-        # Plug in the custom runner: `PytestDTRunner` 
+        # Plug in the custom runner: `PytestDTRunner`
         runner = _get_runner(self.config,
             verbose=False,
             optionflags=optionflags,
@@ -245,7 +245,7 @@ class DTModule(DoctestModule):
 class DTTextfile(DoctestTextfile):
     """
     This class extends the DoctestTextfile class provided by pytest.
-    
+
     DTTextfile is responsible for overriding the behavior of the collect method.
     The collect method is called by pytest to collect and generate test items for doctests
     in the specified text files.
@@ -282,7 +282,7 @@ class DTTextfile(DoctestTextfile):
 def _get_runner(config, verbose, optionflags):
     """
     Override function to return an instance of PytestDTRunner.
-    
+
     This function creates and returns an instance of PytestDTRunner, a custom runner class
     that extends the behavior of DebugDTRunner for running doctests in pytest.
     """
@@ -290,13 +290,13 @@ def _get_runner(config, verbose, optionflags):
         def run(self, test, compileflags=None, out=None, clear_globs=False):
             """
             Run tests in context managers.
-            
+
             Restore the errstate/print state after each docstring.
             Also, make MPL backend non-GUI and close the figures.
-            
+
             The order of context managers is actually relevant. Consider
             user_context_mgr that turns warnings into errors.
-            
+
             Additionally, suppose that MPL deprecates something and plt.something
             starts issuing warnings. Now all of those become errors
             *unless* the `mpl()` context mgr has a chance to filter them out

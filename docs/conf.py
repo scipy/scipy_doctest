@@ -54,4 +54,4 @@ always_document_param_types = True
 html_theme = 'furo'
 
 autosummary_generate = True
-numpydoc_show_class_members = False 
+numpydoc_show_class_members = False

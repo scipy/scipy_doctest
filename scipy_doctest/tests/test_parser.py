@@ -31,6 +31,3 @@ def test_config_nocopy():
     config = DTConfig()
     parser = DTParser(config)
     assert parser.config is config
-
-
-

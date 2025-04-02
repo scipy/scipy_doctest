@@ -39,7 +39,7 @@ def test_failure_cases(pytester):
         result = pytester.inline_run(python_file, "--doctest-modules")
     assert result.ret == pytest.ExitCode.TESTS_FAILED
 
-    
+
 @pytest.mark.skipif(not HAVE_MATPLOTLIB, reason='need matplotlib')
 def test_stopword_cases(pytester):
     """Test that pytest uses the DTParser for doctests."""
@@ -90,4 +90,3 @@ def test_alt_checker(pytester):
     # run all tests with pytest
     result = pytester.inline_run(f, '--doctest-modules')
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-

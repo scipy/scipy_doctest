@@ -193,7 +193,7 @@ below
 
 Note how the block above will fail doctesting unless the second line is
 skipped. A standard solution is to add a +SKIP marker to every line, but this
-is ugly and we skip the whole block instead. 
+is ugly and we skip the whole block instead.
 
 Once the block is over, we get back to usual doctests, which are not skipped
 
@@ -216,4 +216,3 @@ def test_SKIPBLOCK():
     assert test.examples[0].options[SKIP] is True
     assert test.examples[1].options[SKIP] is True
     assert test.examples[2].options == {}    # not skipped
-

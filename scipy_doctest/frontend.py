@@ -478,4 +478,3 @@ def _main():
         if result.failed:
             return 1
     return 0
-

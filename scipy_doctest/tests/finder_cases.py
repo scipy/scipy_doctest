@@ -61,5 +61,3 @@ def _underscored_private_func():
     >>> 9 + 12
     21
     """
-
-

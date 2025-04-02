@@ -260,9 +260,9 @@ modules = []
 def generate_log(module, test):
     """
     Generate a log of the doctested items.
-    
+
     This function logs the items being doctested to a file named 'doctest.log'.
-    
+
     Args:
         module (module): The module being doctested.
         test (str): The name of the doctest item.
@@ -276,4 +276,3 @@ def generate_log(module, test):
             LOGFILE.write(f"{test}\n")
         except AttributeError:
             LOGFILE.write(f"{test}\n")
-
