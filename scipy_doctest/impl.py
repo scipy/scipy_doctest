@@ -60,7 +60,7 @@ class DTConfig:
         >>> for test in tests:
         ...     with user_context(test):
         ...         runner.run(test)
-        
+
         Default is a noop.
     local_resources: dict
         If a test needs some local files, list them here. The format is
@@ -298,7 +298,7 @@ class DTChecker(doctest.OutputChecker):
     Allows robust output comparison for numerical values and special
     cases involving NumPy arrays, masked arrays, namedtuples, and object
     memory addresses. It is configurable via a `DTConfig` object.
-    
+
     Parameters:
     -----------
     config : DTConfig, optional
@@ -361,9 +361,9 @@ class DTChecker(doctest.OutputChecker):
                 s_got = try_convert_printed_array(s_got)
 
                 return self.check_output(s_want, s_got, optionflags)
-            
+
             #handle array abbreviation for n-dimensional arrays, n >= 1
-            ndim_array = (s_want.startswith("array([") and "..." in s_want and 
+            ndim_array = (s_want.startswith("array([") and "..." in s_want and
                           s_got.startswith("array([") and "..." in s_got)
             if ndim_array:
                 s_want, want_shape = try_split_shape_from_abbrv(s_want)
@@ -451,7 +451,7 @@ class DTRunner(doctest.DocTestRunner):
     """
     A drop-in replacement for `doctest.DocTestRunner`.
 
-    Improves how test names are reported and allows better control over exception handling. 
+    Improves how test names are reported and allows better control over exception handling.
     It integrates with `DTConfig` to apply customized settings for doctest execution.
 
     Parameters:
@@ -564,7 +564,7 @@ class DTFinder(doctest.DocTestFinder):
         A configuration object controlling doctest behavior; a default instance is used if not provided.
 
     """
-    
+
     def __init__(self, verbose=None, parser=None, recurse=True,
                  exclude_empty=True, config=None):
         if config is None:
@@ -579,7 +579,7 @@ class DTFinder(doctest.DocTestFinder):
         if globs is None:
             globs = dict(self.config.default_namespace)
         # XXX: does this make similar checks in testmod/testfile duplicate?
-        if module not in self.config.skiplist:   
+        if module not in self.config.skiplist:
             tests = super().find(obj, name, module, globs, extraglobs)
 
             if inspect.isclass(obj):
@@ -663,4 +663,3 @@ class DTParser(doctest.DocTestParser):
                 example.want += "  # _ignore\n"
             examples.append(example)
         return examples
-

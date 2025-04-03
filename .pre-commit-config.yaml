@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Makes sure files end in a newline and only a newline.
+      - id: end-of-file-fixer
+
+      # Trims trailing whitespace
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
+    hooks:
+      # Run the linter.
+      - id: ruff
+
+      # Run the formatter.
+      - id: ruff-format
+        args: [--diff] # Avoid writing any formatted files back; instead, exit with a non-zero status code and the difference between the current file and how the formatted file would look like
+
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.4.2
+    hooks:
+      # Formats non-Python files
+      - id: prettier
+
+# pre-commit.ci will periodically autoupdate your configuration ensuring that hook versions are kept up to date.
+ci:
+  autoupdate_schedule: monthly

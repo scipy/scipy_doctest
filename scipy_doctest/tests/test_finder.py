@@ -86,8 +86,8 @@ class TestSkiplist:
         assert sorted(names) == sorted(wanted_names)
 
     def test_get_doctests_strategy_None(self):
-        # Add a skiplist: strategy=None skips listed items 
-        base = finder_cases.__name__  
+        # Add a skiplist: strategy=None skips listed items
+        base = finder_cases.__name__
         skips = [base + '.func', base + '.Klass.meth_2']
         config = DTConfig(skiplist=skips)
 
@@ -102,8 +102,8 @@ class TestSkiplist:
         assert sorted(names) == sorted(wanted_names)
 
     def test_get_doctests_strategy_api(self):
-        # Add a skiplist: strategy='api' skips listed items 
-        base = finder_cases.__name__  
+        # Add a skiplist: strategy='api' skips listed items
+        base = finder_cases.__name__
         skips = [base + '.func', base + '.Klass.meth_2']
         config = DTConfig(skiplist=skips)
 
@@ -120,8 +120,8 @@ class TestSkiplist:
         assert sorted(names) == sorted(wanted_names)
 
     def test_get_doctests_strategy_list(self):
-        # Add a skiplist: strategy=<list> skips listed items 
-        base = finder_cases.__name__  
+        # Add a skiplist: strategy=<list> skips listed items
+        base = finder_cases.__name__
         skips = [base + '.func', base + '.Klass.meth_2']
         config = DTConfig(skiplist=skips)
 
@@ -217,6 +217,3 @@ def test_private_superclasses_2():
 
     assert len(tests) == len(expected_names)
     assert names == set(expected_names)
-
-
-

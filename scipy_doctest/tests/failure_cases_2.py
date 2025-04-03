@@ -24,4 +24,3 @@ def func_name_error():
     Further name errors are also suppressed (which is a bug, too):
     >>> raise NameError('Also legit')
     """
-

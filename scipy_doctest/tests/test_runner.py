@@ -102,4 +102,3 @@ class TestCheckerDropIn:
         with pytest.raises(doctest.DocTestFailure):
             for t in tests:
                 runner.run(t)
-

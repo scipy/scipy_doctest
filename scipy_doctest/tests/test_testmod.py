@@ -53,7 +53,7 @@ def test_stopwords():
     res, _ = _testmod(stopwords, verbose=_VERBOSE)
     assert res.failed == 0
     assert res.attempted != 0
-    
+
 
 @pytest.mark.skipif(not HAVE_SCIPY, reason='need scipy')
 def test_public_obj_discovery():

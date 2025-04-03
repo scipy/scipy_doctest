@@ -19,4 +19,3 @@ except ModuleNotFoundError:
 
 from .impl import DTChecker, DTFinder, DTParser, DTRunner, DebugDTRunner, DTConfig  # noqa
 from .frontend import testmod, testfile, find_doctests, run_docstring_examples      # noqa
-
