@@ -515,9 +515,10 @@ class DTRunner(doctest.DocTestRunner):
     def get_history(self):
         """Return a dict with names of items which were run.
 
-        Actually the dict is `{name : (f, t)}`, where `name` is the name of
-        an object, and the value is a tuple of the numbers of examples which
-        failed and which were tried.
+        Actually the dict is `{name : (failures, tries, skips)}` (before Python
+        3.13, just `{name : (failures, tries, skips)}`) where `name` is the
+        name of an object, and the value is a tuple of the numbers of examples
+        which failed, were tried, and were skipped, respectively.
         """
         if version_info >= (3, 13):
             return self._stats
