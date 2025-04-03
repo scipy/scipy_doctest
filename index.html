@@ -306,10 +306,10 @@ actual output from numpy: <code class="docutils literal notranslate"><span class
 <span class="go">42     # may vary</span>
 </pre></div>
 </div>
-</li>
-</ul>
 <p>Note that the markers (by default, <code class="docutils literal notranslate"><span class="pre">&quot;#</span> <span class="pre">may</span> <span class="pre">vary&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;#</span> <span class="pre">random&quot;</span></code>) can be applied
 to either an example’s output, or its source.</p>
+</li>
+</ul>
 <p>Also note a difference with respect to the standard <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">doctest:</span> <span class="pre">+SKIP</span></code>: the latter
 skips the example entirely, while these additional markers only skip checking
 the output. Thus the example source needs to be valid python code still.</p>
@@ -449,7 +449,7 @@ classes</p>
 </table>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">DTContext</span></code> class is just a bag class which holds various configuration
-settings as attributes.  An instance of this class is passed around, so user
+settings as attributes. An instance of this class is passed around, so user
 configuration is simply creating an instance, overriding an attribute and
 passing the instance to <code class="docutils literal notranslate"><span class="pre">testmod</span></code> or constructors of <code class="docutils literal notranslate"><span class="pre">DT*</span></code> objects. Defaults
 are provided, based on a long-term usage in SciPy.</p>
@@ -568,7 +568,7 @@ the collections fails if dependencies are not available.</p>
 </ul>
 <p>The default collection strategy follows <code class="docutils literal notranslate"><span class="pre">doctest</span></code> module and <code class="docutils literal notranslate"><span class="pre">pytest</span></code>. This leads
 to duplicates if your package has the split between public and _private modules,
-where  public modules re-export things from private ones. The solution is to
+where public modules re-export things from private ones. The solution is to
 use <code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">pytest</span> <span class="pre">--doctest-collect=api</span></code> CLI switch: with this, only public
 objects will be collected.</p>
 <p>The decision on what is public is as follows: an object is public iff</p>
