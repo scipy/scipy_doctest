@@ -4,6 +4,7 @@ import inspect
 import doctest
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 from itertools import zip_longest
+from sys import version_info
 
 import numpy as np
 
@@ -518,7 +519,10 @@ class DTRunner(doctest.DocTestRunner):
         an object, and the value is a tuple of the numbers of examples which
         failed and which were tried.
         """
-        return self._name2ft
+        if version_info >= (3, 13):
+            return self._stats
+        else:
+            return self._name2ft
 
 
 class DebugDTRunner(DTRunner):
