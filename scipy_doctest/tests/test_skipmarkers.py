@@ -1,4 +1,5 @@
 import doctest
+from sys import version_info
 
 try:
     import matplotlib.pyplot as plt    # noqa
@@ -57,7 +58,8 @@ class TestSyntaxErrors:
                                    lineno=0)
         runner = DebugDTRunner()
         runner.run(test)
-        assert runner.get_history() == {'none : +SKIP': (0, 0)}
+        stats = (0, 1, 1) if version_info >= (3, 13) else (0, 0)
+        assert runner.get_history() == {'none : +SKIP': stats}
 
     def test_invalid_python_pseudocode(self):
         # Marking a test as pseudocode is equivalent to a +SKIP:
@@ -74,7 +76,8 @@ class TestSyntaxErrors:
                                    lineno=0)
         runner = DebugDTRunner()
         runner.run(test)
-        assert runner.get_history() == {'none : pseudocode': (0, 0)}
+        stats = (0, 1, 1) if version_info >= (3, 13) else (0, 0)
+        assert runner.get_history() == {'none : pseudocode': stats}
 
 
 class TestPseudocodeMarkers:
@@ -125,7 +128,8 @@ class TestStopwords:
         runner.run(test)
 
         # one example tried, of which zero failed
-        assert runner.get_history() == {'stopwords_bogus_output': (0, 1)}
+        stats = (0, 1, 0) if version_info >= (3, 13) else (0, 1)
+        assert runner.get_history() == {'stopwords_bogus_output': stats}
 
 
 class TestMayVary:
@@ -148,7 +152,8 @@ class TestMayVary:
         runner.run(test)
 
         # one example tried, of which zero failed
-        assert runner.get_history() == {'may_vary_markers': (0, 1)}
+        stats = (0, 1, 0) if version_info >= (3, 13) else (0, 1)
+        assert runner.get_history() == {'may_vary_markers': stats}
 
     def test_may_vary_source(self):
         # The marker needs to be added to the example output, not source.
@@ -164,7 +169,8 @@ class TestMayVary:
         runner.run(test)
 
         # one example tried, of which zero failed
-        assert runner.get_history() == {'may_vary_source': (0, 1)}
+        stats = (0, 1, 0) if version_info >= (3, 13) else (0, 1)
+        assert runner.get_history() == {'may_vary_source': stats}
 
     def test_may_vary_syntax_error(self):
         # `# may vary` markers do not mask syntax errors, unlike `# doctest: +SKIP`
