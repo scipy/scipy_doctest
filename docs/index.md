@@ -7,4 +7,5 @@
 Home <self>
 implementation.md
 plugin.md
+changelog.md
 ```
