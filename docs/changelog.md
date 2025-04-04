@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.7 (2025-04-04)
+
+- Support python 3.13. The patch by Ben Beasley.
+  Starting from python 3.13, the standard library `doctest.DoctestRunner` tracks the
+  number of skipped doctests, in addition to the counts of attempted and failed
+  doctests. We track this change, thus both the return value of `DTRunner.run` and
+  `DTRunner.get_history` contain this count on python 3.13+ and do not contain it on
+  prior python versions.
+
+
 ## v1.6 (2024-12-17)
 
 - Fix a collection issue, where the DocTestFinder was missing docstrings of data
