@@ -15,6 +15,7 @@ import pytest
 
 try:
     import scipy    # noqa
+    from scipy import stats   # https://github.com/scipy/scipy_doctest/issues/184
     HAVE_SCIPY = True
 except Exception:
     HAVE_SCIPY = False
