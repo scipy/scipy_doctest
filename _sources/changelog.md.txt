@@ -33,7 +33,7 @@
   We now ignore the `shape=` part on NumPy < 2.2 and check the value on newer versions.
 
 
-# v1.4 (2024-09-23)
+## v1.4 (2024-09-23)
 
 - Add a `strict_check` configuration flag to decide whether to require matching dtypes
   or rely on NumPy's lax definition of equality: 
