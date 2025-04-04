@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.7.1 (2025-04-04)
+
+This version fixes a packaging error of v1.7, where the wheel and sdist contained extra files and
+is identical to v1.7 otherwise.
+
 ## v1.7 (2025-04-04)
 
 - Support python 3.13. The patch by Ben Beasley.
