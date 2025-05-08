@@ -242,3 +242,21 @@ def array_and_list_2():
     >>> [1, 2, 3]
     array([1, 2, 3])
     """
+
+
+def two_dicts():
+    """
+    >>> import numpy as np
+    >>> dict(a=0, b=1)
+    {'a': 0, 'b': 1}
+    >>> {'a': 0., 'b': np.arange(3) / 3 }
+    {'a': 0.0, 'b': array([0, 0.33333333, 0.66666667])}
+    """
+
+def nested_dicts():
+    """
+    >>> import numpy as np
+    >>> {'a': 1.0, 'b': dict(blurb=np.arange(3)/3)}
+    {'a': 1.0, 'b': {'blurb': array([0, 0.33333333, 0.66666667])}}
+    """
+
