@@ -117,6 +117,18 @@ def test_tuple_and_list():
                       config=config)
     assert res.failed == 2
 
+def test_dict():
+    config = DTConfig()
+    res, _ = _testmod(failure_cases,
+                      strategy=[failure_cases.dict_not_dict,
+                                failure_cases.dict_not_dict_2,
+                                failure_cases.dict_wrong_keys,
+                                failure_cases.dict_wrong_values,
+                                failure_cases.dict_wrong_values_np,
+                                failure_cases.dict_nested_wrong_values_np],
+                      config=config)
+    assert res.failed == 6
+
 
 @pytest.mark.parametrize('strict, num_fails', [(True, 1), (False, 0)])
 class TestStrictDType:

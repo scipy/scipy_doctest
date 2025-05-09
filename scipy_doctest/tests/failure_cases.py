@@ -53,3 +53,46 @@ def dtype_mismatch():
     >>> 3.0
     3
     """
+
+
+def dict_not_dict():
+    """
+    >>> dict(a=1, b=2)
+    ['a', 'b']
+    """
+
+def dict_not_dict_2():
+    """
+    >>> [('a', 1), ('b', 2)]
+    {'a': 1, 'b': 2}
+    """
+
+
+def dict_wrong_keys():
+    """
+    >>> dict(a=1, b=2)
+    {'c': 1, 'd': 2}
+    """
+
+
+def dict_wrong_values():
+    """
+    >>> dict(a=1, b=2)
+    {'a': -1, 'b': -2}
+    """
+
+
+def dict_wrong_values_np():
+    """
+    >>> import numpy as np
+    >>> dict(a=1, b=np.arange(3)/3)
+    {'a': 1, 'b': array([0, 0.335, 0.669])}
+    """
+
+
+def dict_nested_wrong_values_np():
+    """
+    >>> import numpy as np
+    >>> dict(a=1, b=dict(blurb=np.arange(3)/3))
+    {'a': 1, 'b': {'blurb': array([0, 0.335, 0.669])}}
+    """

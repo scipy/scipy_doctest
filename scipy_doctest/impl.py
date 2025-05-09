@@ -2,6 +2,7 @@ import re
 import warnings
 import inspect
 import doctest
+import operator
 from doctest import NORMALIZE_WHITESPACE, ELLIPSIS, IGNORE_EXCEPTION_DETAIL
 from itertools import zip_longest
 from sys import version_info
@@ -412,6 +413,19 @@ class DTChecker(doctest.OutputChecker):
                             isinstance(a_got, (list, tuple)))
         if is_list_or_tuple and type(a_want) is not type(a_got):
             return False
+
+        # dicts and other mappings need special treatment
+        want_is_dict = hasattr(a_want, 'items')
+        got_is_dict = hasattr(a_got, 'items')
+        if operator.xor(want_is_dict, got_is_dict):
+            # either both are dicts or both are not
+            return False
+
+        if want_is_dict:
+            # convert dicts into lists of key-value pairs and retry
+            want_items = str(list(a_want.items()))
+            got_items = str(list(a_got.items()))
+            return self.check_output(want_items, got_items, optionflags)
 
         # ... and defer to numpy
         strict = self.config.strict_check
