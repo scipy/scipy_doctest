@@ -386,6 +386,17 @@ use the command flag</p>
 </div>
 <p>See <a class="reference internal" href="#more-fine-grained-control">More fine-grained control</a> section
 for details on how to customize the behavior.</p>
+<p>** NOTE ** Currently, <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code> only collects doctests and skips
+‘regular’ unit tests. This differs from the vanilla <code class="docutils literal notranslate"><span class="pre">pytest</span></code> behavior, which collects
+both doctests and unit tests.
+The behavior will change in a future version: <code class="docutils literal notranslate"><span class="pre">scipy-doctest==2.0</span></code> <strong>will change the
+default</strong> to align with the vanilla <code class="docutils literal notranslate"><span class="pre">pytest</span></code>.</p>
+<p>To retain the current behavior, use the <code class="docutils literal notranslate"><span class="pre">--doctest-only-doctests</span></code> CLI option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest --doctest-modules --doctest-only-doctests
+</pre></div>
+</div>
+<p>is unambiguous and will behave identically in the current version 1.8 and upcoming
+versions of <code class="docutils literal notranslate"><span class="pre">scipy-doctest</span></code>.</p>
 </section>
 <section id="basic-usage">
 <h3>Basic usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
@@ -520,9 +531,9 @@ for more details.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ spin check-docs
 </pre></div>
 </div>
-<p>SciPy wraps <code class="docutils literal notranslate"><span class="pre">scipy-doctest</span></code> with custom <code class="docutils literal notranslate"><span class="pre">dev.py</span></code> commands:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python dev.py smoke-docs    # check docstrings
-$ python dev.py smoke-tutorials   # ReST user guide tutorials
+<p>In SciPy, the name of the <code class="docutils literal notranslate"><span class="pre">spin</span></code> command is <code class="docutils literal notranslate"><span class="pre">smoke-docs</span></code>::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ spin smoke-docs    # check docstrings
+$ spin smoke-tutorials   # ReST user guide tutorials
 </pre></div>
 </div>
 </section>
