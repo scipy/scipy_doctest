@@ -29,6 +29,28 @@ def pytest_addoption(parser):
         dest="collection_strategy"
     )
 
+    # We cannot add `--doctest-only` option because of
+    # https://github.com/pytest-dev/pytest/discussions/13435
+    #
+    # Therefore, we add a new option, --doctest-only-doctests,
+    # which is `true` by default, for now.
+    #
+    # In v2.0, it the default will become `false`, so that
+    #
+    # $ pytest --doctest-modules
+    #
+    # will run both doctests and unit tests, and the way to use the
+    # current behavior (only run doctests, skip unit tests) will be
+    #
+    # $ pytest --doctest-modules --doctest-only-doctests=true
+    #
+    group.addoption("--doctest-only-doctests",
+        action="store",
+        default="true",
+        help="Whether to only collect doctests, or also collect unit tests, too.",
+        choices=("true", "false"),
+        dest="doctest_only_doctests"
+    )
 
 def pytest_configure(config):
     """
@@ -49,7 +71,13 @@ def pytest_ignore_collect(collection_path, config):
     This function is used to exclude the 'tests' directory and test modules when
     the `--doctest-modules` option is used.
     """
-    if config.getoption("--doctest-modules"):
+    # XXX: in v2.0, --doctest-modules will mean "run both doctests and unit tests",
+    # (consistent with vanilla pytest), and the way to retain the current behavior
+    # will be to add --doctest-only-doctests=true to the CLI command
+    if (
+        config.getoption("--doctest-modules") and
+        config.getoption("--doctest-only-doctests") == 'true'
+    ):
         path_str = str(collection_path)
         if "tests" in path_str or "test_" in path_str:
             return True
