@@ -151,6 +151,22 @@ $ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
 See [More fine-grained control](#more-fine-grained-control) section
 for details on how to customize the behavior.
 
+** NOTE ** Currently, `pytest --doctest-modules` only collects doctests and skips
+'regular' unit tests. This differs from the vanilla `pytest` behavior, which collects
+both doctests and unit tests.
+The behavior will change in a future version: `scipy-doctest==2.0` **will change the
+default** to align with the vanilla `pytest`.
+
+To retain the current behavior, use the `--doctest-only-doctests` CLI option:
+
+```
+$ pytest --doctest-modules --doctest-only-doctests
+```
+
+is unambiguous and will behave identically in the current version 1.8 and upcoming
+versions of `scipy-doctest`. 
+
+
 ### Basic usage
 
 The use of `pytest` is optional, and you can use the `doctest` layer API.
@@ -291,11 +307,11 @@ NumPy wraps `scipy-doctest` with the `spin` command
 $ spin check-docs
 ```
 
-SciPy wraps `scipy-doctest` with custom `dev.py` commands:
+In SciPy, the name of the `spin` command is `smoke-docs`::
 
 ```
-$ python dev.py smoke-docs    # check docstrings
-$ python dev.py smoke-tutorials   # ReST user guide tutorials
+$ spin smoke-docs    # check docstrings
+$ spin smoke-tutorials   # ReST user guide tutorials
 ```
 
 ## Rough edges and sharp bits
