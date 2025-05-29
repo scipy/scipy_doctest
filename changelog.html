@@ -262,6 +262,22 @@
         <article role="main" id="furo-main-content">
           <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>1.8 (2025-05-29)<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Add a CLI option, <code class="docutils literal notranslate"><span class="pre">--doctest-only-doctests={true,false}</span></code> to control whether to only
+collect doctests (<code class="docutils literal notranslate"><span class="pre">true</span></code>, default) or also collect “regular” unit tests (<code class="docutils literal notranslate"><span class="pre">false</span></code>).
+Currently the default is to only collect doctests; in a next major version, the
+default will change to <code class="docutils literal notranslate"><span class="pre">false</span></code> to align the behavior of <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code>
+with the vanilla pytest behavior. See <a class="reference external" href="https://github.com/scipy/scipy_doctest/issues/198">gh-198</a>
+for discussion.</p></li>
+<li><p>Fix doctesting dictionaries. Previously, only keys were checked and the values
+were not.</p></li>
+<li><p>Work around <a class="reference external" href="https://github.com/pytest-dev/pytest/discussions/13353">a pytest issue</a>,
+which led to spurious test failures with <code class="docutils literal notranslate"><span class="pre">scipy&gt;=1.5</span></code>.
+See <a class="reference external" href="https://github.com/scipy/scipy_doctest/issues/184">gh-184</a> for details.</p></li>
+</ul>
+</section>
 <section id="v1-7-1-2025-04-04">
 <h2>v1.7.1 (2025-04-04)<a class="headerlink" href="#v1-7-1-2025-04-04" title="Link to this heading">¶</a></h2>
 <p>This version fixes a packaging error of v1.7, where the wheel and sdist contained extra files and
@@ -401,6 +417,7 @@ core functionality from SciPy’s and NumPy’s <code class="docutils literal no
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#id1">1.8 (2025-05-29)</a></li>
 <li><a class="reference internal" href="#v1-7-1-2025-04-04">v1.7.1 (2025-04-04)</a></li>
 <li><a class="reference internal" href="#v1-7-2025-04-04">v1.7 (2025-04-04)</a></li>
 <li><a class="reference internal" href="#v1-6-2024-12-17">v1.6 (2024-12-17)</a></li>
