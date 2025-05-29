@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2025-05-29)
+
+- Add a CLI option, `--doctest-only-doctests={true,false}` to control whether to only
+  collect doctests (`true`, default) or also collect "regular" unit tests (`false`).
+  Currently the default is to only collect doctests; in a next major version, the
+  default will change to `false` to align the behavior of `pytest --doctest-modules`
+  with the vanilla pytest behavior. See [gh-198](https://github.com/scipy/scipy_doctest/issues/198)
+  for discussion.
+- Fix doctesting dictionaries. Previously, only keys were checked and the values
+  were not.
+- Work around [a pytest issue](https://github.com/pytest-dev/pytest/discussions/13353),
+  which led to spurious test failures with `scipy>=1.5`.
+  See [gh-184](https://github.com/scipy/scipy_doctest/issues/184) for details.
+
+
 ## v1.7.1 (2025-04-04)
 
 This version fixes a packaging error of v1.7, where the wheel and sdist contained extra files and
