@@ -151,7 +151,7 @@ $ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
 See [More fine-grained control](#more-fine-grained-control) section
 for details on how to customize the behavior.
 
-**NOTE ** Currently, `pytest --doctest-modules` only collects doctests and skips
+**NOTE** Currently, `pytest --doctest-modules` only collects doctests and skips
 'regular' unit tests. This differs from the vanilla `pytest` behavior, which collects
 both doctests and unit tests.
 The behavior will change in a future version: `scipy-doctest==2.0` **will change the
@@ -402,13 +402,19 @@ adding `--assert=plain` is reasonable.
 - `pytest-doctestplus` plugin from the `AstroPy` project has similar goals.
   The package is well established and widely used. From a user perspective, main
   differences are: (i) `pytest-doctestplus` is more sensitive to formatting,
-  including whitespace---thus if numpy tweaks its output formatting, doctests
-  may start failing; (ii) there is still a need for `# doctest: +FLOAT_CMP`
+  including whitespace; (ii) there is still a need for `# doctest: +FLOAT_CMP`
   directives.
 
-  This project takes a different approach: in addition to plugging into `pytest`,
-  we closely follow the `doctest` API and implementation, which are naturally
-  way more stable then `pytest`.
+  This project takes a slightly different approach: we strive to make numeric comparisons
+  whitespace insensitive and automatic, without a need for explicit markup.  For rare cases
+  which require additional configuration, we either keep it in the tool (thus out of
+  reader-visible docstrings), or provide human-readable markers (hence `# may vary`
+  not `# doctest +SKIP`).
+  Furthermore, in addition to plugging into `pytest`, we provide an API layer which closely
+  follows the `doctest` API. Essentially all aspects of doctesting are user-configurable.
+
+- `xdoctest` package relies on a deeper rewrite of the standard-library `doctest`
+  functionality, and uses an AST-based analysis to parse code examples out of docstrings.
 
 - `NumPy` and `SciPy` were using modified doctesting in their `refguide-check` utilities.
   These utilities are tightly coupled to their libraries, and have been reported
