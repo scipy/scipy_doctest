@@ -151,7 +151,7 @@ $ pytest --pyargs <your-package> --doctest-modules --doctest-collect=api
 See [More fine-grained control](#more-fine-grained-control) section
 for details on how to customize the behavior.
 
-** NOTE ** Currently, `pytest --doctest-modules` only collects doctests and skips
+**NOTE ** Currently, `pytest --doctest-modules` only collects doctests and skips
 'regular' unit tests. This differs from the vanilla `pytest` behavior, which collects
 both doctests and unit tests.
 The behavior will change in a future version: `scipy-doctest==2.0` **will change the
