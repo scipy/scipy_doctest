@@ -249,14 +249,26 @@ def two_dicts():
     >>> import numpy as np
     >>> dict(a=0, b=1)
     {'a': 0, 'b': 1}
+    >>> {'a': 1/3, 'b': 2/3}
+    {'a': 0.333, 'b': 0.667}
     >>> {'a': 0., 'b': np.arange(3) / 3 }
-    {'a': 0.0, 'b': array([0, 0.33333333, 0.66666667])}
+    {'a': 0.0, 'b': array([0, 0.333, 0.667])}
     """
 
 def nested_dicts():
+    # Note that we need to give all digits: checking nested dictionaries
+    # currently fall back to vanilla doctest.
+    # cf failure_cases.py::dict_nested_needs_numeric_comparison
     """
     >>> import numpy as np
     >>> {'a': 1.0, 'b': dict(blurb=np.arange(3)/3)}
     {'a': 1.0, 'b': {'blurb': array([0, 0.33333333, 0.66666667])}}
     """
 
+
+def list_of_tuples_numeric():
+    # cf failure_cases.py::list_of_tuples --- string entries preclude numeric comparisons
+    """
+    >>> [(1, 1/3), (2, 2/3)]
+    [(1, 0.333), (2, 0.667)]
+    """

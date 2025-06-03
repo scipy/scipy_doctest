@@ -117,6 +117,15 @@ def test_tuple_and_list():
                       config=config)
     assert res.failed == 2
 
+
+def test_list_of_tuples():
+    config = DTConfig()
+    res, _ = _testmod(failure_cases,
+                      strategy=[failure_cases.list_of_tuples],
+                      config=config)
+    assert res.failed == 1
+
+
 def test_dict():
     config = DTConfig()
     res, _ = _testmod(failure_cases,
@@ -125,9 +134,11 @@ def test_dict():
                                 failure_cases.dict_wrong_keys,
                                 failure_cases.dict_wrong_values,
                                 failure_cases.dict_wrong_values_np,
-                                failure_cases.dict_nested_wrong_values_np],
+                                failure_cases.dict_nested_wrong_values_np,
+                                failure_cases.dict_nested_needs_numeric_comparison,
+                      ],
                       config=config)
-    assert res.failed == 6
+    assert res.failed == 7
 
 
 @pytest.mark.parametrize('strict, num_fails', [(True, 1), (False, 0)])

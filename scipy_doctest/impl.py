@@ -422,10 +422,13 @@ class DTChecker(doctest.OutputChecker):
             return False
 
         if want_is_dict:
-            # convert dicts into lists of key-value pairs and retry
-            want_items = str(list(a_want.items()))
-            got_items = str(list(a_got.items()))
-            return self.check_output(want_items, got_items, optionflags)
+            # split each dict into a pair of lists of keys and values, and retry
+            want_keys, want_values = f"{list(a_want.keys())}", f"{list(a_want.values())}"
+            got_keys, got_values = f"{list(a_got.keys())}", f"{list(a_got.values())}"
+
+            keys_match = self.check_output(want_keys, got_keys, optionflags)
+            values_match = self.check_output(want_values, got_values, optionflags)
+            return keys_match and values_match
 
         # ... and defer to numpy
         strict = self.config.strict_check
