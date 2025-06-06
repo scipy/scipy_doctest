@@ -46,11 +46,11 @@
 
    .. autosummary::
    
+      ~DTTextfile.config
       ~DTTextfile.name
       ~DTTextfile.parent
-      ~DTTextfile.config
-      ~DTTextfile.session
       ~DTTextfile.path
+      ~DTTextfile.session
       ~DTTextfile.cls
       ~DTTextfile.ihook
       ~DTTextfile.instance

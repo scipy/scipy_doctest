@@ -386,7 +386,7 @@ use the command flag</p>
 </div>
 <p>See <a class="reference internal" href="#more-fine-grained-control">More fine-grained control</a> section
 for details on how to customize the behavior.</p>
-<p>**NOTE ** Currently, <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code> only collects doctests and skips
+<p><strong>NOTE</strong> Currently, <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code> only collects doctests and skips
 ‘regular’ unit tests. This differs from the vanilla <code class="docutils literal notranslate"><span class="pre">pytest</span></code> behavior, which collects
 both doctests and unit tests.
 The behavior will change in a future version: <code class="docutils literal notranslate"><span class="pre">scipy-doctest==2.0</span></code> <strong>will change the
@@ -541,9 +541,8 @@ $ spin smoke-tutorials   # ReST user guide tutorials
 <section id="rough-edges-and-sharp-bits">
 <h2>Rough edges and sharp bits<a class="headerlink" href="#rough-edges-and-sharp-bits" title="Link to this heading">¶</a></h2>
 <p>Here is a (non-exhaustive) list of possible gotchas:</p>
-<ul class="simple">
-<li><p><em>In-place development builds</em>.</p></li>
-</ul>
+<section id="in-place-development-builds">
+<h3><em>In-place development builds</em>.<a class="headerlink" href="#in-place-development-builds" title="Link to this heading">¶</a></h3>
 <p>Some tools (looking at you <code class="docutils literal notranslate"><span class="pre">meson-python</span></code>) simulate in-place builds with a
 <code class="docutils literal notranslate"><span class="pre">build-install</span></code> directory. If this directory is located under the project root,
 <code class="docutils literal notranslate"><span class="pre">pytest</span></code> is getting confused by duplicated items under the root and build-install
@@ -560,11 +559,11 @@ need to add <code class="docutils literal notranslate"><span class="pre">--impor
 <code class="docutils literal notranslate"> <span class="pre">PY_IGNORE_IMPORTMISMATCH=1</span> <span class="pre">pytest</span> <span class="pre">...</span></code>,
 however the need usually indicates an issue with the package itself.
 (see <a class="reference external" href="https://github.com/scipy/scipy_doctest/pull/107">gh-107</a> for an example).</p>
-<ul class="simple">
-<li><p><em>Optional dependencies are not that optional</em></p></li>
-</ul>
+</section>
+<section id="optional-dependencies-are-not-that-optional">
+<h3><em>Optional dependencies are not that optional</em><a class="headerlink" href="#optional-dependencies-are-not-that-optional" title="Link to this heading">¶</a></h3>
 <p>If your package contains optional dependencies, doctests do not know about them
-being optional. So you either guard the imports in doctests (yikes!), or
+being optional. So you either guard the imports in doctests themselves (yikes!), or
 the collections fails if dependencies are not available.</p>
 <p>The solution is to explicitly <code class="docutils literal notranslate"><span class="pre">--ignore</span></code> the paths to modules with optionals.
 (or, equivalently, use <code class="docutils literal notranslate"><span class="pre">DTConfig.pytest_extra_ignore</span></code> list):</p>
@@ -575,9 +574,9 @@ the collections fails if dependencies are not available.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest --pyargs scipy --doctest-modules --ignore=/path/to/installed/scipy/_lib
 </pre></div>
 </div>
-<ul class="simple">
-<li><p><em>Doctest collection strategies</em></p></li>
-</ul>
+</section>
+<section id="doctest-collection-strategies">
+<h3><em>Doctest collection strategies</em><a class="headerlink" href="#doctest-collection-strategies" title="Link to this heading">¶</a></h3>
 <p>The default collection strategy follows <code class="docutils literal notranslate"><span class="pre">doctest</span></code> module and <code class="docutils literal notranslate"><span class="pre">pytest</span></code>. This leads
 to duplicates if your package has the split between public and _private modules,
 where public modules re-export things from private ones. The solution is to
@@ -596,8 +595,10 @@ leads to</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">scipy.linalg._basic.det</span></code>, collected from <code class="docutils literal notranslate"><span class="pre">scipy/linalg/_basic.py</span></code>, is private.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">scipy.linalg.det</span></code>, collected from <code class="docutils literal notranslate"><span class="pre">scipy/linalg/__init__.py</span></code>, is public.</p></li>
-<li><p><em><code class="docutils literal notranslate"><span class="pre">pytest</span></code>’s assertion rewriting</em></p></li>
 </ul>
+</section>
+<section id="pytest-s-assertion-rewriting">
+<h3><em><code class="docutils literal notranslate"><span class="pre">pytest</span></code>’s assertion rewriting</em><a class="headerlink" href="#pytest-s-assertion-rewriting" title="Link to this heading">¶</a></h3>
 <p>In some rare cases you may need to either explicitly register the <code class="docutils literal notranslate"><span class="pre">scipy_doctest</span></code>
 package with the <code class="docutils literal notranslate"><span class="pre">pytest</span></code> assertion rewriting machinery, or ask it to avoid rewriting
 completely, via <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--assert=plain</span></code>.
@@ -607,6 +608,20 @@ for more details.</p>
 output on error is fixed by the doctest machinery anyway. Therefore, we believe
 adding <code class="docutils literal notranslate"><span class="pre">--assert=plain</span></code> is reasonable.</p>
 </section>
+<section id="mixing-strings-and-numbers">
+<h3><em>Mixing strings and numbers</em><a class="headerlink" href="#mixing-strings-and-numbers" title="Link to this heading">¶</a></h3>
+<p>Generally, we aim to handle mixtures of strings and numeric data. Deeply nested data
+structures, however, may cause the checker to fall back to the vanilla <code class="docutils literal notranslate"><span class="pre">doctest</span></code> literal
+checking. For instance, <code class="docutils literal notranslate"><span class="pre">[&quot;value&quot;,</span> <span class="pre">1/3]</span></code> will use the floating-point aware checker, and
+so will <code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">1/3,</span> <span class="pre">&quot;other</span> <span class="pre">value&quot;:</span> <span class="pre">2/3}</span></code> or <code class="docutils literal notranslate"><span class="pre">[(1,</span> <span class="pre">2),</span> <span class="pre">(3,</span> <span class="pre">4)]</span></code>; Meanwhile, nested
+dictionaries, <code class="docutils literal notranslate"><span class="pre">{&quot;a&quot;:</span> <span class="pre">dict(value=1/3)}</span></code>, or lists of tuples with mixed entries,
+<code class="docutils literal notranslate"><span class="pre">[(&quot;a&quot;,</span> <span class="pre">1/3),</span> <span class="pre">(&quot;b&quot;,</span> <span class="pre">2/3)]</span></code>, will currently fall back to vanilla <code class="docutils literal notranslate"><span class="pre">doctest</span></code> literal
+comparisons.</p>
+<p>We stress that no matter how tricky or deeply nested the output is, the worst case
+scenario is that the floating-point aware checker is not used. If you have a case where
+<code class="docutils literal notranslate"><span class="pre">doctest</span></code> works correctly and <code class="docutils literal notranslate"><span class="pre">scipy_doctest</span></code> does not, please report it as a bug.</p>
+</section>
+</section>
 <section id="prior-art-and-related-work">
 <h2>Prior art and related work<a class="headerlink" href="#prior-art-and-related-work" title="Link to this heading">¶</a></h2>
 <ul>
@@ -614,30 +629,34 @@ adding <code class="docutils literal notranslate"><span class="pre">--assert=pla
 <li><p><code class="docutils literal notranslate"><span class="pre">pytest-doctestplus</span></code> plugin from the <code class="docutils literal notranslate"><span class="pre">AstroPy</span></code> project has similar goals.
 The package is well established and widely used. From a user perspective, main
 differences are: (i) <code class="docutils literal notranslate"><span class="pre">pytest-doctestplus</span></code> is more sensitive to formatting,
-including whitespace—thus if numpy tweaks its output formatting, doctests
-may start failing; (ii) there is still a need for <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">doctest:</span> <span class="pre">+FLOAT_CMP</span></code>
+including whitespace; (ii) there is still a need for <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">doctest:</span> <span class="pre">+FLOAT_CMP</span></code>
 directives.</p>
-<p>This project takes a different approach: in addition to plugging into <code class="docutils literal notranslate"><span class="pre">pytest</span></code>,
-we closely follow the <code class="docutils literal notranslate"><span class="pre">doctest</span></code> API and implementation, which are naturally
-way more stable then <code class="docutils literal notranslate"><span class="pre">pytest</span></code>.</p>
+<p>This project takes a slightly different approach: we strive to make numeric comparisons
+whitespace insensitive and automatic, without a need for explicit markup.  For rare cases
+which require additional configuration, we either keep it in the tool (thus out of
+reader-visible docstrings), or provide human-readable markers (hence <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">may</span> <span class="pre">vary</span></code>
+not <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">doctest</span> <span class="pre">+SKIP</span></code>).
+Furthermore, in addition to plugging into <code class="docutils literal notranslate"><span class="pre">pytest</span></code>, we provide an API layer which closely
+follows the <code class="docutils literal notranslate"><span class="pre">doctest</span></code> API. Essentially all aspects of doctesting are user-configurable.</p>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xdoctest</span></code> package relies on a deeper rewrite of the standard-library <code class="docutils literal notranslate"><span class="pre">doctest</span></code>
+functionality, and uses an AST-based analysis to parse code examples out of docstrings.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">NumPy</span></code> and <code class="docutils literal notranslate"><span class="pre">SciPy</span></code> were using modified doctesting in their <code class="docutils literal notranslate"><span class="pre">refguide-check</span></code> utilities.
-These utilities are tightly coupled to their libraries, and have been reported
+These utilities were tightly coupled to their libraries, and have been reported
 to be not easy to reason about, work with, and extend to other projects.</p>
-<p>This project is mainly the core functionality of the modified
-<code class="docutils literal notranslate"><span class="pre">refguide-check</span></code> doctesting, extracted to a separate package.
-We believe having it separate simplifies both addressing the needs of these
-two packages, and potential adoption by other projects.</p>
+<p>This project is mainly the core functionality of the modified <code class="docutils literal notranslate"><span class="pre">refguide-check</span></code> doctesting,
+extracted to a separate package. We believe having it separate simplifies both
+addressing the needs of these two packages, and adoption by other projects.</p>
 </li>
 </ul>
+</section>
 <section id="bug-reports-feature-requests-and-contributions">
-<h3>Bug reports, feature requests and contributions<a class="headerlink" href="#bug-reports-feature-requests-and-contributions" title="Link to this heading">¶</a></h3>
+<h2>Bug reports, feature requests and contributions<a class="headerlink" href="#bug-reports-feature-requests-and-contributions" title="Link to this heading">¶</a></h2>
 <p>This package is work in progress. Contributions are most welcome!
 Please don’t hesitate to open an issue in the tracker or send a pull request.</p>
 <p>The current location of the issue tracker is <a class="reference external" href="https://github.com/scipy/scipy_doctest">https://github.com/scipy/scipy_doctest</a>.</p>
 <div class="toctree-wrapper compound">
 </div>
-</section>
 </section>
 </section>
 
@@ -711,11 +730,16 @@ Please don’t hesitate to open an issue in the tracker or send a pull request.<
 <li><a class="reference internal" href="#numpy-and-scipy-wrappers">NumPy and SciPy wrappers</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rough-edges-and-sharp-bits">Rough edges and sharp bits</a></li>
-<li><a class="reference internal" href="#prior-art-and-related-work">Prior art and related work</a><ul>
-<li><a class="reference internal" href="#bug-reports-feature-requests-and-contributions">Bug reports, feature requests and contributions</a></li>
+<li><a class="reference internal" href="#rough-edges-and-sharp-bits">Rough edges and sharp bits</a><ul>
+<li><a class="reference internal" href="#in-place-development-builds"><em>In-place development builds</em>.</a></li>
+<li><a class="reference internal" href="#optional-dependencies-are-not-that-optional"><em>Optional dependencies are not that optional</em></a></li>
+<li><a class="reference internal" href="#doctest-collection-strategies"><em>Doctest collection strategies</em></a></li>
+<li><a class="reference internal" href="#pytest-s-assertion-rewriting"><em><code class="docutils literal notranslate"><span class="pre">pytest</span></code>’s assertion rewriting</em></a></li>
+<li><a class="reference internal" href="#mixing-strings-and-numbers"><em>Mixing strings and numbers</em></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#prior-art-and-related-work">Prior art and related work</a></li>
+<li><a class="reference internal" href="#bug-reports-feature-requests-and-contributions">Bug reports, feature requests and contributions</a></li>
 </ul>
 </li>
 </ul>

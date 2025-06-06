@@ -46,11 +46,11 @@
 
    .. autosummary::
    
+      ~DTModule.config
       ~DTModule.name
       ~DTModule.parent
-      ~DTModule.config
-      ~DTModule.session
       ~DTModule.path
+      ~DTModule.session
       ~DTModule.cls
       ~DTModule.ihook
       ~DTModule.instance
