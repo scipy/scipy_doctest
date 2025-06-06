@@ -345,7 +345,7 @@ however the need usually indicates an issue with the package itself.
 #### _Optional dependencies are not that optional_
 
 If your package contains optional dependencies, doctests do not know about them
-being optional. So you either guard the imports in doctests (yikes!), or
+being optional. So you either guard the imports in doctests themselves (yikes!), or
 the collections fails if dependencies are not available.
 
 The solution is to explicitly `--ignore` the paths to modules with optionals.
@@ -371,17 +371,17 @@ objects will be collected.
 
 The decision on what is public is as follows: an object is public iff
 
-- it is included into the `__all__` list of a public module;
-- the name of the object does not have a leading underscore;
-- the name of the module from which the object is collected does not have
+  - it is included into the `__all__` list of a public module;
+  - the name of the object does not have a leading underscore;
+  - the name of the module from which the object is collected does not have
   a leading underscore.
 
 Consider an example: `scipy.linalg.det` is defined in `scipy/linalg/_basic.py`,
 so it is collected twice, from `_basic.py` and from `__init__.py`. The rule above
 leads to
 
-- `scipy.linalg._basic.det`, collected from `scipy/linalg/_basic.py`, is private.
-- `scipy.linalg.det`, collected from `scipy/linalg/__init__.py`, is public.
+  - `scipy.linalg._basic.det`, collected from `scipy/linalg/_basic.py`, is private.
+  - `scipy.linalg.det`, collected from `scipy/linalg/__init__.py`, is public.
 
 #### _`pytest`'s assertion rewriting_
 
@@ -398,7 +398,7 @@ adding `--assert=plain` is reasonable.
 #### _Mixing strings and numbers_
 
 Generally, we aim to handle mixtures of strings and numeric data. Deeply nested data
-structures however may cause the checker to fall back to the vanilla `doctest` literal
+structures, however, may cause the checker to fall back to the vanilla `doctest` literal
 checking. For instance, `["value", 1/3]` will use the floating-point aware checker, and
 so will `{"value": 1/3, "other value": 2/3}` or `[(1, 2), (3, 4)]`; Meanwhile, nested
 dictionaries, `{"a": dict(value=1/3)}`, or lists of tuples with mixed entries,
