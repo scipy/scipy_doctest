@@ -318,7 +318,7 @@ $ spin smoke-tutorials   # ReST user guide tutorials
 
 Here is a (non-exhaustive) list of possible gotchas:
 
-- _In-place development builds_.
+#### _In-place development builds_.
 
 Some tools (looking at you `meson-python`) simulate in-place builds with a
 `build-install` directory. If this directory is located under the project root,
@@ -342,7 +342,7 @@ If push really comes to shove, you may try using the magic env variable:
 however the need usually indicates an issue with the package itself.
 (see [gh-107](https://github.com/scipy/scipy_doctest/pull/107) for an example).
 
-- _Optional dependencies are not that optional_
+#### _Optional dependencies are not that optional_
 
 If your package contains optional dependencies, doctests do not know about them
 being optional. So you either guard the imports in doctests (yikes!), or
@@ -361,7 +361,7 @@ Note that installed packages are no different:
 $ pytest --pyargs scipy --doctest-modules --ignore=/path/to/installed/scipy/_lib
 ```
 
-- _Doctest collection strategies_
+#### _Doctest collection strategies_
 
 The default collection strategy follows `doctest` module and `pytest`. This leads
 to duplicates if your package has the split between public and \_private modules,
@@ -383,7 +383,7 @@ leads to
 - `scipy.linalg._basic.det`, collected from `scipy/linalg/_basic.py`, is private.
 - `scipy.linalg.det`, collected from `scipy/linalg/__init__.py`, is public.
 
-- _`pytest`'s assertion rewriting_
+#### _`pytest`'s assertion rewriting_
 
 In some rare cases you may need to either explicitly register the `scipy_doctest`
 package with the `pytest` assertion rewriting machinery, or ask it to avoid rewriting
@@ -394,6 +394,21 @@ for more details.
 In general, rewriting assertions is not very useful for doctests, as the
 output on error is fixed by the doctest machinery anyway. Therefore, we believe
 adding `--assert=plain` is reasonable.
+
+#### _Mixing strings and numbers_
+
+Generally, we aim to handle mixtures of strings and numeric data. Deeply nested data
+structures however may cause the checker to fall back to the vanilla `doctest` literal
+checking. For instance, `["value", 1/3]` will use the floating-point aware checker, and
+so will `{"value": 1/3, "other value": 2/3}` or `[(1, 2), (3, 4)]`; Meanwhile, nested
+dictionaries, `{"a": dict(value=1/3)}`, or lists of tuples with mixed entries,
+`[("a", 1/3), ("b", 2/3)]`, will currently fall back to vanilla `doctest` literal
+comparisons.
+
+We stress that no matter how tricky or deeply nested the output is, the worst case
+scenario is that the floating-point aware checker is not used. If you have a case where
+`doctest` works correctly and `scipy_doctest` does not, please report it as a bug.
+
 
 ## Prior art and related work
 
@@ -417,15 +432,15 @@ adding `--assert=plain` is reasonable.
   functionality, and uses an AST-based analysis to parse code examples out of docstrings.
 
 - `NumPy` and `SciPy` were using modified doctesting in their `refguide-check` utilities.
-  These utilities are tightly coupled to their libraries, and have been reported
+  These utilities were tightly coupled to their libraries, and have been reported
   to be not easy to reason about, work with, and extend to other projects.
 
-  This project is mainly the core functionality of the modified
-  `refguide-check` doctesting, extracted to a separate package.
-  We believe having it separate simplifies both addressing the needs of these
-  two packages, and potential adoption by other projects.
+  This project is mainly the core functionality of the modified `refguide-check` doctesting,
+  extracted to a separate package. We believe having it separate simplifies both
+  addressing the needs of these two packages, and adoption by other projects.
 
-### Bug reports, feature requests and contributions
+
+## Bug reports, feature requests and contributions
 
 This package is work in progress. Contributions are most welcome!
 Please don't hesitate to open an issue in the tracker or send a pull request.
