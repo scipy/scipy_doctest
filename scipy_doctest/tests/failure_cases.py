@@ -86,7 +86,7 @@ def dict_wrong_values_np():
     """
     >>> import numpy as np
     >>> dict(a=1, b=np.arange(3)/3)
-    {'a': 1, 'b': array([0, 0.335, 0.669])}
+    {'a': 1, 'b': array([0, 0.335, 0.69])}
     """
 
 
@@ -94,5 +94,25 @@ def dict_nested_wrong_values_np():
     """
     >>> import numpy as np
     >>> dict(a=1, b=dict(blurb=np.arange(3)/3))
-    {'a': 1, 'b': {'blurb': array([0, 0.335, 0.669])}}
+    {'a': 1, 'b': {'blurb': array([0, 0.335, 0.69])}}
+    """
+
+
+# This is an XFAIL
+# Currently, checking nested dicts falls back to vanilla doctest
+# When this is fixed, move this case to module_cases.py
+def dict_nested_needs_numeric_comparison():
+    """
+    >>> import numpy as np
+    >>> dict(a=1, b=dict(blurb=np.arange(3)/3))
+    {'a': 1, 'b': {'blurb': array([0, 0.333, 0.667])}}
+    """
+
+
+# This is an XFAIL
+# Nested sequences which contain strings fall back to vanilla doctest
+def list_of_tuples():
+    """
+    >>> [('a', 1/3), ('b', 2/3)]
+    [('a', 0.333), ('b', 0.667)]
     """
