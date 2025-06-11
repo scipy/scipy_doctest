@@ -82,8 +82,9 @@ def pytest_ignore_collect(collection_path, config):
         if "tests" in path_str or "test_" in path_str:
             return True
 
+    fnmatch_ex = _pytest.pathlib.fnmatch_ex
     for entry in config.dt_config.pytest_extra_ignore:
-        if entry in str(collection_path):
+        if fnmatch_ex(entry, collection_path):
             return True
 
 
