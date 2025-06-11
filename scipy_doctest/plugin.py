@@ -5,6 +5,9 @@ import bdb
 import warnings
 import doctest
 
+from importlib.metadata import version as get_version, PackageNotFoundError
+from packaging.requirements import Requirement
+
 import pytest
 import _pytest
 from _pytest import doctest as pydoctest, outcomes
@@ -83,9 +86,19 @@ def pytest_ignore_collect(collection_path, config):
             return True
 
     fnmatch_ex = _pytest.pathlib.fnmatch_ex
+
     for entry in config.dt_config.pytest_extra_ignore:
         if fnmatch_ex(entry, collection_path):
             return True
+
+    for entry, req_str in config.dt_config.pytest_extra_requires.items():
+        if fnmatch_ex(entry, collection_path):
+            # check the requirement
+            req = Requirement(req_str)
+            try:
+                return not (get_version(req.name) in req.specifier)
+            except PackageNotFoundError:
+                return True
 
 
 def is_private(item):
