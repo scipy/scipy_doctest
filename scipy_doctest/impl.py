@@ -94,7 +94,7 @@ class DTConfig:
         a string. If not empty, the string value is used as the skip reason.
     pytest_extra_requires : dict
         Paths or functions to conditionally ignore unless requirements are met.
-        The format is ``{path/or/glob/pattern: requirement, full.func.name: requiremet}``,
+        The format is ``{path/or/glob/pattern: requirement(s), full.func.name: requirement(s)}``,
         where the values are PEP 508 dependency specifiers. If a requirement is not met,
         the behavior is equivalent to using the ``--ignore=...`` command line switch for
         paths, and to using a `pytest_extra_skip` for function names.

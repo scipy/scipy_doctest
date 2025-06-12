@@ -10,6 +10,8 @@ import tempfile
 import inspect
 from contextlib import contextmanager
 
+from typing import Sequence
+
 from importlib.metadata import version as get_version, PackageNotFoundError
 from packaging.requirements import Requirement
 
@@ -257,12 +259,16 @@ def get_public_objects(module, skiplist=None):
     return (items, names), failures
 
 
-def is_req_satisfied(req_str):
-    """ Check if a PEP 508-compliant requirement is satisfied or not.
+def is_req_satisfied(req_strs: str | Sequence[str]) -> bool:
+    """ Check if all PEP 508-compliant requirement(s) are satisfied or not.
     """
-    req = Requirement(req_str)
+    req_strs = [req_strs] if isinstance(req_strs, str) else req_strs
+    reqs = [Requirement(req_str) for req_str in req_strs]
+    if any(req.marker is not None for req in reqs):
+        msg = r"Markers not supported in `pytest_extra_requires`"
+        raise NotImplementedError(msg)
     try:
-        return get_version(req.name) in req.specifier
+        return all(get_version(req.name) in req.specifier for req in reqs)
     except PackageNotFoundError:
         return False
 

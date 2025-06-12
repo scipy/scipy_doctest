@@ -88,9 +88,9 @@ def pytest_ignore_collect(collection_path, config):
         if fnmatch_ex(entry, collection_path):
             return True
 
-    for entry, req_str in config.dt_config.pytest_extra_requires.items():
+    for entry, reqs in config.dt_config.pytest_extra_requires.items():
         if fnmatch_ex(entry, collection_path):
-            return not is_req_satisfied(req_str)
+            return not is_req_satisfied(reqs)
 
 
 def is_private(item):
