@@ -93,10 +93,11 @@ class DTConfig:
         Each key is a doctest name to skip, and the corresponding value is
         a string. If not empty, the string value is used as the skip reason.
     pytest_extra_requires : dict
-        Paths to conditionally ignore unless requirements are met.
-        The format is ``{path/or/glob/pattern: requirement}``, where the values are
-        PEP 508 dependency specifiers. If a requirement is not met, the behavior
-        is equivalent to using the ``--ignore=...`` command line switch.
+        Paths or functions to conditionally ignore unless requirements are met.
+        The format is ``{path/or/glob/pattern: requirement, full.func.name: requiremet}``,
+        where the values are PEP 508 dependency specifiers. If a requirement is not met,
+        the behavior is equivalent to using the ``--ignore=...`` command line switch for
+        paths, and to using a `pytest_extra_skip` for function names.
     CheckerKlass : object, optional
         The class for the Checker object. Must mimic the ``DTChecker`` API:
         subclass the `doctest.OutputChecker` and make the constructor signature

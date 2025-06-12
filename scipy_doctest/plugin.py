@@ -5,9 +5,6 @@ import bdb
 import warnings
 import doctest
 
-from importlib.metadata import version as get_version, PackageNotFoundError
-from packaging.requirements import Requirement
-
 import pytest
 import _pytest
 from _pytest import doctest as pydoctest, outcomes
@@ -16,7 +13,7 @@ from _pytest.pathlib import import_path
 
 from .impl import DTParser, DebugDTRunner
 from .conftest import dt_config
-from .util import np_errstate, matplotlib_make_nongui, temp_cwd
+from .util import np_errstate, matplotlib_make_nongui, temp_cwd, is_req_satisfied
 from .frontend import find_doctests
 
 
@@ -93,12 +90,7 @@ def pytest_ignore_collect(collection_path, config):
 
     for entry, req_str in config.dt_config.pytest_extra_requires.items():
         if fnmatch_ex(entry, collection_path):
-            # check the requirement
-            req = Requirement(req_str)
-            try:
-                return not (get_version(req.name) in req.specifier)
-            except PackageNotFoundError:
-                return True
+            return not is_req_satisfied(req_str)
 
 
 def is_private(item):
@@ -138,6 +130,13 @@ def _maybe_add_markers(item, config):
         item.add_marker(
             pytest.mark.xfail(reason=reason)
         )
+
+    extra_requires = dt_config.pytest_extra_requires
+    if req_str := extra_requires.get(item.name, None):
+        if not is_req_satisfied(req_str):
+            item.add_marker(
+                pytest.mark.skip(reason=f"requires {req_str}")
+            )
 
 
 def pytest_collection_modifyitems(config, items):

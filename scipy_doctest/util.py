@@ -10,6 +10,8 @@ import tempfile
 import inspect
 from contextlib import contextmanager
 
+from importlib.metadata import version as get_version, PackageNotFoundError
+from packaging.requirements import Requirement
 
 @contextmanager
 def matplotlib_make_nongui():
@@ -253,6 +255,16 @@ def get_public_objects(module, skiplist=None):
             continue
 
     return (items, names), failures
+
+
+def is_req_satisfied(req_str):
+    """ Check if a PEP 508-compliant requirement is satisfied or not.
+    """
+    req = Requirement(req_str)
+    try:
+        return get_version(req.name) in req.specifier
+    except PackageNotFoundError:
+        return False
 
 
 # XXX: not used ATM
