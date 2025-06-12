@@ -13,7 +13,7 @@ from _pytest.pathlib import import_path
 
 from .impl import DTParser, DebugDTRunner
 from .conftest import dt_config
-from .util import np_errstate, matplotlib_make_nongui, temp_cwd
+from .util import np_errstate, matplotlib_make_nongui, temp_cwd, is_req_satisfied
 from .frontend import find_doctests
 
 
@@ -82,9 +82,15 @@ def pytest_ignore_collect(collection_path, config):
         if "tests" in path_str or "test_" in path_str:
             return True
 
+    fnmatch_ex = _pytest.pathlib.fnmatch_ex
+
     for entry in config.dt_config.pytest_extra_ignore:
-        if entry in str(collection_path):
+        if fnmatch_ex(entry, collection_path):
             return True
+
+    for entry, reqs in config.dt_config.pytest_extra_requires.items():
+        if fnmatch_ex(entry, collection_path):
+            return not is_req_satisfied(reqs)
 
 
 def is_private(item):
@@ -124,6 +130,13 @@ def _maybe_add_markers(item, config):
         item.add_marker(
             pytest.mark.xfail(reason=reason)
         )
+
+    extra_requires = dt_config.pytest_extra_requires
+    if req_str := extra_requires.get(item.name, None):
+        if not is_req_satisfied(req_str):
+            item.add_marker(
+                pytest.mark.skip(reason=f"requires {req_str}")
+            )
 
 
 def pytest_collection_modifyitems(config, items):

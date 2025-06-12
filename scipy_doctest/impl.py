@@ -79,7 +79,7 @@ class DTConfig:
         Default is False.
     pytest_extra_ignore : list
         A list of names/modules to ignore when run under pytest plugin. This is
-        equivalent to using `--ignore=...` cmdline switch.
+        equivalent to using ``--ignore=...`` cmdline switch.
     pytest_extra_skip : dict
         Names/modules to skip when run under pytest plugin. This is
         equivalent to decorating the doctest with `@pytest.mark.skip` or adding
@@ -92,6 +92,12 @@ class DTConfig:
         adding `# may vary` to the outputs of all examples.
         Each key is a doctest name to skip, and the corresponding value is
         a string. If not empty, the string value is used as the skip reason.
+    pytest_extra_requires : dict
+        Paths or functions to conditionally ignore unless requirements are met.
+        The format is ``{path/or/glob/pattern: requirement(s), full.func.name: requirement(s)}``,
+        where the values are PEP 508 dependency specifiers. If a requirement is not met,
+        the behavior is equivalent to using the ``--ignore=...`` command line switch for
+        paths, and to using a `pytest_extra_skip` for function names.
     CheckerKlass : object, optional
         The class for the Checker object. Must mimic the ``DTChecker`` API:
         subclass the `doctest.OutputChecker` and make the constructor signature
@@ -125,6 +131,7 @@ class DTConfig:
                           pytest_extra_ignore=None,
                           pytest_extra_skip=None,
                           pytest_extra_xfail=None,
+                          pytest_extra_requires=None,
     ):
         ### DTChecker configuration ###
         self.CheckerKlass = CheckerKlass or DTChecker
@@ -217,6 +224,7 @@ class DTConfig:
         self.pytest_extra_ignore = pytest_extra_ignore or []
         self.pytest_extra_skip = pytest_extra_skip or {}
         self.pytest_extra_xfail = pytest_extra_xfail or {}
+        self.pytest_extra_requires = pytest_extra_requires or {}
 
 
 def try_convert_namedtuple(got):
