@@ -1,8 +1,5 @@
-__all__ = [
-    'func', 'func2', 'func3', 'func4', 'func5', 'func6', 'func8',
-    'func7', 'manip_printoptions', 'array_abbreviation'
-]
-
+""" A collection of test cases.
+"""
 
 def func():
     """
@@ -272,3 +269,8 @@ def list_of_tuples_numeric():
     >>> [(1, 1/3), (2, 2/3)]
     [(1, 0.333), (2, 0.667)]
     """
+
+
+# This is used by test_testmod.py::test_public_object_discovery
+# While in test we only need __all__ to be not empty, let's make it correct, too.
+__all__ = [x for x in vars().keys() if not x.startswith("_")]
