@@ -116,16 +116,14 @@ def _maybe_add_markers(item, config):
     dt_config = config.dt_config
 
     extra_skip = dt_config.pytest_extra_skip
-    skip_it = item.name in extra_skip
-    if skip_it:
+    if skip_it := item.name in extra_skip:
         reason = extra_skip[item.name] or ''
         item.add_marker(
             pytest.mark.skip(reason=reason)
         )
 
     extra_xfail = dt_config.pytest_extra_xfail
-    fail_it = item.name in extra_xfail
-    if fail_it:
+    if fail_it := item.name in extra_xfail:
         reason = extra_xfail[item.name] or ''
         item.add_marker(
             pytest.mark.xfail(reason=reason)
