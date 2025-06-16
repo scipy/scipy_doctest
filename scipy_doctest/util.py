@@ -10,6 +10,10 @@ import tempfile
 import inspect
 from contextlib import contextmanager
 
+from typing import Sequence
+
+from importlib.metadata import version as get_version, PackageNotFoundError
+from packaging.requirements import Requirement
 
 @contextmanager
 def matplotlib_make_nongui():
@@ -253,6 +257,20 @@ def get_public_objects(module, skiplist=None):
             continue
 
     return (items, names), failures
+
+
+def is_req_satisfied(req_strs: str | Sequence[str]) -> bool:
+    """ Check if all PEP 508-compliant requirement(s) are satisfied or not.
+    """
+    req_strs = [req_strs] if isinstance(req_strs, str) else req_strs
+    reqs = [Requirement(req_str) for req_str in req_strs]
+    if any(req.marker is not None for req in reqs):
+        msg = r"Markers not supported in `pytest_extra_requires`"
+        raise NotImplementedError(msg)
+    try:
+        return all(get_version(req.name) in req.specifier for req in reqs)
+    except PackageNotFoundError:
+        return False
 
 
 # XXX: not used ATM
