@@ -33,20 +33,20 @@ def pytest_addoption(parser):
     # https://github.com/pytest-dev/pytest/discussions/13435
     #
     # Therefore, we add a new option, --doctest-only-doctests,
-    # which is `true` by default, for now.
+    # which was `true` by default in versions 1.x.
     #
-    # In v2.0, it the default will become `false`, so that
+    # In v2.0, the default is `false`, so that
     #
     # $ pytest --doctest-modules
     #
-    # will run both doctests and unit tests, and the way to use the
-    # current behavior (only run doctests, skip unit tests) will be
+    # runs both doctests and unit tests, and the way to use the previous behavior
+    # (only run doctests, skip unit tests) is
     #
     # $ pytest --doctest-modules --doctest-only-doctests=true
     #
     group.addoption("--doctest-only-doctests",
         action="store",
-        default="true",
+        default="false",
         help="Whether to only collect doctests, or also collect unit tests, too.",
         choices=("true", "false"),
         dest="doctest_only_doctests"
@@ -71,9 +71,9 @@ def pytest_ignore_collect(collection_path, config):
     This function is used to exclude the 'tests' directory and test modules when
     the `--doctest-modules` option is used.
     """
-    # XXX: in v2.0, --doctest-modules will mean "run both doctests and unit tests",
-    # (consistent with vanilla pytest), and the way to retain the current behavior
-    # will be to add --doctest-only-doctests=true to the CLI command
+    # XXX: From v2.0, --doctest-modules means "run both doctests and unit tests",
+    # (consistent with vanilla pytest), and the way to retain the 1.x behavior
+    # is to add --doctest-only-doctests=true to the CLI command
     if (
         config.getoption("--doctest-modules") and
         config.getoption("--doctest-only-doctests") == 'true'
