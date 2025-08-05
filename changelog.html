@@ -263,7 +263,28 @@
           <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
 <section id="id1">
-<h2>1.8 (2025-05-29)<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<h2>2.0 (2025-08-05)<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>The default for the CLI option <code class="docutils literal notranslate"><span class="pre">--doctest-only-doctests</span></code> is changed to <code class="docutils literal notranslate"><span class="pre">False</span></code>.
+<strong>This is a breaking change.</strong> From now on, the default behavior of
+<code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code> is to collect both doctests and unit tests, which aligns
+with the rest of the ecosystem. To retain the previous behavior of only collecting
+doctests, use <code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">pytest</span> <span class="pre">--doctest-modules</span> <span class="pre">--doctest-only-doctests=true</span></code> explicitly.
+See <a class="reference external" href="https://github.com/scipy/scipy_doctest/issues/198">gh-198</a> for details.</p></li>
+<li><p>A new <code class="docutils literal notranslate"><span class="pre">pytest_extra_requires</span></code> key was added to <code class="docutils literal notranslate"><span class="pre">DTConfig</span></code>. This allows to express
+dependencies of individual functions or modules, and only collect doctests if
+the specified requirements are met. As a made-up example,</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">DTConfig</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">pytest_extra_requires</span> <span class="o">=</span><span class="p">{</span><span class="s2">&quot;full.func.name&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cupy&quot;</span><span class="p">,</span> <span class="s2">&quot;numpy&gt;2&quot;</span><span class="p">]}</span>
+</pre></div>
+</div>
+<p>will only collect doctests from the docstring of <code class="docutils literal notranslate"><span class="pre">full.func.name</span></code> if <code class="docutils literal notranslate"><span class="pre">cupy</span></code> is available,
+and if <code class="docutils literal notranslate"><span class="pre">numpy</span></code> is at version <code class="docutils literal notranslate"><span class="pre">2.0</span></code> or above.
+Parsing requirements relies on the <a class="reference external" href="https://github.com/pypa/packaging"><code class="docutils literal notranslate"><span class="pre">packaging</span></code> module from PyPA</a>.</p>
+</section>
+<section id="id2">
+<h2>1.8 (2025-05-29)<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Add a CLI option, <code class="docutils literal notranslate"><span class="pre">--doctest-only-doctests={true,false}</span></code> to control whether to only
 collect doctests (<code class="docutils literal notranslate"><span class="pre">true</span></code>, default) or also collect “regular” unit tests (<code class="docutils literal notranslate"><span class="pre">false</span></code>).
@@ -417,7 +438,8 @@ core functionality from SciPy’s and NumPy’s <code class="docutils literal no
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
-<li><a class="reference internal" href="#id1">1.8 (2025-05-29)</a></li>
+<li><a class="reference internal" href="#id1">2.0 (2025-08-05)</a></li>
+<li><a class="reference internal" href="#id2">1.8 (2025-05-29)</a></li>
 <li><a class="reference internal" href="#v1-7-1-2025-04-04">v1.7.1 (2025-04-04)</a></li>
 <li><a class="reference internal" href="#v1-7-2025-04-04">v1.7 (2025-04-04)</a></li>
 <li><a class="reference internal" href="#v1-6-2024-12-17">v1.6 (2024-12-17)</a></li>

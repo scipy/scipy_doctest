@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0 (2025-08-05)
+
+- The default for the CLI option `--doctest-only-doctests` is changed to `False`.
+  **This is a breaking change.** From now on, the default behavior of
+  `$ pytest --doctest-modules` is to collect both doctests and unit tests, which aligns
+  with the rest of the ecosystem. To retain the previous behavior of only collecting
+  doctests, use `$ pytest --doctest-modules --doctest-only-doctests=true` explicitly.
+  See [gh-198](https://github.com/scipy/scipy_doctest/issues/198) for details.
+
+- A new `pytest_extra_requires` key was added to `DTConfig`. This allows to express
+  dependencies of individual functions or modules, and only collect doctests if
+  the specified requirements are met. As a made-up example,
+
+```
+config = DTConfig()
+config.pytest_extra_requires ={"full.func.name" : ["cupy", "numpy>2"]}
+```
+
+will only collect doctests from the docstring of `full.func.name` if `cupy` is available,
+and if `numpy` is at version `2.0` or above.
+Parsing requirements relies on the [`packaging` module from PyPA](https://github.com/pypa/packaging).
+
+
 ## 1.8 (2025-05-29)
 
 - Add a CLI option, `--doctest-only-doctests={true,false}` to control whether to only
