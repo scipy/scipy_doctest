@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1 (2025-08-08)
+
+This is a bugfix release with no new features compared to 2.0. The only change is that
+we ensure compatibility with the minimum supported Python version, which is 3.8.
+
+
 ## 2.0 (2025-08-05)
 
 - The default for the CLI option `--doctest-only-doctests` is changed to `False`.
