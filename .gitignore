@@ -8,6 +8,7 @@ dist/
 build/
 .vscode
 **/.DS_Store
+dist_hist/
 
 # Sphinx documentation
 docs/_build/
