@@ -10,7 +10,7 @@ import tempfile
 import inspect
 from contextlib import contextmanager
 
-from typing import Sequence
+from typing import Sequence, Union
 
 from importlib.metadata import version as get_version, PackageNotFoundError
 from packaging.requirements import Requirement
@@ -259,7 +259,7 @@ def get_public_objects(module, skiplist=None):
     return (items, names), failures
 
 
-def is_req_satisfied(req_strs: str | Sequence[str]) -> bool:
+def is_req_satisfied(req_strs: Union[str, Sequence[str]]) -> bool:
     """ Check if all PEP 508-compliant requirement(s) are satisfied or not.
     """
     req_strs = [req_strs] if isinstance(req_strs, str) else req_strs
