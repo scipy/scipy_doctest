@@ -605,6 +605,17 @@ class DTFinder(doctest.DocTestFinder):
         verbose, dtverbose = util._map_verbosity(verbose)
         super().__init__(dtverbose, parser, recurse, exclude_empty)
 
+    def _from_module(self, module, object):
+        # https://github.com/pandas-dev/pandas/blob/91514c363604506f447e53380d3aa00520f1037b/pandas/conftest.py#L122-L131
+        # We only get here when the class that the method is on is from the
+        # appropriate module. So ignore checking the __module__ of the method
+        # itself and run the doctest.
+        # cf https://mail.python.org/archives/list/numpy-discussion@python.org/thread/PWZUBTNEQ2O2UEGJLU257C5VCT4YTQ5Y/
+        # for the discussion 
+        if inspect.isfunction(object) and "." in object.__qualname__:
+            return True
+        return super()._from_module(module, object)
+
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
         if globs is None:
             globs = dict(self.config.default_namespace)
