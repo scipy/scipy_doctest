@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 (2026-02-02)
+
+- Stop skipping methods of objects with manually modified `__module__`.
+  When an object's `__module__` is manually set (e.g. NumPy does this), the `__module__`
+  attribute of its methods no longer agrees with the `__module__` of the object itself,
+  and vanilla DocTestFinder skips it. This fix follows `pandas`, see
+  [gh-198](https://github.com/scipy/scipy_doctest/pull/214) for details.
+
+
 ## 2.0.1 (2025-08-08)
 
 This is a bugfix release with no new features compared to 2.0. The only change is that
