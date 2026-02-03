@@ -6,7 +6,7 @@
   When an object's `__module__` is manually set (e.g. NumPy does this), the `__module__`
   attribute of its methods no longer agrees with the `__module__` of the object itself,
   and vanilla DocTestFinder skips it. This fix follows `pandas`, see
-  [gh-198](https://github.com/scipy/scipy_doctest/pull/214) for details.
+  [gh-214](https://github.com/scipy/scipy_doctest/pull/214) for details.
 
 
 ## 2.0.1 (2025-08-08)
