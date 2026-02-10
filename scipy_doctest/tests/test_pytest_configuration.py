@@ -90,3 +90,59 @@ def test_alt_checker(pytester):
     # run all tests with pytest
     result = pytester.inline_run(f, '--doctest-modules')
     assert result.ret == pytest.ExitCode.TESTS_FAILED
+
+
+def test_alt_checker_doctestplus(pytester):
+    """Test an alternative Checker, from pytest-doctestplus."""
+
+    pytest.importorskip("pytest_doctestplus")
+
+    # create a temporary conftest.py file
+    pytester.makeconftest(
+        """
+        import doctest
+        from scipy_doctest.conftest import dt_config
+
+        # hack!
+        from pytest_doctestplus.output_checker import OutputChecker as _OutputCheckerImpl
+
+        # DTChecker expectes a `config` ctor argument, add it
+        class PDPChecker(_OutputCheckerImpl):
+            def __init__(self, config):
+                super().__init__()
+
+        # Register the checker
+        dt_config.CheckerKlass = PDPChecker
+        """
+    )
+
+    # create a temporary pytest test file
+    src = (
+        """
+        def func():
+            '''
+            The doctest below, when run from the command line,
+            - passes with `pytest --doctest-modules --doctest-plus`, and
+            - fails without `--doctest-plus`.
+
+            We however run this doctest using the PDPChecker, so it picks up
+            the FLOAT_CMP directive from doctestplus without a command-line switch.
+
+            >>> 2/3       # doctest: +FLOAT_CMP
+            0.666666
+            '''
+            pass
+        """
+    )
+
+    # run the doctest
+    f = pytester.makepyfile(src)
+    result = pytester.inline_run(f, '--doctest-modules')
+    assert result.ret == pytest.ExitCode.OK
+
+    # remove the directive and rerun
+    src_ = src.replace("# doctest: +FLOAT_CMP", "")
+    f_ = pytester.makepyfile(src_)
+    result = pytester.inline_run(f_, '--doctest-modules')
+    assert result.ret == pytest.ExitCode.TESTS_FAILED
+
