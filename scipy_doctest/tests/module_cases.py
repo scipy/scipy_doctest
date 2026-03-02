@@ -274,6 +274,7 @@ def list_of_tuples_numeric():
 def rank_3_array_repr():
     """Check recovery of rank-3 array from doctest-style repr.
 
+    >>> import numpy as np
     >>> np.arange(24).reshape(2, 3, 4)
     array([[[ 0,  1,  2,  3],
             [ 4,  5,  6,  7],
