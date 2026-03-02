@@ -356,7 +356,7 @@ class DTChecker(doctest.OutputChecker):
         # OK then, convert strings to objects
         ns = dict(self.config.check_namespace)
         try:
-            a_want = eval(want, dict(ns))
+            a_want = eval(want.replace("<BLANKLINE>", ""), dict(ns))
             a_got = eval(got, dict(ns))
         except Exception:
             # Maybe we're printing a numpy array? This produces invalid python
