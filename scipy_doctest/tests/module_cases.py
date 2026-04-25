@@ -286,6 +286,43 @@ def rank_3_array_repr():
     """
 
 
+def rank_3_printed_array():
+    """Check recovery of a printed (no commas) rank-3 array.
+
+    See https://github.com/scipy/scipy_doctest/issues/21
+
+    >>> import numpy as np
+    >>> print(np.arange(24).reshape(2, 3, 4))
+    [[[ 0  1  2  3]
+      [ 4  5  6  7]
+      [ 8  9 10 11]]
+    <BLANKLINE>
+     [[12 13 14 15]
+      [16 17 18 19]
+      [20 21 22 23]]]
+    """
+
+
+def rank_4_printed_array():
+    """Check recovery of a printed (no commas) rank-4 array.
+
+    >>> import numpy as np
+    >>> print(np.arange(16).reshape(2, 2, 2, 2))
+    [[[[ 0  1]
+       [ 2  3]]
+    <BLANKLINE>
+      [[ 4  5]
+       [ 6  7]]]
+    <BLANKLINE>
+    <BLANKLINE>
+     [[[ 8  9]
+       [10 11]]
+    <BLANKLINE>
+      [[12 13]
+       [14 15]]]]
+    """
+
+
 # This is used by test_testmod.py::test_public_object_discovery
 # While in test we only need __all__ to be not empty, let's make it correct, too.
 __all__ = [x for x in vars().keys() if not x.startswith("_")]

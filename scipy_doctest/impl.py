@@ -248,28 +248,38 @@ def try_convert_namedtuple(got):
     return got_again
 
 
+# A numeric token: optional sign + (digits with optional decimal | leading-dot decimal)
+# with an optional exponent and optional `j` suffix, or `nan`/`inf`/`infinity`.
+# Used to find adjacent numeric tokens in a printed numpy array repr (no commas).
+_NUM_TOKEN = (
+    r'[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?[jJ]?'
+    r'|[-+]?(?:nan|inf|infinity)'
+)
+
+
 def try_convert_printed_array(got):
     """Printed arrays: reinsert commas.
+
+    Handles arbitrary N-dimensional arrays (including 3D and higher), where
+    numpy inserts blank lines between sub-arrays. The strategy is regex-based:
+    insert commas between adjacent numeric tokens and between adjacent
+    `]` ... `[` bracket pairs, regardless of intervening whitespace/newlines.
     """
-    # a minimal version is `s_got = ", ".join(got[1:-1].split())`
-    # but it fails if there's a space after the opening bracket: "[ 0 1 2 ]"
-    # For 2D arrays, split into rows, drop spurious entries, then reassemble.
     if not got.startswith('['):
         return got
 
-    g1 = got[1:-1]  # strip outer "[...]"-s
-    rows = [x for x in g1.split("[") if x]
-    rows2 = [", ".join(row.split()) for row in rows]
-
-    if got.startswith("[["):
-        # was a 2D array, restore the opening brackets in rows; XXX clean up
-        rows3 = ["[" + row for row in rows2]
-    else:
-        rows3 = rows2
-
-    # add back the outer brackets
-    s_got = "[" + ", ".join(rows3) + "]"
-    return s_got
+    # Insert ", " between two numeric tokens separated only by whitespace.
+    # The lookahead avoids consuming the next token's sign/digit/dot.
+    s = re.sub(
+        r'(' + _NUM_TOKEN + r')(\s+)(?=[-+]?(?:\d|\.|nan|inf))',
+        r'\1, ',
+        got,
+        flags=re.IGNORECASE,
+    )
+    # Insert ", " between adjacent `]` and `[` separated by whitespace/newlines.
+    # This collapses `]\n [`, `]\n\n  [[`, etc. into `], [` / `], [[`.
+    s = re.sub(r'\](\s+)\[', '], [', s)
+    return s
 
 
 def has_masked(got):
