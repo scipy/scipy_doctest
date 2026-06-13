@@ -249,27 +249,39 @@ def try_convert_namedtuple(got):
 
 
 def try_convert_printed_array(got):
-    """Printed arrays: reinsert commas.
+    """Printed arrays (no commas): reinsert commas.
+
+    Handles arbitrary N-dimensional arrays (including 3D and higher), where
+    numpy separates sub-arrays with blank lines. We never parse numeric
+    values -- we only look at square brackets and whitespace. Walking the
+    string, each run of whitespace is replaced with either ``", "`` (when it
+    sits between two values or sub-arrays, e.g. ``number number`` or ``] [``)
+    or nothing (when it abuts an opening/closing bracket, e.g. ``[ 0`` or
+    ``0 ]``).
     """
-    # a minimal version is `s_got = ", ".join(got[1:-1].split())`
-    # but it fails if there's a space after the opening bracket: "[ 0 1 2 ]"
-    # For 2D arrays, split into rows, drop spurious entries, then reassemble.
     if not got.startswith('['):
         return got
 
-    g1 = got[1:-1]  # strip outer "[...]"-s
-    rows = [x for x in g1.split("[") if x]
-    rows2 = [", ".join(row.split()) for row in rows]
-
-    if got.startswith("[["):
-        # was a 2D array, restore the opening brackets in rows; XXX clean up
-        rows3 = ["[" + row for row in rows2]
-    else:
-        rows3 = rows2
-
-    # add back the outer brackets
-    s_got = "[" + ", ".join(rows3) + "]"
-    return s_got
+    out = []
+    prev = ''  # last emitted non-whitespace character
+    i, n = 0, len(got)
+    while i < n:
+        ch = got[i]
+        if ch.isspace():
+            j = i
+            while j < n and got[j].isspace():
+                j += 1
+            nxt = got[j] if j < n else ''
+            prev_closes = prev.isalnum() or prev in '.]'
+            next_opens = nxt.isalnum() or nxt in '.+-['
+            if prev_closes and next_opens:
+                out.append(', ')
+            i = j
+        else:
+            out.append(ch)
+            prev = ch
+            i += 1
+    return ''.join(out)
 
 
 def has_masked(got):
