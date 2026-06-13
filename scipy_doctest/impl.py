@@ -248,38 +248,40 @@ def try_convert_namedtuple(got):
     return got_again
 
 
-# A numeric token: optional sign + (digits with optional decimal | leading-dot decimal)
-# with an optional exponent and optional `j` suffix, or `nan`/`inf`/`infinity`.
-# Used to find adjacent numeric tokens in a printed numpy array repr (no commas).
-_NUM_TOKEN = (
-    r'[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?[jJ]?'
-    r'|[-+]?(?:nan|inf|infinity)'
-)
-
-
 def try_convert_printed_array(got):
-    """Printed arrays: reinsert commas.
+    """Printed arrays (no commas): reinsert commas.
 
     Handles arbitrary N-dimensional arrays (including 3D and higher), where
-    numpy inserts blank lines between sub-arrays. The strategy is regex-based:
-    insert commas between adjacent numeric tokens and between adjacent
-    `]` ... `[` bracket pairs, regardless of intervening whitespace/newlines.
+    numpy separates sub-arrays with blank lines. We never parse numeric
+    values -- we only look at square brackets and whitespace. Walking the
+    string, each run of whitespace is replaced with either ``", "`` (when it
+    sits between two values or sub-arrays, e.g. ``number number`` or ``] [``)
+    or nothing (when it abuts an opening/closing bracket, e.g. ``[ 0`` or
+    ``0 ]``).
     """
     if not got.startswith('['):
         return got
 
-    # Insert ", " between two numeric tokens separated only by whitespace.
-    # The lookahead avoids consuming the next token's sign/digit/dot.
-    s = re.sub(
-        r'(' + _NUM_TOKEN + r')(\s+)(?=[-+]?(?:\d|\.|nan|inf))',
-        r'\1, ',
-        got,
-        flags=re.IGNORECASE,
-    )
-    # Insert ", " between adjacent `]` and `[` separated by whitespace/newlines.
-    # This collapses `]\n [`, `]\n\n  [[`, etc. into `], [` / `], [[`.
-    s = re.sub(r'\](\s+)\[', '], [', s)
-    return s
+    out = []
+    prev = ''  # last emitted non-whitespace character
+    i, n = 0, len(got)
+    while i < n:
+        ch = got[i]
+        if ch.isspace():
+            j = i
+            while j < n and got[j].isspace():
+                j += 1
+            nxt = got[j] if j < n else ''
+            prev_closes = prev.isalnum() or prev in '.]'
+            next_opens = nxt.isalnum() or nxt in '.+-['
+            if prev_closes and next_opens:
+                out.append(', ')
+            i = j
+        else:
+            out.append(ch)
+            prev = ch
+            i += 1
+    return ''.join(out)
 
 
 def has_masked(got):
